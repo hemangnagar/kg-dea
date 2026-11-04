@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+.pytest_cache/
+corpus/
+world/expanded.json
+world/graph_truth.json
+.env
+*.sqlite*

@@ -1,0 +1,20 @@
+# Public reference seeds: https://www.dea.gov/ndta and
+# https://www.state.gov/foreign-terrorist-organizations/
+# Small starter list, not an exhaustive real-name safety guarantee. Expand before export.
+organizations:
+  - Sinaloa Cartel
+  - Jalisco New Generation Cartel
+  - Cartel Jalisco Nueva Generacion
+  - Los Zetas
+  - Gulf Cartel
+  - La Familia Michoacana
+  - Cartel del Noreste
+  - Beltran Leyva
+people:
+  - Joaquin Guzman
+  - Ismael Zambada
+  - Nemesio Oseguera
+  - Andres Manuel Lopez Obrador
+  - Claudia Sheinbaum
+  - Felipe Calderon
+  - Enrique Pena Nieto

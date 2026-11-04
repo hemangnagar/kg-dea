@@ -1,0 +1,18 @@
+status: draft-unreviewed
+fictional: true
+notes: All non-geographic names are invented demo labels. Review this seed before paid rendering.
+organizations:
+  - {id: org-01, name: Bruma del Cobre, base: Manzanillo}
+  - {id: org-02, name: Pacto del Faro Gris, base: Veracruz}
+  - {id: org-03, name: Circulo del Valle Quieto, base: Monterrey}
+  - {id: org-04, name: Red del Horizonte Azul, base: Tijuana}
+  - {id: org-05, name: Liga del Cedro Lunar, base: Guadalajara}
+places: [Manzanillo, Veracruz, Monterrey, Tijuana, Guadalajara, Ciudad Juarez, Nuevo Laredo, Reynosa, Matamoros, Mazatlan, Culiacan, Hermosillo, Nogales, Mexicali, Ensenada, Lazaro Cardenas, Acapulco, Tampico, Cancun, Merida, Puebla, Queretaro, El Paso, San Diego, Laredo]
+arc_template:
+  - {year: 2010, type: Founding}
+  - {year: 2012, type: LeadershipChange}
+  - {year: 2014, type: Alliance}
+  - {year: 2017, type: Split}
+  - {year: 2020, type: LeadershipChange}
+  - {year: 2023, type: AllianceBreak}
+  - {year: 2026, type: Operation}
