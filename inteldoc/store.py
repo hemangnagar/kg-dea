@@ -1,13 +1,31 @@
 import sqlite3
+import os
+from pathlib import Path
 from contextlib import contextmanager
 from .world import ROOT
 
-DB = ROOT/'corpus/manifest.sqlite'
+DB = Path(os.getenv('INTELDOC_CORPUS_DIR', str(ROOT/'corpus'))).resolve()/'manifest.sqlite'
+SPEND_DB = ROOT/'corpus/manifest.sqlite' if os.getenv('INTELDOC_CORPUS_DIR') else None
+
+def data_root():
+    return DB.parent
+
+def use_dataset(path):
+    global DB, SPEND_DB
+    # Retain one spend ledger across different corpus directories.
+    if SPEND_DB is None: SPEND_DB = DB
+    DB = Path(path).resolve()/'manifest.sqlite'
 
 @contextmanager
-def connect():
-    DB.parent.mkdir(parents=True,exist_ok=True)
-    db=sqlite3.connect(DB,timeout=30)
+def connect_spend():
+    with connect(SPEND_DB) as db:
+        yield db
+
+@contextmanager
+def connect(path=None):
+    path = path or DB
+    path.parent.mkdir(parents=True,exist_ok=True)
+    db=sqlite3.connect(path,timeout=30)
     db.row_factory=sqlite3.Row
     db.execute('PRAGMA journal_mode=WAL')
     db.executescript('''
@@ -15,6 +33,7 @@ def connect():
     CREATE TABLE IF NOT EXISTS evidence(cable TEXT,paragraph INTEGER,subject TEXT,predicate TEXT,object TEXT,date TEXT,until_date TEXT,classification TEXT,controls TEXT,agency TEXT,PRIMARY KEY(cable,paragraph,subject,predicate,object,date,until_date));
     CREATE TABLE IF NOT EXISTS spend(id INTEGER PRIMARY KEY,provider TEXT,operation TEXT,reserved REAL,actual REAL,input_tokens INTEGER,output_tokens INTEGER,status TEXT);
     CREATE TABLE IF NOT EXISTS jobs(id TEXT PRIMARY KEY,provider TEXT,status TEXT);
+    CREATE TABLE IF NOT EXISTS stages(cable TEXT,stage TEXT,payload TEXT,PRIMARY KEY(cable,stage));
     CREATE TABLE IF NOT EXISTS metadata(key TEXT PRIMARY KEY,value TEXT);
     ''')
     try:

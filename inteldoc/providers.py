@@ -1,4 +1,4 @@
-"""Optional provider boundary. Offline pipeline never invokes these adapters.
+"""Budget-accounted provider boundary for narrative, extraction and query stages.
 
 Every paid request reserves an upper bound BEFORE network I/O. Uncertain failures
 retain reservations. Prices must be explicitly configured from current provider pricing.
@@ -6,7 +6,7 @@ retain reservations. Prices must be explicitly configured from current provider 
 import os
 import math
 import httpx
-from .store import connect
+from .store import connect_spend as connect
 
 class BudgetExceeded(RuntimeError):pass
 
@@ -38,8 +38,8 @@ class OpenAIProvider:
         if not model or not all(isinstance(p, (int, float)) and math.isfinite(p) and p > 0
                                 for p in [input_price, output_price]):
             raise ValueError('Explicit OpenAI model and verified positive token prices required')
-        if not os.getenv('OPENAI_API_KEY'):
-            raise ValueError('OPENAI_API_KEY is not configured')
+        if not (os.getenv('INTELDOC_OPENAI_API_KEY') or os.getenv('OPENAI_API_KEY')):
+            raise ValueError('INTELDOC_OPENAI_API_KEY (or OPENAI_API_KEY) is not configured')
         self.model, self.ip, self.op = model, input_price, output_price
         self.accountant = TokenAccountant(cap)
 
@@ -55,7 +55,7 @@ class OpenAIProvider:
         reservation = self.accountant.reserve('openai', 'responses', cost)
         response = httpx.post(
             'https://api.openai.com/v1/responses',
-            headers={'Authorization': 'Bearer ' + os.environ['OPENAI_API_KEY']},
+            headers={'Authorization': 'Bearer ' + (os.getenv('INTELDOC_OPENAI_API_KEY') or os.environ['OPENAI_API_KEY'])},
             json={'model': self.model, 'input': prompt,
                   'max_output_tokens': max_tokens, 'store': False},
             timeout=120,
@@ -85,7 +85,7 @@ class OllamaProvider:
 
 
 def provider_from_config(config):
-    """Create an optional model adapter; the corpus pipeline remains offline."""
+    """Create the adapter for a configured pipeline or query stage."""
     provider = config.get('provider', 'offline')
     if provider == 'openai':
         return OpenAIProvider(

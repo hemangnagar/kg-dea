@@ -6,10 +6,13 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse, Response
 from pydantic import BaseModel, Field
 from .world import ROOT, load_world
-from .store import connect
+from .store import connect, connect_spend
 from .models import Cable
 from .pipeline import score
 from .xmlio import render
+from .settings import load_config
+from .providers import provider_from_config, BudgetExceeded
+from .llm import answer_question
 
 app=FastAPI(title='IntelDoc / Synthetic intelligence workbench',version='0.1.0')
 Persona=Literal['secret','unclassified']
@@ -57,6 +60,7 @@ def stats(persona:Persona='secret'):
     rows=visible(persona)
     with connect() as db:
         states=dict(db.execute('SELECT state,count(*) FROM cables GROUP BY state'))
+    with connect_spend() as db:
         spend=db.execute('SELECT COALESCE(sum(COALESCE(actual,reserved)),0) FROM spend').fetchone()[0]
     return {'documents':states.get('validated',0),'entities':len({r[k] for r in rows for k in ['subject','object']}),'facts':len(compact(rows,100000)),'states':states,'spend':round(spend,4),'events':len(world()['events'])}
 
@@ -94,7 +98,25 @@ def query(body:Question):
     ambiguity=len(matches)>1 and not body.entity_id and any(len([e for e in matches if alias in e['aliases']])>1 for entity in matches for alias in entity['aliases'] if alias.casefold() in text)
     if ambiguity:facts=[]
     summary=('This alias identifies more than one fictional person. Select an entity below to disambiguate.' if ambiguity else f'Found {len(facts)} supported relationships in the accessible reporting. Each statement below links to its original paragraph.' if facts else 'No supported relationships were found in the accessible reporting. Try a canonical entity name, place, or a sample question.')
-    return {'summary':summary,'facts':facts,'entities':matches,'related_entities':[entities()[id] for id in sorted({f[k] for f in facts for k in ['subject','object']})],'ambiguous':ambiguity,'mode':'Deterministic graph retrieval · 2 hops · no LLM answer generation','persona':body.persona}
+    answer=[]
+    mode='Deterministic graph retrieval · 2 hops · offline answer'
+    cfg=load_config()
+    query_provider=cfg.get('query_provider','offline')
+    if query_provider!='offline' and facts and not ambiguity:
+        try:
+            provider=provider_from_config({**cfg,'provider':query_provider})
+            accessible_names={id:entities()[id] for id in allowed}
+            answer=answer_question(body.question,facts,accessible_names,provider,cfg)
+            mode=f'{query_provider} evidence selection · quote-verified citations'
+            summary=('The model selected the following source-grounded answer.' if answer else
+                     'The model found no answer supported by the retrieved evidence.')
+        except BudgetExceeded:
+            raise HTTPException(402,'Model spend cap reached; no unverified answer returned')
+        except ValueError:
+            raise HTTPException(502,'Model configuration or evidence validation failed; no unverified answer returned')
+        except Exception:
+            raise HTTPException(503,'Model provider unavailable; no unverified answer returned')
+    return {'summary':summary,'answer':answer,'facts':facts,'entities':matches,'related_entities':[entities()[id] for id in sorted({f[k] for f in facts for k in ['subject','object']})],'ambiguous':ambiguity,'mode':mode,'persona':body.persona}
 
 @app.get('/api/graph/{id}')
 def graph(id:str,persona:Persona='secret'):
@@ -127,3 +149,12 @@ def xml(id:str,persona:Persona='secret'):
 
 @app.get('/api/scorecard')
 def scorecard():return score()
+
+
+@app.get('/api/runtime')
+def runtime():
+    cfg=load_config()
+    return {'query_provider':cfg.get('query_provider','offline'),
+            'narrative_provider':cfg.get('provider','offline'),
+            'extraction':cfg.get('extraction','deterministic'),
+            'model':cfg.get('openai_model') if cfg.get('query_provider')=='openai' else cfg.get('ollama_model')}

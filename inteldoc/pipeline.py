@@ -6,7 +6,9 @@ from datetime import date, timedelta
 import yaml
 from .world import ROOT, load_world
 from .models import Cable, Paragraph, Fact
-from .store import connect
+from .store import connect, data_root
+from .settings import load_config
+from .providers import provider_from_config, BudgetExceeded
 from .xmlio import render
 
 VERBS={'participated_in':'participated in','linked_to':'was linked to','supported':'supported','uses':'used','involved_in':'was involved in','occurred_at':'occurred at','leads':'led'}
@@ -20,9 +22,11 @@ FILLER=('This fictional reporting is intended solely for a controlled demonstrat
 def canonical(s):
     return ''.join(c for c in unicodedata.normalize('NFKD',s).casefold() if not unicodedata.combining(c))
 
-def plan(count=5000,seed=42):
-    world=load_world(); rng=random.Random(seed); cfg=yaml.safe_load((ROOT/'config/corpus.yaml').read_text())
-    if cfg['provider']!='offline':raise ValueError('This pipeline supports offline generation only; provider adapters are not yet integrated')
+def plan(count=5000,seed=42,config=None):
+    world=load_world(); rng=random.Random(seed); cfg=config or load_config(ROOT/'config/corpus.yaml')
+    if count<=0:raise ValueError('count must be positive')
+    if cfg.get('extraction')=='model' and cfg.get('provider','offline')=='offline':
+        raise ValueError('Model extraction requires an online provider')
     entities={e['id']:e for e in world['entities']}; agencies=list(cfg['agencies'])
     records=[]
     for i in range(count):
@@ -50,6 +54,18 @@ def plan(count=5000,seed=42):
         old=db.execute("SELECT value FROM metadata WHERE key='plan'").fetchone()
         if old and old[0]!=identity:raise ValueError('Existing manifest has a different plan. Use a separate corpus directory or remove generated corpus deliberately.')
         db.execute("INSERT OR IGNORE INTO metadata VALUES('plan',?)",(identity,))
+        import hashlib
+        settings=json.dumps({k:cfg.get(k) for k in ['provider','extraction','openai_model','ollama_model']},sort_keys=True)
+        old_settings=db.execute("SELECT value FROM metadata WHERE key='generation_settings'").fetchone()
+        if old_settings and old_settings[0]!=settings:
+            raise ValueError('Dataset provider changed; choose a new --output-dir')
+        if not old_settings and old and cfg.get('provider','offline')!='offline':
+            raise ValueError('Existing baseline corpus cannot be relabeled as model-generated; choose a new --output-dir')
+        db.execute("INSERT OR IGNORE INTO metadata VALUES('generation_settings',?)",(settings,))
+        world_hash=hashlib.sha256(json.dumps(world,sort_keys=True).encode()).hexdigest()
+        old_hash=db.execute("SELECT value FROM metadata WHERE key='world_hash'").fetchone()
+        if old_hash and old_hash[0]!=world_hash:raise ValueError('World changed underneath this dataset')
+        db.execute("INSERT OR IGNORE INTO metadata VALUES('world_hash',?)",(world_hash,))
         db.executemany('INSERT OR IGNORE INTO cables(id,state,record) VALUES(?,?,?)',[(c.cable_id,'planned',c.model_dump_json()) for c in records])
     return len(records)
 
@@ -75,6 +91,7 @@ def check(cable,world):
     known_dates={str(f.date) for p in cable.paragraphs for f in p.facts}|{str(f.until) for p in cable.paragraphs for f in p.facts if f.until}
     allowed_names=set(names.values())|{cable.place}
     for p in cable.paragraphs:
+        known_dates={str(f.date) for f in p.facts}|{str(f.until) for f in p.facts if f.until}
         for f in p.facts:
             if names[f.subject] not in p.text or names[f.object] not in p.text or str(f.date) not in p.text:raise ValueError('Missing planted fact')
         for d in re.findall(r'\b\d{4}-\d{2}-\d{2}\b',p.text):
@@ -83,9 +100,10 @@ def check(cable,world):
         for name in sorted(allowed_names,key=len,reverse=True):scrub=scrub.replace(name,'entity')
         if re.search(r'\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+\b',scrub):raise ValueError('Unknown capitalized proper name')
     # Validate extracted claims exactly: catches changed relations, extra dates/quantities in the baseline grammar.
-    extracted={f.key() for p in cable.paragraphs for f in extract(p.text,world)}
-    expected={f.key() for p in cable.paragraphs for f in p.facts}
-    if extracted!=expected:raise ValueError('Narrative relation mismatch')
+    for p in cable.paragraphs:
+        extracted={f.key() for f in extract(p.text,world)}
+        expected={f.key() for f in p.facts}
+        if extracted!=expected:raise ValueError('Narrative relation mismatch in paragraph '+str(p.number))
 
 def extract(text,world):
     # Independent text-only baseline. Never reads planted-fact arrays.
@@ -98,32 +116,56 @@ def extract(text,world):
             if left in names and right in names:results.append(Fact(subject=names[left],predicate=predicate,object=names[right],date=m[3],until=m[4]))
     return results
 
-def run(limit=None,retry_failed=False):
+def run(limit=None,retry_failed=False,config=None):
+    from .llm import render_narrative, extract_claims
+    cfg=config or load_config(ROOT/'config/corpus.yaml')
+    if limit is not None and limit<=0:raise ValueError('limit must be positive')
+    # Require the same provider/world contract on every resume, including generate-only commands.
+    with connect() as db:
+        saved=db.execute("SELECT value FROM metadata WHERE key='plan'").fetchone()
+    if saved:
+        identity=json.loads(saved[0])
+        plan(identity['count'],identity['seed'],cfg)
     world=load_world(); done=failed=0
-    (ROOT/'corpus/xml').mkdir(parents=True,exist_ok=True);(ROOT/'corpus/truth').mkdir(parents=True,exist_ok=True)
+    output=data_root()
+    (output/'xml').mkdir(parents=True,exist_ok=True);(output/'truth').mkdir(parents=True,exist_ok=True)
     with connect() as db:
         rows=db.execute("SELECT * FROM cables WHERE state!='validated'"+('' if retry_failed else " AND state!='failed'")+ ' ORDER BY id'+(' LIMIT ?' if limit else ''),(limit,) if limit else ()).fetchall()
+    provider=provider_from_config(cfg) if rows and cfg.get('provider','offline')!='offline' else None
     for row in rows:
         c=Cable.model_validate_json(row['record'])
         try:
-            with connect() as db:db.execute("UPDATE cables SET state='drafted',attempts=attempts+1 WHERE id=?",(c.cable_id,))
-            c=draft(c,world)
-            check(c,world)
-            with connect() as db:db.execute("UPDATE cables SET state='critiqued' WHERE id=?",(c.cable_id,))
-            # Offline mode uses a deterministic checker; no LLM critique or revision is claimed.
+            with connect() as db:db.execute("UPDATE cables SET attempts=attempts+1 WHERE id=?",(c.cable_id,))
+            if provider:
+                c=render_narrative(c,world,provider,cfg,row['error'])
+            else:
+                c=draft(c,world)
+                check(c,world)
+                with connect() as db:db.execute("UPDATE cables SET state='critiqued' WHERE id=?",(c.cable_id,))
             xml=render(c)
+            claims=(extract_claims(c,world,provider,cfg) if cfg.get('extraction')=='model' else
+                    [(p.number,f) for p in c.paragraphs for f in extract(p.text,world)])
             number=int(c.cable_id.split('-')[1]); stem=f'{number:04}-{c.report_date.year:06}'
-            (ROOT/f'corpus/xml/{stem}.xml').write_bytes(xml)
-            (ROOT/f'corpus/truth/{stem}.json').write_text(c.model_dump_json(indent=2))
+            # Atomic replacement avoids truncated output when a generation process is interrupted.
+            for path,content in [(output/f'xml/{stem}.xml',xml),(output/f'truth/{stem}.json',c.model_dump_json(indent=2).encode())]:
+                temporary=path.with_suffix(path.suffix+'.tmp');temporary.write_bytes(content);temporary.replace(path)
             with connect() as db:
                 db.execute('DELETE FROM evidence WHERE cable=?',(c.cable_id,))
-                for p in c.paragraphs:
-                    for f in extract(p.text,world):db.execute('INSERT OR IGNORE INTO evidence VALUES(?,?,?,?,?,?,?,?,?,?)',(c.cable_id,p.number,f.subject,f.predicate,f.object,str(f.date),str(f.until or ''),p.classification,','.join(p.controls),c.agency))
+                marks={p.number:p for p in c.paragraphs}
+                for number,f in claims:
+                    p=marks[number]
+                    db.execute('INSERT OR IGNORE INTO evidence VALUES(?,?,?,?,?,?,?,?,?,?)',(c.cable_id,p.number,f.subject,f.predicate,f.object,str(f.date),str(f.until or ''),p.classification,','.join(p.controls),c.agency))
                 db.execute("UPDATE cables SET state='validated',record=?,error=NULL WHERE id=?",(c.model_dump_json(),c.cable_id))
             done+=1
         except Exception as exc:
-            with connect() as db:db.execute("UPDATE cables SET state='failed',error=? WHERE id=?",(str(exc),c.cable_id))
+            # Persist safe, actionable errors, never a raw HTTP payload or secret-bearing exception.
+            message=str(exc) if isinstance(exc,(ValueError,BudgetExceeded)) else type(exc).__name__
+            with connect() as db:db.execute("UPDATE cables SET state='failed',error=? WHERE id=?",(message,c.cable_id))
             failed+=1
+            if isinstance(exc,BudgetExceeded):
+                return dict(validated=done,failed=failed,stopped='spend_cap')
+            if provider and not isinstance(exc,ValueError):
+                return dict(validated=done,failed=failed,stopped='provider_error')
     return dict(validated=done,failed=failed)
 
 def score():
@@ -134,5 +176,8 @@ def score():
         for r in db.execute("SELECT record FROM cables WHERE state='validated'"):
             c=Cable.model_validate_json(r[0]); planted.update(f.key() for p in c.paragraphs for f in p.facts)
         counts=dict(db.execute('SELECT state,count(*) FROM cables GROUP BY state').fetchall())
+        settings_row=db.execute("SELECT value FROM metadata WHERE key='generation_settings'").fetchone()
+        settings=json.loads(settings_row[0]) if settings_row else {}
+    online=settings.get('provider','offline')!='offline'
     tp=len(recovered&truth)
-    return dict(method='Deterministic text-pattern extraction on templated offline narratives',truth_edges=len(truth),planted_edges=len(planted),extracted_edges=len(recovered),true_positives=tp,precision=tp/len(recovered) if recovered else 0,world_recall=tp/len(truth) if truth else 0,planted_recall=len(recovered&planted)/len(planted) if planted else 0,states=counts,limitations='Baseline only. Does not measure LLM extraction or generalization to independently authored prose.',schema_validated=(ROOT/'schemas/pubs.xsd').exists())
+    return dict(method=(f"{settings.get('provider')} narratives with {settings.get('extraction') or 'deterministic'} extraction" if online else 'Deterministic text-pattern extraction on templated offline narratives'),truth_edges=len(truth),planted_edges=len(planted),extracted_edges=len(recovered),true_positives=tp,precision=tp/len(recovered) if recovered else 0,world_recall=tp/len(truth) if truth else 0,planted_recall=len(recovered&planted)/len(planted) if planted else 0,states=counts,limitations=('Model-generated prose retains canonical fact-sentence anchors. Scores measure constrained extraction, not unrestricted real-world prose.' if online else 'Baseline only. Does not measure LLM extraction or generalization to independently authored prose.'),schema_validated=(ROOT/'schemas/pubs.xsd').exists())

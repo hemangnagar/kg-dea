@@ -1,0 +1,24 @@
+# Copy to corpus/openai.yaml (ignored), then choose a model and current prices.
+# Setup/startup never enables API calls automatically.
+count: 5000
+seed: 42
+provider: openai
+query_provider: openai
+extraction: model
+max_spend_usd: 40
+openai_model: null
+input_usd_per_million: null
+output_usd_per_million: null
+narrative_max_output_tokens: 2400
+extraction_max_output_tokens: 2400
+answer_max_output_tokens: 2000
+core_fraction: 0.75
+secret_fraction: 0.65
+agencies:
+  DEA: 55
+  FBI: 12
+  HSI: 8
+  CBP: 4
+  DIA: 6
+  TREASURY: 5
+  OSINT: 10

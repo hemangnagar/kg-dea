@@ -1,11 +1,13 @@
 count: 5000
 seed: 42
 provider: offline
+query_provider: offline
+extraction: deterministic
 max_spend_usd: 40
 core_fraction: 0.75
 secret_fraction: 0.65
 # Paid model IDs and current published prices must be supplied explicitly.
-# Optional adapters: openai or ollama. The corpus pipeline remains offline.
+# Providers: offline, openai or ollama. Enable model extraction with extraction: model.
 # Choose an available OpenAI API model; ChatGPT plan credits do not cover API calls.
 openai_model: null
 ollama_model: null

@@ -1,6 +1,6 @@
 # IntelDoc KG
 
-A local evidence workbench built from the **IntelDoc KG Demo — Handoff Brief**. All actors and reporting are fictional. Real geography only. This first version is the **offline demo with a draft world seed**, as requested. It spends no API money.
+A local evidence workbench built from the **IntelDoc KG Demo — Handoff Brief**. All actors and reporting are fictional. Real geography only. The default dataset is the **offline demo with a draft world seed**. OpenAI and Ollama are also wired into narrative generation, constrained relationship extraction, and source-grounded query answers. Offline mode spends no API money.
 
 The original specification is included in [IntelDoc KG Demo — Handoff Brief](docs/IntelDoc-KG-Demo-Handoff-Brief.pdf).
 
@@ -25,7 +25,7 @@ Use the existing checkout in cloud tasks. Tasks are already isolated; do not cre
 4. Open **Extraction scorecard**. Precision, whole-world recall, and planted-fact recall are computed from extracted text relationships, not hard-coded scores.
 5. Open **World bible** to explain the fictional seed and limitations.
 
-The query engine uses deterministic entity matching and at most two graph hops. It supports relationship, geography, leadership and year queries, not arbitrary natural-language reasoning. Ambiguous shared nicknames prompt disambiguation. Answers are evidence statements with citations, not LLM-written summaries.
+The query engine uses deterministic entity matching and at most two graph hops. It supports relationship, geography, leadership and year queries, not arbitrary natural-language reasoning. Ambiguous shared nicknames prompt disambiguation. Offline answers are evidence statements with citations. Online answers use the model to select relevant source quotations, then verify each quotation and cited relation deterministically.
 
 ## Pipeline and files
 
@@ -44,7 +44,7 @@ Generated outputs are ignored by Git and reproducible:
 
 - `world/expanded.json`: full fictional world.
 - `world/graph_truth.json`: world relationships, derived by code.
-- `corpus/manifest.sqlite`: planned/drafted/critiqued/validated/failed state, records, indexed evidence, spend reservations and optional batch-job registry.
+- `corpus/manifest.sqlite`: planned/drafted/critiqued/revised/validated/failed state, records, indexed evidence, per-stage model checkpoints, spend reservations and optional batch-job registry.
 - `corpus/xml/NNNN-YYYYYY.xml`: deterministic PUBS-like XML.
 - `corpus/truth/NNNN-YYYYYY.json`: per-cable facts and paragraph marks.
 - `corpus/scorecard.json`: measured evaluation output.
@@ -69,24 +69,43 @@ A production deployment needs authenticated, server-assigned clearances, agency 
 
 ## Optional providers and spend
 
-The running corpus pipeline is offline and needs no credentials. The optional adapters are **OpenAI** (ChatGPT-family API models) and **Ollama**; Anthropic is not required. These adapters share `complete(prompt, max_tokens)`. They are not yet wired into cable generation, extraction or query answering.
+The default configuration is offline. For OpenAI, the corpus generator now calls the model for **draft → critique → revise → extract**, persists completed stages, runs deterministic validation, renders XML and indexes extracted evidence. Query answers use the configured model to choose relevant quotes from accessible evidence. Every answer quote is checked against its cited paragraph and relation before returning it. Invalid answers fail closed; there is no silent fallback from a broken online provider.
 
-OpenAI uses the Responses API. A ChatGPT subscription does not include OpenAI API usage: use a separately billed API project and an `OPENAI_API_KEY` supplied securely through the process environment. No ChatGPT browser session or subscription credentials are used. Never commit keys or paste them into chat.
+Narrative models must preserve canonical fact sentences inside otherwise model-authored prose. This lets the checker verify entities, dates, relationships and portion boundaries without trusting a second model's opinion. The extraction model receives narrative paragraphs and a text-derived entity vocabulary, **not planted-fact arrays**. It may omit facts (lowering measured recall), but unsupported claims are rejected. This is constrained model extraction, not unrestricted prose understanding. Query answers are extractive rather than freely paraphrased to keep their claims verifiable.
 
-To make an explicit, optional single model call:
+### Configure and run an online pilot
 
-1. Copy `config/corpus.yaml` to an ignored local path such as `corpus/model.yaml` after setup.
-2. In that copy, set `provider: openai`, `openai_model` to an available API model ID, and both token prices to current published USD per million tokens. Choose a small model for inexpensive rendering and a stronger model for QA when those stages are implemented. No model names or prices are guessed here.
-3. Set `OPENAI_API_KEY` securely in the environment. The network must allow `api.openai.com`; cloud environments may need this destination added in environment settings.
-4. Put your prompt into a local text file, then run:
+OpenAI uses the Responses API. ChatGPT subscriptions do not include API usage. Supply a separately billed API project's key securely as `INTELDOC_OPENAI_API_KEY` (recommended in cloud settings), or `OPENAI_API_KEY` for local use. The destination is `api.openai.com`. Do not commit keys or paste them into chat. No ChatGPT browser session credentials are used.
+
+1. Copy `config/openai.example.yaml` to `corpus/openai.yaml`, which is ignored by Git.
+2. Set `openai_model` to an available OpenAI API model ID and the two token prices to current published USD per million tokens. Keep `max_spend_usd` at or below your budget. Missing model, price or key fails before a request.
+3. Start with a small pilot in a separate directory. Existing validated offline records are never overwritten or relabeled as model-generated:
 
 ```sh
-.venv/bin/python -m scripts.model_prompt --config corpus/model.yaml --prompt-file /path/to/prompt.txt
+.venv/bin/python -m scripts.demo build --config corpus/openai.yaml --output-dir corpus/pilot --count 5
 ```
 
-That command is a billable call and is never invoked by setup, startup or tests. It defaults to at most 1,600 output tokens. Keep the original `config/corpus.yaml` in offline mode for corpus commands. For a locally running Ollama service, the same command accepts `provider: ollama` and `ollama_model` instead; no OpenAI key is needed.
+A five-cable run makes up to 20 model calls. A retry with the same command preserves validated cables and completed draft/critique/revision/extraction stages. To retry failed records explicitly, add `--retry-failed`. A provider error or exhausted spend cap stops the run instead of attempting every remaining cable. The CLI returns nonzero on failed generation. Do not start with 5,000 paid cables before checking the pilot's spend and quality.
 
-The accountant atomically reserves a conservative request bound before network I/O, records returned input and output usage (including billed reasoning output), and retains reservations after uncertain failures. Incomplete responses and refusals are accounted and reported as errors. `MAX_SPEND_USD` defaults to $40, with config `max_spend_usd` as the fallback. This is a local ledger guard based on configured pricing, not a provider billing limit. Set a provider-side limit as well before paid use. No automatic retry, batch submission or recovery workflow is implemented yet. Responses use `store: false`; this does not by itself guarantee provider-side zero retention.
+To use OpenAI for answers over the existing 5,000-cable baseline:
+
+```sh
+INTELDOC_MODEL_CONFIG=corpus/openai.yaml bash scripts/start.sh
+```
+
+To serve the model-generated pilot instead:
+
+```sh
+INTELDOC_MODEL_CONFIG=corpus/openai.yaml INTELDOC_CORPUS_DIR=corpus/pilot bash scripts/start.sh
+```
+
+The UI shows the query provider, verified model-selected answer quotes, and accounted spend. The scorecard reads generation/extraction method from the dataset manifest. Both demo personas still use the same agency NTK profiles; inaccessible paragraphs are filtered **before** constructing any query prompt. Empty or ambiguous retrieval makes no model request.
+
+One-off requests remain available via `.venv/bin/python -m scripts.model_prompt --config corpus/openai.yaml --prompt-file /path/to/prompt.txt`. For a locally running Ollama service, use `provider: ollama`, `query_provider: ollama`, and `ollama_model` in the same configuration. No OpenAI key is needed for Ollama.
+
+The accountant atomically reserves a conservative request bound before network I/O, records returned input and output usage (including billed reasoning output), and retains reservations after uncertain failures. All corpus directories share the baseline ledger at `corpus/manifest.sqlite`; switching to a pilot directory does not reset the spend cap. `MAX_SPEND_USD` overrides config `max_spend_usd`, defaulting to $40. This is a local ledger guard based on configured pricing, not a provider billing limit. Incomplete responses and refusals are accounted and reported as errors. No automatic retry or provider batch workflow is implemented. Responses use `store: false`; this does not guarantee provider-side zero retention.
+
+No live OpenAI run has been validated in this environment: there is no configured API key. Tests exercise the full provider-backed pipeline through mocked HTTP Responses API replies, including failures, resume behavior, extraction omissions, persona isolation and invented citations. This distinction is intentional; simulated success is not a live model-quality measurement.
 
 ## Validation
 
@@ -103,4 +122,4 @@ Start the server first. The script checks search, citation dialogs, persona swit
 
 ## Remaining brief work
 
-The offline first version intentionally defers editorial seed approval, richer lifetime/membership/corridor semantics, alias usage in narrative prose, event quantities in extraction, 5% contradiction and 1–2% correction sampling, 3-pass/best-of LLM narrative rendering, actual batch resumption, general LLM extraction and QA grading, real NTK authorization, official schema confirmation and native desktop packaging. Model adapters, optional relation fields and tables are extension points, not completed features. The UI, corpus and scorecard identify the baseline so it cannot be mistaken for completion of these phases.
+The offline first version intentionally defers editorial seed approval, richer lifetime/membership/corridor semantics, alias usage in narrative prose, event quantities in extraction, 5% contradiction and 1–2% correction sampling, best-of LLM narrative selection, actual provider-batch resumption, unrestricted LLM extraction and QA grading, real NTK authorization, official schema confirmation and native desktop packaging. The model-backed draft/critique/revise pipeline, constrained extraction and quote-grounded query path are implemented; the deferred stages above are not. The UI, corpus and scorecard identify the baseline so it cannot be mistaken for completion of these phases.
