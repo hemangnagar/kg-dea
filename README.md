@@ -69,9 +69,24 @@ A production deployment needs authenticated, server-assigned clearances, agency 
 
 ## Optional providers and spend
 
-The running pipeline is offline. `inteldoc/providers.py` contains optional Anthropic and Ollama adapters sharing `complete(prompt, max_tokens)`. These adapters are **not wired into generation, extraction or query answering yet**. No credentials are required for this version.
+The running corpus pipeline is offline and needs no credentials. The optional adapters are **OpenAI** (ChatGPT-family API models) and **Ollama**; Anthropic is not required. These adapters share `complete(prompt, max_tokens)`. They are not yet wired into cable generation, extraction or query answering.
 
-Anthropic requires an explicit available model ID, current positive input/output token prices and `ANTHROPIC_API_KEY` in the process. Do not assume the brief's “Haiku 5.5” / “Opus 5.5” labels are valid API IDs. The accountant atomically reserves a conservative request bound before network I/O, records actual returned usage and retains reservations after uncertain failures. `MAX_SPEND_USD` defaults to $40. It is a local ledger guard based on configured pricing, not a provider billing limit. Set a provider-side limit as well before paid use. No batch submission or recovery workflow is implemented yet; a schema table alone is not that capability.
+OpenAI uses the Responses API. A ChatGPT subscription does not include OpenAI API usage: use a separately billed API project and an `OPENAI_API_KEY` supplied securely through the process environment. No ChatGPT browser session or subscription credentials are used. Never commit keys or paste them into chat.
+
+To make an explicit, optional single model call:
+
+1. Copy `config/corpus.yaml` to an ignored local path such as `corpus/model.yaml` after setup.
+2. In that copy, set `provider: openai`, `openai_model` to an available API model ID, and both token prices to current published USD per million tokens. Choose a small model for inexpensive rendering and a stronger model for QA when those stages are implemented. No model names or prices are guessed here.
+3. Set `OPENAI_API_KEY` securely in the environment. The network must allow `api.openai.com`; cloud environments may need this destination added in environment settings.
+4. Put your prompt into a local text file, then run:
+
+```sh
+.venv/bin/python -m scripts.model_prompt --config corpus/model.yaml --prompt-file /path/to/prompt.txt
+```
+
+That command is a billable call and is never invoked by setup, startup or tests. It defaults to at most 1,600 output tokens. Keep the original `config/corpus.yaml` in offline mode for corpus commands. For a locally running Ollama service, the same command accepts `provider: ollama` and `ollama_model` instead; no OpenAI key is needed.
+
+The accountant atomically reserves a conservative request bound before network I/O, records returned input and output usage (including billed reasoning output), and retains reservations after uncertain failures. Incomplete responses and refusals are accounted and reported as errors. `MAX_SPEND_USD` defaults to $40, with config `max_spend_usd` as the fallback. This is a local ledger guard based on configured pricing, not a provider billing limit. Set a provider-side limit as well before paid use. No automatic retry, batch submission or recovery workflow is implemented yet. Responses use `store: false`; this does not by itself guarantee provider-side zero retention.
 
 ## Validation
 

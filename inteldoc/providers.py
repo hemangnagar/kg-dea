@@ -31,21 +31,50 @@ class TokenAccountant:
             db.execute("UPDATE spend SET actual=?,input_tokens=?,output_tokens=?,status='settled' WHERE id=?",(actual,input_tokens,output_tokens,id))
         if actual>reserved:raise BudgetExceeded('Provider charge exceeded reservation; stop and correct prices')
 
-class AnthropicProvider:
-    def __init__(self,model,input_price,output_price,cap=40):
-        if not model or not all(math.isfinite(p) and p>0 for p in [input_price,output_price]):raise ValueError('Explicit model and verified positive token prices required')
-        if not os.getenv('ANTHROPIC_API_KEY'):raise ValueError('ANTHROPIC_API_KEY is not configured')
-        self.model,self.ip,self.op=model,input_price,output_price
-        self.accountant=TokenAccountant(cap)
+class OpenAIProvider:
+    """Text-only Responses API adapter. No ChatGPT session cookies or subscriptions."""
 
-    def complete(self,prompt,max_tokens=1600):
-        # UTF-8 byte count conservatively bounds input tokens; output has an enforced ceiling.
-        cost=((len(prompt.encode())+len(self.model.encode())+1024)*self.ip+max_tokens*self.op)/1e6
-        reservation=self.accountant.reserve('anthropic','messages',cost)
-        response=httpx.post('https://api.anthropic.com/v1/messages',headers={'x-api-key':os.environ['ANTHROPIC_API_KEY'],'anthropic-version':'2023-06-01'},json={'model':self.model,'max_tokens':max_tokens,'messages':[{'role':'user','content':prompt}]},timeout=120)
-        response.raise_for_status(); data=response.json(); usage=data['usage']
-        self.accountant.settle(reservation,usage['input_tokens'],usage['output_tokens'],self.ip,self.op)
-        return ''.join(block.get('text','') for block in data['content'])
+    def __init__(self, model, input_price, output_price, cap=40):
+        if not model or not all(isinstance(p, (int, float)) and math.isfinite(p) and p > 0
+                                for p in [input_price, output_price]):
+            raise ValueError('Explicit OpenAI model and verified positive token prices required')
+        if not os.getenv('OPENAI_API_KEY'):
+            raise ValueError('OPENAI_API_KEY is not configured')
+        self.model, self.ip, self.op = model, input_price, output_price
+        self.accountant = TokenAccountant(cap)
+
+    def complete(self, prompt, max_tokens=1600):
+        if not isinstance(prompt, str) or not prompt.strip():
+            raise ValueError('Prompt must be nonempty text')
+        if type(max_tokens) is not int or max_tokens <= 0:
+            raise ValueError('max_tokens must be a positive integer')
+        # UTF-8 bytes conservatively bound text input tokens, with overhead allowance.
+        # max_output_tokens also limits billed reasoning tokens on reasoning models.
+        cost = ((len(prompt.encode()) + len(self.model.encode()) + 1024) * self.ip
+                + max_tokens * self.op) / 1e6
+        reservation = self.accountant.reserve('openai', 'responses', cost)
+        response = httpx.post(
+            'https://api.openai.com/v1/responses',
+            headers={'Authorization': 'Bearer ' + os.environ['OPENAI_API_KEY']},
+            json={'model': self.model, 'input': prompt,
+                  'max_output_tokens': max_tokens, 'store': False},
+            timeout=120,
+        )
+        # Failed/uncertain requests retain their reservation; do not retry automatically.
+        response.raise_for_status()
+        data = response.json()
+        usage = data['usage']
+        self.accountant.settle(reservation, usage['input_tokens'], usage['output_tokens'],
+                               self.ip, self.op)
+        if data.get('status') != 'completed':
+            raise RuntimeError('OpenAI response did not complete; usage was accounted')
+        text = ''.join(
+            part['text'] for item in data.get('output', []) if item.get('type') == 'message'
+            for part in item.get('content', []) if part.get('type') == 'output_text'
+        )
+        if not text:
+            raise RuntimeError('OpenAI returned no text (possibly a refusal); usage was accounted')
+        return text
 
 class OllamaProvider:
     def __init__(self,model,base_url='http://127.0.0.1:11434'):
@@ -53,3 +82,23 @@ class OllamaProvider:
     def complete(self,prompt,max_tokens=1600):
         response=httpx.post(self.base_url+'/api/generate',json={'model':self.model,'prompt':prompt,'stream':False,'options':{'num_predict':max_tokens}},timeout=120)
         response.raise_for_status(); return response.json()['response']
+
+
+def provider_from_config(config):
+    """Create an optional model adapter; the corpus pipeline remains offline."""
+    provider = config.get('provider', 'offline')
+    if provider == 'openai':
+        return OpenAIProvider(
+            model=config.get('openai_model'),
+            input_price=config.get('input_usd_per_million'),
+            output_price=config.get('output_usd_per_million'),
+            cap=config.get('max_spend_usd', 40),
+        )
+    if provider == 'ollama':
+        model = config.get('ollama_model')
+        if not model:
+            raise ValueError('ollama_model is required')
+        return OllamaProvider(model, config.get('ollama_base_url', 'http://127.0.0.1:11434'))
+    if provider == 'offline':
+        raise ValueError('Offline mode makes no model calls; use scripts.demo for the local corpus')
+    raise ValueError('Unsupported model provider; choose openai or ollama')

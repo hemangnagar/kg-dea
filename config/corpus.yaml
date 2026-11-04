@@ -5,8 +5,10 @@ max_spend_usd: 40
 core_fraction: 0.75
 secret_fraction: 0.65
 # Paid model IDs and current published prices must be supplied explicitly.
-# Models named in the brief are not assumed to be available API identifiers.
-anthropic_model: null
+# Optional adapters: openai or ollama. The corpus pipeline remains offline.
+# Choose an available OpenAI API model; ChatGPT plan credits do not cover API calls.
+openai_model: null
+ollama_model: null
 input_usd_per_million: null
 output_usd_per_million: null
 agencies:
