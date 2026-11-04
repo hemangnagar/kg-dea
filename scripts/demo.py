@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import json
-from inteldoc.world import expand, load_world
+from inteldoc.world import expand, load_world, use_world_dir
 from inteldoc.pipeline import plan, run, score
 from inteldoc.settings import load_config
 from inteldoc.store import use_dataset, data_root
@@ -15,9 +15,11 @@ def main():
     parser.add_argument('--limit',type=int)
     parser.add_argument('--retry-failed',action='store_true')
     parser.add_argument('--config',help='YAML provider and corpus settings; defaults to offline config')
+    parser.add_argument('--world-dir',help='Separate expanded-world directory; also set INTELDOC_WORLD_DIR when serving it')
     parser.add_argument('--output-dir',help='Separate corpus directory; recommended for model pilots')
     args=parser.parse_args()
     if args.output_dir:use_dataset(args.output_dir)
+    if args.world_dir:use_world_dir(args.world_dir)
     try:
         cfg=load_config(args.config)
         failed=0

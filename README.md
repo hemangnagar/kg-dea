@@ -27,10 +27,33 @@ Use the existing checkout in cloud tasks. Tasks are already isolated; do not cre
 
 The query engine uses deterministic entity matching and at most two graph hops. It supports relationship, geography, leadership and year queries, not arbitrary natural-language reasoning. Ambiguous shared nicknames prompt disambiguation. Offline answers are evidence statements with citations. Online answers use the model to select relevant source quotations, then verify each quotation and cited relation deterministically.
 
+## 50-document API pilot
+
+The detailed Claude-style seed requirements are now represented in `world/seed.yaml` (schema v2): five organizations with exact leadership windows, dated fractures/alliances, 25 corridor control histories, 50 people across all required tiers and official roles, 15 shared aliases including five inherited aliases, 18 companies with nominee ownership, 12 registered assets, 56 sources (eight per agency), and 35 dated timeline beats. It remains **draft-unreviewed**; automated integrity checks are not editorial approval or proof that every invented name is globally unique.
+
+```sh
+.venv/bin/python -m scripts.validate_seed
+bash scripts/pilot50.sh
+```
+
+The pilot script plans all 5,000 records against a separate expanded world in `world/pilot`, then makes only original record numbers 1–50 eligible for generation. It uses `config/pilot-50.yaml`: OpenAI `gpt-4.1-mini`, a $5 local cap, 3-pass narratives plus model extraction. The configured $0.40 input / $1.60 output per million rates come from [OpenAI's published model-selection guide](https://github.com/openai/openai-cookbook/blob/main/examples/partners/model_selection_guide/model_selection_guide.ipynb), whose pricing table is dated April 2025. Reconfirm your account's current pricing before execution. The local accountant is not a provider billing limit.
+
+Supply `INTELDOC_OPENAI_API_KEY` securely in environment settings, with HTTPS access to `api.openai.com`. There is no saved key binding or injected key in the current environment. **The first run was attempted and stopped before any API request.** Its manifest has 5,000 planned / zero API-validated records. No API-generated pilot documents are claimed yet.
+
+The fixed selection contains DEA 30, FBI 5, HSI 1, CBP 2, DIA 2, Treasury 3, and OSINT 7 cables; 33 are Secret, 17 Unclassified, and 38 core / 12 background. Re-running the script resumes these same 50, not another 50. Output goes to `corpus/api-pilot`; the initial selection is recorded in `selection.json` there. Its XML/truth directories appear as successful records are validated. Remove or raise `max_cables` only when deliberately moving beyond the pilot.
+
+The old offline dataset keeps its original expanded world at `world/expanded.json`. The v2 pilot uses `world/pilot/expanded.json`; never re-expand the baseline world under existing documents. Serve the API pilot with matching world and corpus profiles:
+
+```sh
+INTELDOC_WORLD_DIR=world/pilot INTELDOC_CORPUS_DIR=corpus/api-pilot INTELDOC_MODEL_CONFIG=config/pilot-50.yaml bash scripts/start.sh
+```
+
+Seed validation checks all references, leadership/control intervals, inherited-alias timing, required tiers, geography, source counts, and events after a participant's recorded arrest/death (except release events). Expansion selects eligible living/unconfined participants and preserves each agency source's stable reliability grade. These checks also run before the paid pilot. The planned sample is not a substitute for a live-generation quality review.
+
 ## Pipeline and files
 
 ```sh
-.venv/bin/python -m scripts.demo world --seed 42
+.venv/bin/python -m scripts.demo world --seed 42 --world-dir world/pilot
 .venv/bin/python -m scripts.demo plan --count 5000 --seed 42
 .venv/bin/python -m scripts.demo generate
 .venv/bin/python -m scripts.demo generate --retry-failed
@@ -38,7 +61,7 @@ The query engine uses deterministic entity matching and at most two graph hops. 
 .venv/bin/python -m pytest -q
 ```
 
-`world/seed.yaml` is the draft editorial input. Scripted expansion creates 200 people, 80 companies, 45 assets, 360 non-operational identifiers, 50 sources, 25 places, five organizations, 600 events and non-overlapping leadership windows. There are 35 seed arc beats. Shared nicknames are intentional. This is a mechanical synthetic baseline, not a hand-authored geopolitical simulation.
+`world/seed.yaml` is the draft editorial input. Scripted expansion creates 200 people, 80 companies, 45 assets, 360 non-operational identifiers, 56 sources in v2 (50 in the preserved v1 baseline), 25 places, five organizations, 600 events and non-overlapping leadership windows. The v2 seed contains 35 exact-dated timeline beats; the preserved v1 baseline used 35 template arc beats. Shared nicknames are intentional. This is a mechanical synthetic baseline, not a hand-authored geopolitical simulation.
 
 Generated outputs are ignored by Git and reproducible:
 

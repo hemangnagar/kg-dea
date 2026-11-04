@@ -6,3 +6,5 @@ world/expanded.json
 world/graph_truth.json
 .env
 *.sqlite*
+world/*/expanded.json
+world/*/graph_truth.json

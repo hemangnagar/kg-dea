@@ -4,7 +4,7 @@ import re
 import unicodedata
 from datetime import date, timedelta
 import yaml
-from .world import ROOT, load_world
+from .world import ROOT, load_world, world_dir
 from .models import Cable, Paragraph, Fact
 from .store import connect, data_root
 from .settings import load_config
@@ -45,9 +45,11 @@ def plan(count=5000,seed=42,config=None):
         for j,facts in enumerate(groups):
             cls='S' if secret and j>0 else 'U'; controls=['NF'] if cls=='S' else ([] if secret or agency=='OSINT' else ['FOUO'])
             paragraphs.append(Paragraph(number=j+1,classification=cls,controls=controls,facts=facts))
-        source_index=(agencies.index(agency)+7*(i%7))%50
+        sources=[s for s in entities.values() if s['kind']=='source' and s.get('agency',agency)==agency]
+        selected_source=sources[i%len(sources)]
+        source_index=int(selected_source['id'].split('-')[1])
         report=date.fromisoformat(e['date'])+timedelta(days=i%14)
-        cable=Cable(cable_id=f'{agency}-{i+1:06}-IIR-{report.year%100:02}',agency=agency,office=f'{agency} Synthetic Reporting Office',report_date=report,subject=f'{e["type"]} reporting in {e["place"]}',event_id=e['id'],source_id=entities[f'source-{source_index:03}']['name'],reliability=['A2','B2','C3'][source_index%3],place=e['place'],keywords=[e['type'],e['place']],ntk=[agency],relevance='core' if core else 'background',paragraphs=paragraphs)
+        cable=Cable(cable_id=f'{agency}-{i+1:06}-IIR-{report.year%100:02}',agency=agency,office=f'{agency} Synthetic Reporting Office',report_date=report,subject=f'{e["type"]} reporting in {e["place"]}',event_id=e['id'],source_id=selected_source['name'],reliability=selected_source.get('reliability',['A2','B2','C3'][source_index%3]),place=e['place'],keywords=[e['type'],e['place']],ntk=[agency],relevance='core' if core else 'background',paragraphs=paragraphs)
         records.append(cable)
     with connect() as db:
         identity=json.dumps(dict(count=count,seed=seed,world_seed=world['seed']))
@@ -130,7 +132,15 @@ def run(limit=None,retry_failed=False,config=None):
     output=data_root()
     (output/'xml').mkdir(parents=True,exist_ok=True);(output/'truth').mkdir(parents=True,exist_ok=True)
     with connect() as db:
-        rows=db.execute("SELECT * FROM cables WHERE state!='validated'"+('' if retry_failed else " AND state!='failed'")+ ' ORDER BY id'+(' LIMIT ?' if limit else ''),(limit,) if limit else ()).fetchall()
+        sql="SELECT * FROM cables WHERE state!='validated'"+('' if retry_failed else " AND state!='failed'")
+        args=[]
+        if cfg.get('max_cables') is not None:
+            if type(cfg['max_cables']) is not int or cfg['max_cables']<=0:raise ValueError('max_cables must be a positive integer')
+            sql+=" AND CAST(substr(id,instr(id,'-')+1,6) AS INTEGER)<=?"
+            args.append(cfg['max_cables'])
+        sql+=' ORDER BY rowid'
+        if limit:sql+=' LIMIT ?';args.append(limit)
+        rows=db.execute(sql,args).fetchall()
     provider=provider_from_config(cfg) if rows and cfg.get('provider','offline')!='offline' else None
     for row in rows:
         c=Cable.model_validate_json(row['record'])
@@ -169,7 +179,7 @@ def run(limit=None,retry_failed=False,config=None):
     return dict(validated=done,failed=failed)
 
 def score():
-    truth={Fact(**f).key() for f in json.loads((ROOT/'world/graph_truth.json').read_text())}
+    truth={Fact(**f).key() for f in json.loads((world_dir()/'graph_truth.json').read_text())}
     with connect() as db:
         recovered={tuple(r) for r in db.execute('SELECT DISTINCT subject,predicate,object,date,until_date FROM evidence')}
         planted=set()

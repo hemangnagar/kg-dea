@@ -183,3 +183,21 @@ def test_dataset_switch_shares_spend_cap(model_demo):
     with pytest.raises(BudgetExceeded): ledger.reserve('openai', 'test', .5)
     with store.connect_spend() as db:
         assert db.execute('SELECT count(*) FROM spend').fetchone()[0] == 1
+
+
+def test_pilot_cap_resumes_same_subset_and_preserves_source_grades(model_demo):
+    bible, cfg, calls, _, _ = model_demo
+    cfg={**cfg,'max_cables':3}
+    pipeline.plan(10,config=cfg)
+    assert pipeline.run(config=cfg)=={'validated':3,'failed':0}
+    before=len(calls)
+    assert pipeline.run(config=cfg)=={'validated':0,'failed':0}
+    assert len(calls)==before
+    sources={e['name']:e for e in bible['entities'] if e['kind']=='source'}
+    with store.connect() as db:
+        assert db.execute("SELECT count(*) FROM cables WHERE state='planned'").fetchone()[0]==7
+        records=[Cable.model_validate_json(row[0]) for row in db.execute("SELECT record FROM cables WHERE state='validated' ORDER BY rowid")]
+    assert [int(c.cable_id.split('-')[1]) for c in records]==[1,2,3]
+    for c in records:
+        assert sources[c.source_id]['agency']==c.agency
+        assert sources[c.source_id]['reliability']==c.reliability
