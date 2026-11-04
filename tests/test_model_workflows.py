@@ -20,6 +20,7 @@ def model_demo(tmp_path, monkeypatch):
         monkeypatch.setattr(module, 'ROOT', tmp_path)
     monkeypatch.setattr(store, 'DB', tmp_path / 'corpus/manifest.sqlite')
     monkeypatch.setattr(store, 'SPEND_DB', None)
+    monkeypatch.delenv('INTELDOC_OPENAI_API_KEY2', raising=False)
     monkeypatch.setenv('INTELDOC_OPENAI_API_KEY', 'test-key-not-real')
     monkeypatch.delenv('MAX_SPEND_USD', raising=False)
     bible = world.expand()

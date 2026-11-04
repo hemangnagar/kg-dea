@@ -38,7 +38,7 @@ bash scripts/pilot50.sh
 
 The pilot script plans all 5,000 records against a separate expanded world in `world/pilot`, then makes only original record numbers 1–50 eligible for generation. It uses `config/pilot-50.yaml`: OpenAI `gpt-4.1-mini`, a $5 local cap, 3-pass narratives plus model extraction. The configured $0.40 input / $1.60 output per million rates come from [OpenAI's published model-selection guide](https://github.com/openai/openai-cookbook/blob/main/examples/partners/model_selection_guide/model_selection_guide.ipynb), whose pricing table is dated April 2025. Reconfirm your account's current pricing before execution. The local accountant is not a provider billing limit.
 
-Supply `INTELDOC_OPENAI_API_KEY` securely in environment settings, with HTTPS access to `api.openai.com`. There is no saved key binding or injected key in the current environment. **The first run was attempted and stopped before any API request.** Its manifest has 5,000 planned / zero API-validated records. No API-generated pilot documents are claimed yet.
+Supply `INTELDOC_OPENAI_API_KEY2` (or `INTELDOC_OPENAI_API_KEY`) securely in environment settings, with HTTPS access to `api.openai.com`. There is no saved key binding or injected key in the current environment. **The first run was attempted and stopped before any API request.** Its manifest has 5,000 planned / zero API-validated records. No API-generated pilot documents are claimed yet.
 
 The fixed selection contains DEA 30, FBI 5, HSI 1, CBP 2, DIA 2, Treasury 3, and OSINT 7 cables; 33 are Secret, 17 Unclassified, and 38 core / 12 background. Re-running the script resumes these same 50, not another 50. Output goes to `corpus/api-pilot`; the initial selection is recorded in `selection.json` there. Its XML/truth directories appear as successful records are validated. Remove or raise `max_cables` only when deliberately moving beyond the pilot.
 
@@ -98,7 +98,7 @@ Narrative models must preserve canonical fact sentences inside otherwise model-a
 
 ### Configure and run an online pilot
 
-OpenAI uses the Responses API. ChatGPT subscriptions do not include API usage. Supply a separately billed API project's key securely as `INTELDOC_OPENAI_API_KEY` (recommended in cloud settings), or `OPENAI_API_KEY` for local use. The destination is `api.openai.com`. Do not commit keys or paste them into chat. No ChatGPT browser session credentials are used.
+OpenAI uses the Responses API. ChatGPT subscriptions do not include API usage. Supply a separately billed API project's key securely as `INTELDOC_OPENAI_API_KEY2`, `INTELDOC_OPENAI_API_KEY`, or `OPENAI_API_KEY` (in that precedence order). The destination is `api.openai.com`. Do not commit keys or paste them into chat. No ChatGPT browser session credentials are used.
 
 1. Copy `config/openai.example.yaml` to `corpus/openai.yaml`, which is ignored by Git.
 2. Set `openai_model` to an available OpenAI API model ID and the two token prices to current published USD per million tokens. Keep `max_spend_usd` at or below your budget. Missing model, price or key fails before a request.
@@ -146,3 +146,5 @@ Start the server first. The script checks search, citation dialogs, persona swit
 ## Remaining brief work
 
 The offline first version intentionally defers editorial seed approval, richer lifetime/membership/corridor semantics, alias usage in narrative prose, event quantities in extraction, 5% contradiction and 1–2% correction sampling, best-of LLM narrative selection, actual provider-batch resumption, unrestricted LLM extraction and QA grading, real NTK authorization, official schema confirmation and native desktop packaging. The model-backed draft/critique/revise pipeline, constrained extraction and quote-grounded query path are implemented; the deferred stages above are not. The UI, corpus and scorecard identify the baseline so it cannot be mistaken for completion of these phases.
+
+The replacement variable `INTELDOC_OPENAI_API_KEY2` is supported and takes precedence over older key names. If a published variable is absent in this running task, reconnect/restart the task using the updated environment version; publishing another version does not prove an existing process received the variable. Keep HTTPS access to `api.openai.com` enabled. Do not create or paste duplicate keys to troubleshoot a stale runtime.

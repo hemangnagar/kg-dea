@@ -8,6 +8,8 @@ from inteldoc.providers import OpenAIProvider, BudgetExceeded, provider_from_con
 @pytest.fixture
 def ledger(tmp_path, monkeypatch):
     monkeypatch.setattr(store, 'DB', tmp_path / 'spend.sqlite')
+    monkeypatch.delenv('INTELDOC_OPENAI_API_KEY2', raising=False)
+    monkeypatch.delenv('INTELDOC_OPENAI_API_KEY', raising=False)
     monkeypatch.setenv('OPENAI_API_KEY', 'test-key-not-a-real-credential')
     monkeypatch.delenv('MAX_SPEND_USD', raising=False)
 
@@ -97,3 +99,13 @@ def test_failure_keeps_reservation_without_retry(ledger, monkeypatch):
         row = db.execute('SELECT * FROM spend').fetchone()
         assert row['status'] == 'reserved'
         assert row['actual'] is None
+
+
+def test_replacement_key2_is_used_in_request(ledger, monkeypatch):
+    monkeypatch.setenv('INTELDOC_OPENAI_API_KEY2', 'replacement-test-key')
+    monkeypatch.setenv('INTELDOC_OPENAI_API_KEY', 'older-test-key')
+    def post(url, *, headers, json, timeout):
+        assert headers['Authorization'] == 'Bearer replacement-test-key'
+        return response(successful())
+    monkeypatch.setattr(httpx, 'post', post)
+    assert OpenAIProvider('test-model', 2, 8).complete('Example') == 'Fictional test response.'

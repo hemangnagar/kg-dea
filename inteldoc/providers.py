@@ -31,6 +31,12 @@ class TokenAccountant:
             db.execute("UPDATE spend SET actual=?,input_tokens=?,output_tokens=?,status='settled' WHERE id=?",(actual,input_tokens,output_tokens,id))
         if actual>reserved:raise BudgetExceeded('Provider charge exceeded reservation; stop and correct prices')
 
+def openai_api_key():
+    # Prefer the user's explicitly named replacement key. Never log key values.
+    return (os.getenv('INTELDOC_OPENAI_API_KEY2') or
+            os.getenv('INTELDOC_OPENAI_API_KEY') or os.getenv('OPENAI_API_KEY'))
+
+
 class OpenAIProvider:
     """Text-only Responses API adapter. No ChatGPT session cookies or subscriptions."""
 
@@ -38,8 +44,8 @@ class OpenAIProvider:
         if not model or not all(isinstance(p, (int, float)) and math.isfinite(p) and p > 0
                                 for p in [input_price, output_price]):
             raise ValueError('Explicit OpenAI model and verified positive token prices required')
-        if not (os.getenv('INTELDOC_OPENAI_API_KEY') or os.getenv('OPENAI_API_KEY')):
-            raise ValueError('INTELDOC_OPENAI_API_KEY (or OPENAI_API_KEY) is not configured')
+        if not openai_api_key():
+            raise ValueError('No OpenAI key configured: INTELDOC_OPENAI_API_KEY2, INTELDOC_OPENAI_API_KEY or OPENAI_API_KEY')
         self.model, self.ip, self.op = model, input_price, output_price
         self.accountant = TokenAccountant(cap)
 
@@ -55,7 +61,7 @@ class OpenAIProvider:
         reservation = self.accountant.reserve('openai', 'responses', cost)
         response = httpx.post(
             'https://api.openai.com/v1/responses',
-            headers={'Authorization': 'Bearer ' + (os.getenv('INTELDOC_OPENAI_API_KEY') or os.environ['OPENAI_API_KEY'])},
+            headers={'Authorization': 'Bearer ' + openai_api_key()},
             json={'model': self.model, 'input': prompt,
                   'max_output_tokens': max_tokens, 'store': False},
             timeout=120,
