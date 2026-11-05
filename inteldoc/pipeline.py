@@ -409,7 +409,7 @@ def score():
         settings = json.loads(settings_row[0]) if settings_row else {}
     online = settings.get('provider', 'offline') not in ('offline', 'authored')
     with connect() as db:
-        authored = db.execute("SELECT count(*) FROM cables WHERE state='validated' AND record LIKE '%\"authored\": true%'").fetchone()[0]
+        authored = db.execute("SELECT count(*) FROM cables WHERE state='validated' AND record LIKE '%\"authored\":true%'").fetchone()[0]
     tp = len(recovered & truth)
     disputed = {k for k in recovered if (k[0], k[1], k[2], k[3]) in contradictions}
     undisputed = recovered - disputed
