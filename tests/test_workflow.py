@@ -16,22 +16,24 @@ def corpus(tmp_path,monkeypatch):
         shutil.copy(world.ROOT/name,tmp_path/name)
     for module in [world,pipeline,xmlio]:monkeypatch.setattr(module,'ROOT',tmp_path)
     monkeypatch.setattr(store,'DB',tmp_path/'corpus/manifest.sqlite')
-    w=world.expand(42)
-    pipeline.plan(90,42)
+    w=world.expand(42,total_events=120)
+    pipeline.plan(120,42)
     outcome=pipeline.run()
-    assert outcome=={'validated':90,'failed':0}
+    assert outcome=={'validated':120,'failed':0}
     return w,tmp_path
 
 def test_resume_and_reproducibility(corpus):
     w,path=corpus
     first=(path/'corpus/xml').glob('*.xml')
     before={p.name:p.read_bytes() for p in first}
-    pipeline.plan(90,42)
+    pipeline.plan(120,42)
     assert pipeline.run()=={'validated':0,'failed':0}
     assert before=={p.name:p.read_bytes() for p in (path/'corpus/xml').glob('*.xml')}
-    with pytest.raises(ValueError,match='different plan'):pipeline.plan(90,43)
-    assert pipeline.score()['precision']==1
-    assert pipeline.score()['planted_recall']==1
+    with pytest.raises(ValueError,match='different plan'):pipeline.plan(120,43)
+    score=pipeline.score()
+    assert score['precision_excluding_contradictions']==1 and score['planted_recall']==1
+    assert score['contradiction_edges']>0 and score['precision']<1  # deliberate 5% contradictions are measured, not hidden
+    assert 0<score['world_recall']<1 and set(score['recall_by_predicate'])>={'member_of','controls','owns','allied_with','leads'}
 
 def test_xml_rollup_and_metadata(corpus):
     _,path=corpus
@@ -57,6 +59,10 @@ def test_checker_rejects_mutations(corpus):
     with pytest.raises(ValueError,match='relation mismatch'):pipeline.check(c,w)
     c=deepcopy(original);c.paragraphs[0].text+=' Mystery Criminal Company.'
     with pytest.raises(ValueError,match='Unknown capitalized'):pipeline.check(c,w)
+    c=deepcopy(original);c.paragraphs[0].text+=' Investigators later counted 999 kg.'
+    with pytest.raises(ValueError,match='Unplanned number'):pipeline.check(c,w)
+    c=deepcopy(original);c.paragraphs[0].text+=' A meeting followed on 2011-02-02.'
+    with pytest.raises(ValueError,match='Unplanned date'):pipeline.check(c,w)
     with pytest.raises(ValueError):Paragraph(number=1,classification='U',controls=['NF'])
 
 def test_budget_reserves_failed_calls(tmp_path,monkeypatch):
@@ -102,6 +108,11 @@ def test_temporal_query_and_shared_alias(corpus):
     result=client.post('/api/query',json={'question':'Who led Bruma del Cobre in 2021?'}).json()
     assert result['facts']
     assert all(f['predicate']=='leads' and f['date']<='2021-12-31'<f['until_date'] for f in result['facts'])
-    result=client.post('/api/query',json={'question':'Who is El Farol 03?'}).json()
-    assert result['ambiguous'] and not result['facts']
+    result=client.post('/api/query',json={'question':'Who is El Relojero?'}).json()
+    assert result['ambiguous'] and not result['facts'] and len(result['entities'])==2
+    result=client.post('/api/query',json={'question':'Who is Anzures Ibarra?'}).json()
+    assert [e['id'] for e in result['entities']]==['p-anzures-y']  # longest alias wins over the bare surname alias
+    result=client.post('/api/query',json={'question':'Which corridors did Bruma del Cobre control?'}).json()
+    assert result['facts'] and all(f['predicate']=='controls' or any(k.startswith('cor-') for k in [f['subject'],f['object']]) for f in result['facts'])
+    assert client.get('/api/world').json()['organizations'][0]['leadership']
     web.world.cache_clear();web.entities.cache_clear()

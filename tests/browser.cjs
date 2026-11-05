@@ -12,7 +12,7 @@ const assert = require('node:assert/strict');
   await page.locator('#ask').click();
   await page.waitForFunction(()=>!document.querySelector('#ask').disabled);
   await page.locator('#answer .fact').first().waitFor();
-  assert.match(await page.locator('#answer').innerText(), /2020-01-01/);
+  assert.match(await page.locator('#answer').innerText(), /2020-02-27/);
   await page.locator('#answer .cite').first().click();
   await page.locator('dialog[open] .doc-p.highlight').waitFor();
   await page.locator('dialog .close').click();

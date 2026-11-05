@@ -79,11 +79,17 @@ def query(body:Question):
     rows=visible(body.persona)
     allowed={r[k] for r in rows for k in ['subject','object']}
     text=body.question.casefold()
-    matches=[e for e in entities().values() if e['id'] in allowed and any(n.casefold() in text for n in [e['name']]+e['aliases'])]
+    hits={}
+    for e in entities().values():
+        if e['id'] in allowed:
+            found=[n for n in [e['name']]+e['aliases'] if n.casefold() in text]
+            if found:hits[e['id']]=max(found,key=len)
+    # Prefer the longest matching name: "Anzures Ibarra" must not also match the entity known only as "Anzures".
+    matches=[entities()[id] for id,n in hits.items() if not any(o!=id and n.casefold()!=m.casefold() and n.casefold() in m.casefold() for o,m in hits.items())]
     if body.entity_id:
         matches=[entities()[body.entity_id]] if body.entity_id in allowed else []
     ids=[e['id'] for e in matches]
-    years=re.findall(r'\b(?:201\d|202[0-6])\b',text)
+    years=re.findall(r'\b(?:201\d|202[0-7])\b',text)
     if years:
         lo,hi=min(years)+'-01-01',max(years)+'-12-31'
         rows=[r for r in rows if (r['date']<=hi and (r['until_date']>lo if r['until_date'] else r['date']>=lo))]
@@ -94,6 +100,9 @@ def query(body:Question):
         selected=[r for r in rows if any(t in (entities()[r['subject']]['name']+' '+entities()[r['object']]['name']+' '+r['predicate']).casefold() for t in tokens)]
     if any(t in text for t in ['company','companies','front']):selected=[r for r in selected if any(entities()[r[k]]['kind']=='company' for k in ['subject','object'])]
     if any(t in text for t in ['leader','leads','led','leadership']):selected=[r for r in selected if r['predicate']=='leads']
+    if any(t in text for t in ['corridor','plaza','crossing','route']):selected=[r for r in selected if any(entities()[r[k]]['kind']=='corridor' for k in ['subject','object'])]
+    if any(t in text for t in ['member','members','membership']):selected=[r for r in selected if r['predicate'] in ('member_of','leads')]
+    if any(t in text for t in ['owner','owns','owned','nominee']):selected=[r for r in selected if r['predicate'] in ('owns','nominee_for')]
     facts=compact(selected,24)
     ambiguity=len(matches)>1 and not body.entity_id and any(len([e for e in matches if alias in e['aliases']])>1 for entity in matches for alias in entity['aliases'] if alias.casefold() in text)
     if ambiguity:facts=[]
@@ -149,6 +158,23 @@ def xml(id:str,persona:Persona='secret'):
 
 @app.get('/api/scorecard')
 def scorecard():return score()
+
+@app.get('/api/world')
+def world_summary():
+    w=world(); by_id=entities()
+    organizations=[]
+    for o in w['entities']:
+        if o['kind']!='organization':continue
+        organizations.append({'id':o['id'],'name':o['name'],'base':o['place'],'founded':o.get('founded'),'profile':o.get('profile',''),
+            'leadership':[{'person':by_id[l['person']]['name'],'from':l['from'],'to':l['to'],'secret_only':bool(l.get('secret_only'))} for l in o.get('leadership',[])],
+            'alliances':[{'with':by_id[a['with']]['name'],'from':a['from'],'to':a['to']} for a in o.get('alliances',[])],
+            'fractures':[{'leader':by_id[f['departing_leader']]['name'],'to':by_id[f['destination_org']]['name'],'date':f['date']} for f in o.get('fractures',[])]})
+    kinds={}
+    for e in w['entities']:kinds[e['kind']]=kinds.get(e['kind'],0)+1
+    return {'status':w.get('status'),'notes':w.get('notes',''),'organizations':organizations,'entity_counts':kinds,'events':len(w['events']),
+            'authored_people':sum(1 for e in w['entities'] if e['kind']=='person' and e.get('authored')),
+            'authored_events':sum(1 for e in w['events'] if e.get('seed_event')),
+            'corridors':[{'name':c['name'],'kind':c.get('corridor_kind'),'places':c.get('places',[]),'control':[{'organization':by_id[x['organization']]['name'],'from':x['from'],'to':x['to']} for x in c.get('control_history',[])]} for c in w['entities'] if c['kind']=='corridor']}
 
 
 @app.get('/api/runtime')

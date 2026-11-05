@@ -45,6 +45,9 @@ class Cable(BaseModel):
     paragraphs: list[Paragraph]
     corrects: str | None = None
     disputed: bool = False
+    dispute: dict | None = None
+    description: str = ''
+    quantities: list[str] = Field(default_factory=list)
 
     @property
     def classification(self):

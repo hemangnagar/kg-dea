@@ -71,21 +71,28 @@ def checkpoint(cable, stage, schema, make):
 def render_narrative(cable, world, provider, settings, previous_error=None):
     from .pipeline import draft, check, VERBS
     baseline = draft(cable.model_copy(deep=True), world)
-    names = {e['id']: e['name'] for e in world['entities']}
-    paragraphs = []
+    entities = {e['id']: e for e in world['entities']}
+    paragraphs, people = [], {}
     for p in baseline.paragraphs:
         anchors = []
         for f in p.facts:
-            anchors.append(f"{names[f.subject]} {VERBS[f.predicate]} {names[f.object]} on {f.date}"
-                           + (f' until {f.until}' if f.until else '') + '.')
+            anchors.append(f"{entities[f.subject]['name']} {VERBS[f.predicate]} {entities[f.object]['name']} "
+                           + ('from' if f.until else 'on') + f" {f.date}" + (f' until {f.until}' if f.until else '') + '.')
+            for id in [f.subject, f.object]:
+                if entities[id]['kind'] == 'person':
+                    people[entities[id]['name']] = entities[id]['aliases']
         paragraphs.append({'number': p.number, 'mark': p.mark, 'required_sentences': anchors,
                            'baseline': p.text})
     data = {'agency': cable.agency, 'office': cable.office, 'source_reliability': cable.reliability,
+            'event_context': cable.description, 'planted_quantities': cable.quantities,
+            'aliases_allowed_after_first_mention': people, 'corrects_document': cable.corrects,
             'paragraphs': paragraphs, 'word_bounds': [250, 900]}
     instruction = ('Write a fictional analytical intelligence report in restrained IIR style. '
                    'Write narrative text only in the specified JSON paragraphs. Preserve paragraph numbers. '
                    'Preserve each required sentence VERBATIM in its assigned paragraph, as a separate sentence. '
-                   'Do not add people, places, names, dates, quantities or factual claims. '
+                   'Use event_context in paragraph 1 as background prose, rewritten in your own words, without dates. '
+                   'After a person is named once you may refer to them by a listed alias. '
+                   'Do not add people, places, names, dates, numbers or factual claims beyond the supplied data. '
                    'Never move information to a differently marked paragraph. '
                    'Do not include headings, numbering, portion marks or metadata inside text. '
                    'All paragraphs together must be 250 to 900 words. Use cautious analytical framing around anchors.')
@@ -132,13 +139,15 @@ def apply(cable, narrative):
 def extract_claims(cable, world, provider, settings):
     from .pipeline import extract
     # Vocabulary is selected from the narrative, not from planted facts.
-    text = ' '.join(p.text for p in cable.paragraphs)
-    vocabulary = [{'id': e['id'], 'name': e['name']} for e in world['entities'] if e['name'] in text]
+    from .pipeline import VERBS, canonical
+    text = canonical(' '.join(p.text for p in cable.paragraphs))
+    vocabulary = [{'id': e['id'], 'name': e['name'], 'aliases': e['aliases']} for e in world['entities']
+                  if any(canonical(n) in text for n in [e['name']] + e['aliases'])]
     data = {'paragraphs': [{'number': p.number, 'text': p.text} for p in cable.paragraphs],
-            'vocabulary': vocabulary,
-            'predicates': ['participated_in', 'linked_to', 'supported', 'uses', 'involved_in', 'occurred_at', 'leads']}
+            'vocabulary': vocabulary, 'predicates': list(VERBS)}
     instruction = ('Extract explicit relationships from the fictional report. Use only supplied entity IDs '
-                   'and predicates. Include the exact supporting sentence as quote and its paragraph number. '
+                   'and predicates. A person may appear under an alias; resolve it to the entity ID. '
+                   'Include the exact supporting sentence as quote and its paragraph number. '
                    'Dates are ISO dates from the sentence, with until only when explicitly stated. '
                    'Do not infer unstated relations. Report zero claims if no relationships are stated.')
 

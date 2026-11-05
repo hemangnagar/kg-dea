@@ -1,2112 +1,1618 @@
-schema_version: 2
+schema_version: 3
 status: draft-unreviewed
 fictional: true
-notes: All non-geographic names are invented synthetic labels. No real intelligence.
-  Editorial review remains pending. Intervals are half-open [from,to).
+notes: >-
+  Hand-authored fictional world for the IntelDoc KG demo. Every organization,
+  person, nickname, company, vessel, registration, source and operation name is
+  invented. Only the geography is real. Intervals are half-open [from, to).
+  The sentinel 2027-01-01 means "still current at the end of the corpus".
+  Editorial review is pending; automated integrity checks are not approval.
+
+# ---------------------------------------------------------------------------
+# Real geography. kind: port | border-crossing | city | hub | highway | region
+# ---------------------------------------------------------------------------
+geography:
+  places:
+  - {id: manzanillo, code: MZN, name: Manzanillo, state: Colima, country: MX, kind: port}
+  - {id: colima, code: COL, name: Colima, state: Colima, country: MX, kind: city}
+  - {id: lazaro-cardenas, code: LZC, name: Lázaro Cárdenas, state: Michoacán, country: MX, kind: port}
+  - {id: apatzingan, code: APZ, name: Apatzingán, state: Michoacán, country: MX, kind: city}
+  - {id: uruapan, code: URU, name: Uruapan, state: Michoacán, country: MX, kind: city}
+  - {id: tierra-caliente, code: TCA, name: Tierra Caliente, state: Michoacán, country: MX, kind: region}
+  - {id: morelia, code: MOR, name: Morelia, state: Michoacán, country: MX, kind: city}
+  - {id: guadalajara, code: GDL, name: Guadalajara, state: Jalisco, country: MX, kind: city}
+  - {id: tepic, code: TPQ, name: Tepic, state: Nayarit, country: MX, kind: city}
+  - {id: mazatlan, code: MZT, name: Mazatlán, state: Sinaloa, country: MX, kind: port}
+  - {id: culiacan, code: CUL, name: Culiacán, state: Sinaloa, country: MX, kind: city}
+  - {id: hermosillo, code: HMO, name: Hermosillo, state: Sonora, country: MX, kind: city}
+  - {id: nogales-sonora, code: NOG, name: 'Nogales, Sonora', state: Sonora, country: MX, kind: border-crossing}
+  - {id: san-luis-rio-colorado, code: SLR, name: San Luis Río Colorado, state: Sonora, country: MX, kind: border-crossing}
+  - {id: mexicali, code: MXL, name: Mexicali, state: Baja California, country: MX, kind: border-crossing}
+  - {id: tecate, code: TCT, name: Tecate, state: Baja California, country: MX, kind: border-crossing}
+  - {id: tijuana, code: TIJ, name: Tijuana, state: Baja California, country: MX, kind: border-crossing}
+  - {id: ensenada, code: ENS, name: Ensenada, state: Baja California, country: MX, kind: port}
+  - {id: chihuahua, code: CUU, name: Chihuahua, state: Chihuahua, country: MX, kind: city}
+  - {id: ciudad-juarez, code: CJS, name: Ciudad Juárez, state: Chihuahua, country: MX, kind: border-crossing}
+  - {id: ojinaga, code: OJI, name: Ojinaga, state: Chihuahua, country: MX, kind: border-crossing}
+  - {id: piedras-negras, code: PDN, name: Piedras Negras, state: Coahuila, country: MX, kind: border-crossing}
+  - {id: saltillo, code: SLW, name: Saltillo, state: Coahuila, country: MX, kind: city}
+  - {id: monterrey, code: MTY, name: Monterrey, state: Nuevo León, country: MX, kind: city}
+  - {id: nuevo-laredo, code: NLD, name: Nuevo Laredo, state: Tamaulipas, country: MX, kind: border-crossing}
+  - {id: reynosa, code: REX, name: Reynosa, state: Tamaulipas, country: MX, kind: border-crossing}
+  - {id: matamoros, code: MAM, name: Matamoros, state: Tamaulipas, country: MX, kind: border-crossing}
+  - {id: tampico, code: TAM, name: Tampico, state: Tamaulipas, country: MX, kind: port}
+  - {id: tuxpan, code: TUX, name: Tuxpan, state: Veracruz, country: MX, kind: port}
+  - {id: veracruz, code: VER, name: Veracruz, state: Veracruz, country: MX, kind: port}
+  - {id: coatzacoalcos, code: COA, name: Coatzacoalcos, state: Veracruz, country: MX, kind: port}
+  - {id: puebla, code: PBC, name: Puebla, state: Puebla, country: MX, kind: city}
+  - {id: queretaro, code: QRO, name: Querétaro, state: Querétaro, country: MX, kind: city}
+  - {id: mexico-city, code: MEX, name: Mexico City, state: Mexico City, country: MX, kind: city}
+  - {id: toluca, code: TLC, name: Toluca, state: State of Mexico, country: MX, kind: city}
+  - {id: acapulco, code: ACA, name: Acapulco, state: Guerrero, country: MX, kind: port}
+  - {id: cancun, code: CUN, name: Cancún, state: Quintana Roo, country: MX, kind: city}
+  - {id: progreso, code: PGO, name: Progreso, state: Yucatán, country: MX, kind: port}
+  - {id: highway-15, code: H15, name: Highway 15, state: Sonora, country: MX, kind: highway}
+  - {id: highway-85, code: H85, name: Highway 85, state: Nuevo León, country: MX, kind: highway}
+  - {id: highway-57, code: H57, name: Highway 57, state: Coahuila, country: MX, kind: highway}
+  - {id: highway-180, code: H18, name: Highway 180, state: Veracruz, country: MX, kind: highway}
+  - {id: highway-2, code: H02, name: Highway 2, state: Baja California, country: MX, kind: highway}
+  - {id: san-diego, code: SAN, name: San Diego, state: California, country: US, kind: hub}
+  - {id: san-ysidro, code: SYS, name: San Ysidro, state: California, country: US, kind: border-crossing}
+  - {id: otay-mesa, code: OTM, name: Otay Mesa, state: California, country: US, kind: border-crossing}
+  - {id: calexico, code: CLX, name: Calexico, state: California, country: US, kind: border-crossing}
+  - {id: los-angeles, code: LAX, name: Los Angeles, state: California, country: US, kind: hub}
+  - {id: yuma, code: YUM, name: Yuma, state: Arizona, country: US, kind: city}
+  - {id: nogales-arizona, code: NGZ, name: 'Nogales, Arizona', state: Arizona, country: US, kind: border-crossing}
+  - {id: tucson, code: TUS, name: Tucson, state: Arizona, country: US, kind: hub}
+  - {id: phoenix, code: PHX, name: Phoenix, state: Arizona, country: US, kind: hub}
+  - {id: el-paso, code: ELP, name: El Paso, state: Texas, country: US, kind: border-crossing}
+  - {id: presidio, code: PRS, name: Presidio, state: Texas, country: US, kind: border-crossing}
+  - {id: eagle-pass, code: EGP, name: Eagle Pass, state: Texas, country: US, kind: border-crossing}
+  - {id: laredo, code: LRD, name: Laredo, state: Texas, country: US, kind: border-crossing}
+  - {id: mcallen, code: MFE, name: McAllen, state: Texas, country: US, kind: border-crossing}
+  - {id: brownsville, code: BRO, name: Brownsville, state: Texas, country: US, kind: border-crossing}
+  - {id: houston, code: HOU, name: Houston, state: Texas, country: US, kind: hub}
+  - {id: dallas, code: DFW, name: Dallas, state: Texas, country: US, kind: hub}
+  - {id: atlanta, code: ATL, name: Atlanta, state: Georgia, country: US, kind: hub}
+  - {id: chicago, code: CHI, name: Chicago, state: Illinois, country: US, kind: hub}
+
+# ---------------------------------------------------------------------------
+# Organizations. Six factions: five founded 2010-2011 and one 2018 split-off.
+# ---------------------------------------------------------------------------
 organizations:
 - id: org-01
   name: Bruma del Cobre
-  base: Manzanillo
-  base_city: Manzanillo
-  founded_year: 2010
-  founding:
-    type: new
-    split_from: null
+  nickname: los Brumas
+  base: manzanillo
+  founded: '2010-03-14'
+  founding: {type: new, event: beat-01}
+  profile: >-
+    Pacific port network built by a former Manzanillo customs broker. Imports
+    precursor chemicals through Manzanillo, moves product north along Highway 15
+    and crosses at Nogales and San Luis Río Colorado. Launders through trucking,
+    produce export and a Guadalajara currency exchange.
   leadership:
-  - person: person-000
-    from: '2010-01-01'
-    to: '2012-01-01'
-  - person: person-001
-    from: '2012-01-01'
-    to: '2020-01-01'
-  - person: person-002
-    from: '2020-01-01'
-    to: '2027-01-01'
+  - {person: p-anzures-r, from: '2010-03-14', to: '2014-08-02'}
+  - {person: p-olivares-d, from: '2014-08-02', to: '2020-02-27'}
+  - {person: p-anzures-y, from: '2020-02-27', to: '2027-01-01', secret_only: true}
   fractures:
-  - date: '2017-01-01'
-    event: beat-003
-    departing_leader: person-003
-    destination_org: org-02
+  - {date: '2017-02-20', event: beat-19, departing_leader: p-loera-f, destination_org: org-05}
   alliances:
-  - with: org-02
-    from: '2014-01-01'
-    to: '2023-01-01'
-    formed_event: beat-002
-    broken_event: beat-005
+  - {with: org-04, from: '2013-06-11', to: '2019-09-30', formed_event: beat-08, broken_event: beat-26}
 - id: org-02
   name: Pacto del Faro Gris
-  base: Veracruz
-  base_city: Veracruz
-  founded_year: 2010
-  founding:
-    type: new
-    split_from: null
+  nickname: los Faros
+  base: veracruz
+  founded: '2011-01-22'
+  founding: {type: new, event: beat-05}
+  profile: >-
+    Gulf coast pact of three port crews under a single boss. Controls the
+    Veracruz and Tuxpan docks and the Highway 180 route to Tamaulipas. Shares
+    and then fights over Reynosa and Matamoros with Círculo del Valle Quieto.
   leadership:
-  - person: person-010
-    from: '2010-01-01'
-    to: '2012-01-01'
-  - person: person-011
-    from: '2012-01-01'
-    to: '2020-01-01'
-  - person: person-012
-    from: '2020-01-01'
-    to: '2027-01-01'
+  - {person: p-trevino-i, from: '2011-01-22', to: '2016-03-09'}
+  - {person: p-mijares-l, from: '2016-03-09', to: '2023-11-14'}
+  - {person: p-barcenas-u, from: '2023-11-14', to: '2027-01-01', secret_only: true}
   fractures:
-  - date: '2017-01-01'
-    event: beat-010
-    departing_leader: person-013
-    destination_org: org-03
+  - {date: '2017-08-25', event: beat-20, departing_leader: p-sarabia-b, destination_org: org-03}
   alliances:
-  - with: org-03
-    from: '2014-01-01'
-    to: '2023-01-01'
-    formed_event: beat-009
-    broken_event: beat-012
+  - {with: org-03, from: '2012-10-03', to: '2015-07-14', formed_event: beat-07, broken_event: beat-14}
+  - {with: org-05, from: '2014-02-14', to: '2016-04-20', formed_event: beat-10, broken_event: beat-16}
 - id: org-03
-  name: Circulo del Valle Quieto
-  base: Monterrey
-  base_city: Monterrey
-  founded_year: 2010
-  founding:
-    type: new
-    split_from: null
+  name: Círculo del Valle Quieto
+  nickname: el Círculo
+  base: monterrey
+  founded: '2010-09-01'
+  founding: {type: new, event: beat-03}
+  profile: >-
+    Northeastern trucking network run from Monterrey. Owns the Nuevo Laredo and
+    Piedras Negras crossings through corrupt customs staff and a fleet of
+    tractor-trailers, and takes Reynosa from Pacto del Faro Gris in 2015.
   leadership:
-  - person: person-020
-    from: '2010-01-01'
-    to: '2012-01-01'
-  - person: person-021
-    from: '2012-01-01'
-    to: '2020-01-01'
-  - person: person-022
-    from: '2020-01-01'
-    to: '2027-01-01'
+  - {person: p-castanon-a, from: '2010-09-01', to: '2019-05-23'}
+  - {person: p-vidaurri-m, from: '2019-05-23', to: '2027-01-01'}
   fractures:
-  - date: '2017-01-01'
-    event: beat-017
-    departing_leader: person-023
-    destination_org: org-04
+  - {date: '2020-01-10', event: beat-27, departing_leader: p-pedraza-j, destination_org: org-02}
   alliances:
-  - with: org-04
-    from: '2014-01-01'
-    to: '2023-01-01'
-    formed_event: beat-016
-    broken_event: beat-019
+  - {with: org-02, from: '2012-10-03', to: '2015-07-14', formed_event: beat-07, broken_event: beat-14}
+  - {with: org-06, from: '2020-05-15', to: '2024-03-08', formed_event: beat-29, broken_event: beat-37}
 - id: org-04
   name: Red del Horizonte Azul
-  base: Tijuana
-  base_city: Tijuana
-  founded_year: 2010
-  founding:
-    type: new
-    split_from: null
+  nickname: los Azules
+  base: tijuana
+  founded: '2010-05-30'
+  founding: {type: new, event: beat-02}
+  profile: >-
+    Baja California crossing network. Runs tunnels at Otay Mesa, pangas from
+    Ensenada to San Diego and vehicle loads through Tijuana, Tecate and Mexicali.
+    Allied with Bruma del Cobre over Sonora until a dispute over Nogales.
   leadership:
-  - person: person-030
-    from: '2010-01-01'
-    to: '2012-01-01'
-  - person: person-031
-    from: '2012-01-01'
-    to: '2020-01-01'
-  - person: person-032
-    from: '2020-01-01'
-    to: '2027-01-01'
+  - {person: p-ferreira-g, from: '2010-05-30', to: '2014-11-20'}
+  - {person: p-lizarraga-t, from: '2014-11-20', to: '2027-01-01'}
   fractures:
-  - date: '2017-01-01'
-    event: beat-024
-    departing_leader: person-033
-    destination_org: org-05
+  - {date: '2022-08-16', event: beat-34, departing_leader: p-sandoval-i, destination_org: org-01}
   alliances:
-  - with: org-05
-    from: '2014-01-01'
-    to: '2023-01-01'
-    formed_event: beat-023
-    broken_event: beat-026
+  - {with: org-01, from: '2013-06-11', to: '2019-09-30', formed_event: beat-08, broken_event: beat-26}
 - id: org-05
   name: Liga del Cedro Lunar
-  base: Guadalajara
-  base_city: Guadalajara
-  founded_year: 2010
-  founding:
-    type: new
-    split_from: null
+  nickname: la Liga
+  base: guadalajara
+  founded: '2010-11-18'
+  founding: {type: new, event: beat-04}
+  profile: >-
+    Highland synthetic-drug producer based in Guadalajara with laboratories in
+    the Tierra Caliente of Michoacán. Takes the Lázaro Cárdenas port in 2012,
+    loses its founder to arrest in 2018 and splits that summer.
   leadership:
-  - person: person-040
-    from: '2010-01-01'
-    to: '2012-01-01'
-  - person: person-041
-    from: '2012-01-01'
-    to: '2020-01-01'
-  - person: person-042
-    from: '2020-01-01'
-    to: '2027-01-01'
+  - {person: p-montemayor-e, from: '2010-11-18', to: '2018-04-26'}
+  - {person: p-ruvalcaba-r, from: '2018-04-26', to: '2027-01-01'}
   fractures:
-  - date: '2017-01-01'
-    event: beat-031
-    departing_leader: person-043
-    destination_org: org-01
+  - {date: '2018-06-30', event: beat-23, departing_leader: p-loera-f, destination_org: org-06}
   alliances:
-  - with: org-01
-    from: '2014-01-01'
-    to: '2023-01-01'
-    formed_event: beat-030
-    broken_event: beat-033
-places:
-- Manzanillo
-- Veracruz
-- Monterrey
-- Tijuana
-- Guadalajara
-- Ciudad Juarez
-- Nuevo Laredo
-- Reynosa
-- Matamoros
-- Mazatlan
-- Culiacan
-- Hermosillo
-- Nogales
-- Mexicali
-- Ensenada
-- Lazaro Cardenas
-- Acapulco
-- Tampico
-- Cancun
-- Merida
-- Puebla
-- Queretaro
-- El Paso
-- San Diego
-- Laredo
+  - {with: org-02, from: '2014-02-14', to: '2016-04-20', formed_event: beat-10, broken_event: beat-16}
+- id: org-06
+  name: Los del Cedro Partido
+  nickname: los Partidos
+  base: apatzingan
+  founded: '2018-06-30'
+  founding: {type: split, split_from: org-05, event: beat-23}
+  profile: >-
+    Faction that broke away from Liga del Cedro Lunar after the founder's
+    arrest. Holds Apatzingán, Uruapan and the Lázaro Cárdenas docks, and allies
+    with Círculo del Valle Quieto to reach the Texas border through Ojinaga.
+  leadership:
+  - {person: p-loera-f, from: '2018-06-30', to: '2027-01-01'}
+  fractures:
+  - {date: '2025-10-02', event: beat-41, departing_leader: p-ledezma-c, destination_org: org-05}
+  alliances:
+  - {with: org-03, from: '2020-05-15', to: '2024-03-08', formed_event: beat-29, broken_event: beat-37}
+
+# ---------------------------------------------------------------------------
+# Plazas and routes. Control changes hands over time; every window is dated.
+# ---------------------------------------------------------------------------
 corridors:
-- id: corridor-00
-  name: Manzanillo corridor
-  places:
-  - Manzanillo
-  - Veracruz
+- id: cor-manzanillo-port
+  name: Manzanillo port plaza
+  kind: plaza
+  places: [manzanillo, colima]
+  hubs: [los-angeles, phoenix]
+  commodities: [methamphetamine precursor, cocaine]
   control_history:
-  - organization: org-01
-    from: '2010-01-01'
-    to: '2017-01-01'
-  - organization: org-02
-    from: '2017-01-01'
-    to: '2027-01-01'
-- id: corridor-01
-  name: Veracruz corridor
-  places:
-  - Veracruz
-  - Monterrey
+  - {organization: org-01, from: '2010-03-14', to: '2014-08-02'}
+  - {organization: org-05, from: '2014-08-02', to: '2015-01-20'}
+  - {organization: org-01, from: '2015-01-20', to: '2027-01-01'}
+- id: cor-lazaro-port
+  name: Lázaro Cárdenas port plaza
+  kind: plaza
+  places: [lazaro-cardenas]
+  hubs: [los-angeles, chicago]
+  commodities: [methamphetamine precursor, cocaine]
   control_history:
-  - organization: org-02
-    from: '2010-01-01'
-    to: '2017-01-01'
-  - organization: org-03
-    from: '2017-01-01'
-    to: '2027-01-01'
-- id: corridor-02
-  name: Monterrey corridor
-  places:
-  - Monterrey
-  - Tijuana
+  - {organization: org-01, from: '2010-03-14', to: '2012-07-09'}
+  - {organization: org-05, from: '2012-07-09', to: '2018-06-30'}
+  - {organization: org-06, from: '2018-06-30', to: '2027-01-01'}
+- id: cor-tierra-caliente
+  name: Tierra Caliente plaza
+  kind: plaza
+  places: [apatzingan, uruapan, tierra-caliente]
+  hubs: [los-angeles, dallas]
+  commodities: [methamphetamine, fentanyl]
   control_history:
-  - organization: org-03
-    from: '2010-01-01'
-    to: '2017-01-01'
-  - organization: org-04
-    from: '2017-01-01'
-    to: '2027-01-01'
-- id: corridor-03
-  name: Tijuana corridor
-  places:
-  - Tijuana
-  - Guadalajara
+  - {organization: org-05, from: '2010-11-18', to: '2018-06-30'}
+  - {organization: org-06, from: '2018-06-30', to: '2027-01-01'}
+- id: cor-pacific-15
+  name: Highway 15 Pacific route
+  kind: route
+  places: [guadalajara, tepic, mazatlan, culiacan, hermosillo, highway-15]
+  hubs: [phoenix, los-angeles]
+  commodities: [methamphetamine, cocaine, fentanyl]
   control_history:
-  - organization: org-04
-    from: '2010-01-01'
-    to: '2017-01-01'
-  - organization: org-05
-    from: '2017-01-01'
-    to: '2027-01-01'
-- id: corridor-04
-  name: Guadalajara corridor
-  places:
-  - Guadalajara
-  - Ciudad Juarez
+  - {organization: org-05, from: '2010-11-18', to: '2013-06-11'}
+  - {organization: org-01, from: '2013-06-11', to: '2027-01-01'}
+- id: cor-nogales
+  name: Nogales crossing
+  kind: plaza
+  places: [nogales-sonora, nogales-arizona, tucson]
+  hubs: [phoenix, los-angeles]
+  commodities: [methamphetamine, fentanyl, cocaine]
   control_history:
-  - organization: org-05
-    from: '2010-01-01'
-    to: '2017-01-01'
-  - organization: org-01
-    from: '2017-01-01'
-    to: '2027-01-01'
-- id: corridor-05
-  name: Ciudad Juarez corridor
-  places:
-  - Ciudad Juarez
-  - Nuevo Laredo
+  - {organization: org-04, from: '2010-05-30', to: '2013-06-11'}
+  - {organization: org-01, from: '2013-06-11', to: '2019-09-30'}
+  - {organization: org-04, from: '2019-09-30', to: '2022-08-16'}
+  - {organization: org-01, from: '2022-08-16', to: '2027-01-01'}
+- id: cor-san-luis
+  name: San Luis Río Colorado crossing
+  kind: plaza
+  places: [san-luis-rio-colorado, yuma]
+  hubs: [phoenix, los-angeles]
+  commodities: [methamphetamine, cannabis]
   control_history:
-  - organization: org-01
-    from: '2010-01-01'
-    to: '2017-01-01'
-  - organization: org-02
-    from: '2017-01-01'
-    to: '2027-01-01'
-- id: corridor-06
-  name: Nuevo Laredo corridor
-  places:
-  - Nuevo Laredo
-  - Reynosa
+  - {organization: org-04, from: '2010-05-30', to: '2019-09-30'}
+  - {organization: org-01, from: '2019-09-30', to: '2027-01-01'}
+- id: cor-mexicali
+  name: Mexicali crossing
+  kind: plaza
+  places: [mexicali, calexico, highway-2]
+  hubs: [los-angeles]
+  commodities: [methamphetamine, cannabis]
   control_history:
-  - organization: org-02
-    from: '2010-01-01'
-    to: '2017-01-01'
-  - organization: org-03
-    from: '2017-01-01'
-    to: '2027-01-01'
-- id: corridor-07
-  name: Reynosa corridor
-  places:
-  - Reynosa
-  - Matamoros
+  - {organization: org-04, from: '2010-05-30', to: '2022-08-16'}
+  - {organization: org-01, from: '2022-08-16', to: '2027-01-01'}
+- id: cor-tecate
+  name: Tecate crossing
+  kind: plaza
+  places: [tecate]
+  hubs: [san-diego, los-angeles]
+  commodities: [cannabis, methamphetamine]
   control_history:
-  - organization: org-03
-    from: '2010-01-01'
-    to: '2017-01-01'
-  - organization: org-04
-    from: '2017-01-01'
-    to: '2027-01-01'
-- id: corridor-08
-  name: Matamoros corridor
-  places:
-  - Matamoros
-  - Mazatlan
+  - {organization: org-04, from: '2010-05-30', to: '2024-01-29'}
+  - {organization: org-01, from: '2024-01-29', to: '2027-01-01'}
+- id: cor-tijuana
+  name: Tijuana crossing plaza
+  kind: plaza
+  places: [tijuana, san-ysidro, otay-mesa, san-diego]
+  hubs: [los-angeles, chicago]
+  commodities: [cocaine, methamphetamine, fentanyl, cannabis]
   control_history:
-  - organization: org-04
-    from: '2010-01-01'
-    to: '2017-01-01'
-  - organization: org-05
-    from: '2017-01-01'
-    to: '2027-01-01'
-- id: corridor-09
-  name: Mazatlan corridor
-  places:
-  - Mazatlan
-  - Culiacan
+  - {organization: org-04, from: '2010-05-30', to: '2014-11-20'}
+  - {organization: org-05, from: '2014-11-20', to: '2015-06-01'}
+  - {organization: org-04, from: '2015-06-01', to: '2027-01-01'}
+- id: cor-ensenada-maritime
+  name: Ensenada maritime route
+  kind: route
+  places: [ensenada, san-diego, los-angeles]
+  hubs: [los-angeles]
+  commodities: [cocaine, cannabis]
   control_history:
-  - organization: org-05
-    from: '2010-01-01'
-    to: '2017-01-01'
-  - organization: org-01
-    from: '2017-01-01'
-    to: '2027-01-01'
-- id: corridor-10
-  name: Culiacan corridor
-  places:
-  - Culiacan
-  - Hermosillo
+  - {organization: org-04, from: '2010-05-30', to: '2015-02-05'}
+  - {organization: org-05, from: '2015-02-05', to: '2016-04-20'}
+  - {organization: org-04, from: '2016-04-20', to: '2027-01-01'}
+- id: cor-juarez
+  name: Ciudad Juárez plaza
+  kind: plaza
+  places: [ciudad-juarez, el-paso, chihuahua]
+  hubs: [dallas, chicago]
+  commodities: [cocaine, cannabis, methamphetamine]
   control_history:
-  - organization: org-01
-    from: '2010-01-01'
-    to: '2017-01-01'
-  - organization: org-02
-    from: '2017-01-01'
-    to: '2027-01-01'
-- id: corridor-11
-  name: Hermosillo corridor
-  places:
-  - Hermosillo
-  - Nogales
+  - {organization: org-03, from: '2010-09-01', to: '2016-12-02'}
+  - {organization: org-05, from: '2016-12-02', to: '2018-04-26'}
+  - {organization: org-03, from: '2018-04-26', to: '2027-01-01'}
+- id: cor-ojinaga
+  name: Ojinaga crossing
+  kind: plaza
+  places: [ojinaga, presidio]
+  hubs: [dallas]
+  commodities: [cannabis, methamphetamine]
   control_history:
-  - organization: org-02
-    from: '2010-01-01'
-    to: '2017-01-01'
-  - organization: org-03
-    from: '2017-01-01'
-    to: '2027-01-01'
-- id: corridor-12
-  name: Nogales corridor
-  places:
-  - Nogales
-  - Mexicali
+  - {organization: org-03, from: '2010-09-01', to: '2020-05-15'}
+  - {organization: org-06, from: '2020-05-15', to: '2024-03-08'}
+  - {organization: org-03, from: '2024-03-08', to: '2027-01-01'}
+- id: cor-piedras-negras
+  name: Piedras Negras crossing
+  kind: plaza
+  places: [piedras-negras, eagle-pass, highway-57]
+  hubs: [dallas, houston]
+  commodities: [cocaine, methamphetamine]
   control_history:
-  - organization: org-03
-    from: '2010-01-01'
-    to: '2017-01-01'
-  - organization: org-04
-    from: '2017-01-01'
-    to: '2027-01-01'
-- id: corridor-13
-  name: Mexicali corridor
-  places:
-  - Mexicali
-  - Ensenada
+  - {organization: org-03, from: '2010-09-01', to: '2012-10-03'}
+  - {organization: org-02, from: '2012-10-03', to: '2015-07-14'}
+  - {organization: org-03, from: '2015-07-14', to: '2027-01-01'}
+- id: cor-nuevo-laredo
+  name: Nuevo Laredo plaza
+  kind: plaza
+  places: [nuevo-laredo, laredo]
+  hubs: [dallas, houston, atlanta]
+  commodities: [cocaine, methamphetamine, fentanyl]
   control_history:
-  - organization: org-04
-    from: '2010-01-01'
-    to: '2017-01-01'
-  - organization: org-05
-    from: '2017-01-01'
-    to: '2027-01-01'
-- id: corridor-14
-  name: Ensenada corridor
-  places:
-  - Ensenada
-  - Lazaro Cardenas
+  - {organization: org-03, from: '2010-09-01', to: '2019-05-23'}
+  - {organization: org-02, from: '2019-05-23', to: '2020-01-10'}
+  - {organization: org-03, from: '2020-01-10', to: '2027-01-01'}
+- id: cor-highway-85
+  name: Highway 85 route
+  kind: route
+  places: [monterrey, nuevo-laredo, highway-85]
+  hubs: [dallas, houston]
+  commodities: [cocaine, methamphetamine]
   control_history:
-  - organization: org-05
-    from: '2010-01-01'
-    to: '2017-01-01'
-  - organization: org-01
-    from: '2017-01-01'
-    to: '2027-01-01'
-- id: corridor-15
-  name: Lazaro Cardenas corridor
-  places:
-  - Lazaro Cardenas
-  - Acapulco
+  - {organization: org-03, from: '2010-09-01', to: '2019-05-23'}
+  - {organization: org-02, from: '2019-05-23', to: '2020-01-10'}
+  - {organization: org-03, from: '2020-01-10', to: '2027-01-01'}
+- id: cor-reynosa
+  name: Reynosa plaza
+  kind: plaza
+  places: [reynosa, mcallen]
+  hubs: [houston, atlanta]
+  commodities: [cocaine, cannabis]
   control_history:
-  - organization: org-01
-    from: '2010-01-01'
-    to: '2017-01-01'
-  - organization: org-02
-    from: '2017-01-01'
-    to: '2027-01-01'
-- id: corridor-16
-  name: Acapulco corridor
-  places:
-  - Acapulco
-  - Tampico
+  - {organization: org-02, from: '2011-01-22', to: '2015-07-14'}
+  - {organization: org-03, from: '2015-07-14', to: '2020-01-10'}
+  - {organization: org-02, from: '2020-01-10', to: '2021-10-19'}
+  - {organization: org-03, from: '2021-10-19', to: '2027-01-01'}
+- id: cor-matamoros
+  name: Matamoros plaza
+  kind: plaza
+  places: [matamoros, brownsville]
+  hubs: [houston, atlanta]
+  commodities: [cocaine, cannabis]
   control_history:
-  - organization: org-02
-    from: '2010-01-01'
-    to: '2017-01-01'
-  - organization: org-03
-    from: '2017-01-01'
-    to: '2027-01-01'
-- id: corridor-17
-  name: Tampico corridor
-  places:
-  - Tampico
-  - Cancun
+  - {organization: org-02, from: '2011-01-22', to: '2017-08-25'}
+  - {organization: org-03, from: '2017-08-25', to: '2027-01-01'}
+- id: cor-gulf-180
+  name: Highway 180 Gulf route
+  kind: route
+  places: [veracruz, tuxpan, tampico, highway-180]
+  hubs: [houston]
+  commodities: [cocaine]
   control_history:
-  - organization: org-03
-    from: '2010-01-01'
-    to: '2017-01-01'
-  - organization: org-04
-    from: '2017-01-01'
-    to: '2027-01-01'
-- id: corridor-18
-  name: Cancun corridor
-  places:
-  - Cancun
-  - Merida
+  - {organization: org-02, from: '2011-01-22', to: '2014-02-14'}
+  - {organization: org-05, from: '2014-02-14', to: '2016-04-20'}
+  - {organization: org-02, from: '2016-04-20', to: '2027-01-01'}
+- id: cor-veracruz-port
+  name: Veracruz port plaza
+  kind: plaza
+  places: [veracruz, coatzacoalcos]
+  hubs: [houston, atlanta]
+  commodities: [cocaine, methamphetamine precursor]
   control_history:
-  - organization: org-04
-    from: '2010-01-01'
-    to: '2017-01-01'
-  - organization: org-05
-    from: '2017-01-01'
-    to: '2027-01-01'
-- id: corridor-19
-  name: Merida corridor
-  places:
-  - Merida
-  - Puebla
+  - {organization: org-02, from: '2011-01-22', to: '2023-11-14'}
+  - {organization: org-03, from: '2023-11-14', to: '2024-09-05'}
+  - {organization: org-02, from: '2024-09-05', to: '2027-01-01'}
+- id: cor-tampico-port
+  name: Tampico port plaza
+  kind: plaza
+  places: [tampico]
+  hubs: [houston]
+  commodities: [cocaine]
   control_history:
-  - organization: org-05
-    from: '2010-01-01'
-    to: '2017-01-01'
-  - organization: org-01
-    from: '2017-01-01'
-    to: '2027-01-01'
-- id: corridor-20
-  name: Puebla corridor
-  places:
-  - Puebla
-  - Queretaro
+  - {organization: org-02, from: '2011-01-22', to: '2017-08-25'}
+  - {organization: org-03, from: '2017-08-25', to: '2027-01-01'}
+- id: cor-highway-57
+  name: Highway 57 interior route
+  kind: route
+  places: [mexico-city, queretaro, saltillo, highway-57]
+  hubs: [dallas, houston]
+  commodities: [methamphetamine, fentanyl]
   control_history:
-  - organization: org-01
-    from: '2010-01-01'
-    to: '2017-01-01'
-  - organization: org-02
-    from: '2017-01-01'
-    to: '2027-01-01'
-- id: corridor-21
-  name: Queretaro corridor
-  places:
-  - Queretaro
-  - El Paso
+  - {organization: org-05, from: '2010-11-18', to: '2020-05-15'}
+  - {organization: org-06, from: '2020-05-15', to: '2024-03-08'}
+  - {organization: org-05, from: '2024-03-08', to: '2027-01-01'}
+- id: cor-acapulco
+  name: Acapulco port plaza
+  kind: plaza
+  places: [acapulco]
+  hubs: [los-angeles]
+  commodities: [cocaine]
   control_history:
-  - organization: org-02
-    from: '2010-01-01'
-    to: '2017-01-01'
-  - organization: org-03
-    from: '2017-01-01'
-    to: '2027-01-01'
-- id: corridor-22
-  name: El Paso corridor
-  places:
-  - El Paso
-  - San Diego
+  - {organization: org-05, from: '2010-11-18', to: '2018-06-30'}
+  - {organization: org-06, from: '2018-06-30', to: '2022-11-21'}
+  - {organization: org-05, from: '2022-11-21', to: '2027-01-01'}
+- id: cor-cancun
+  name: Cancún plaza
+  kind: plaza
+  places: [cancun, progreso]
+  hubs: [houston, atlanta]
+  commodities: [cocaine]
   control_history:
-  - organization: org-03
-    from: '2010-01-01'
-    to: '2017-01-01'
-  - organization: org-04
-    from: '2017-01-01'
-    to: '2027-01-01'
-- id: corridor-23
-  name: San Diego corridor
-  places:
-  - San Diego
-  - Laredo
-  control_history:
-  - organization: org-04
-    from: '2010-01-01'
-    to: '2017-01-01'
-  - organization: org-05
-    from: '2017-01-01'
-    to: '2027-01-01'
-- id: corridor-24
-  name: Laredo corridor
-  places:
-  - Laredo
-  - Manzanillo
-  control_history:
-  - organization: org-05
-    from: '2010-01-01'
-    to: '2017-01-01'
-  - organization: org-01
-    from: '2017-01-01'
-    to: '2027-01-01'
+  - {organization: org-02, from: '2011-01-22', to: '2016-03-09'}
+  - {organization: org-03, from: '2016-03-09', to: '2027-01-01'}
+
+# ---------------------------------------------------------------------------
+# People. Tiers: boss, lieutenant, plaza-boss, sicario-chief, launderer,
+# logistics, lawyer, corrupt-official (official_role: police, customs, mayor,
+# prosecutor, military). Membership windows are the member_of edges.
+# ---------------------------------------------------------------------------
 people:
-- id: person-000
-  name: Ilareno Vesquinal
+# --- Bruma del Cobre -------------------------------------------------------
+- id: p-anzures-r
+  name: Rogelio Anzures Tapia
   tier: boss
-  organization: org-01
-  places:
-  - Manzanillo
-  aliases:
-  - El Farol 00
-  - Operador Niebla 000
-  - La Aguja de Vidrio 00
-  alias_history:
-  - alias: La Aguja de Vidrio 00
-    from: '2010-01-01'
-    to: '2012-01-01'
-    inherited_from: null
-  arrest_date: '2012-01-01'
-  death_date: null
-- id: person-001
-  name: Ilareno Nuberal
-  tier: boss
-  organization: org-01
-  places:
-  - Veracruz
-  aliases:
-  - El Farol 01
-  - Operador Niebla 001
-  - La Aguja de Vidrio 00
-  alias_history:
-  - alias: La Aguja de Vidrio 00
-    from: '2012-01-01'
-    to: '2020-01-01'
-    inherited_from: person-000
-  arrest_date: null
-  death_date: '2020-01-01'
-- id: person-002
-  name: Ilareno Cendavelo
-  tier: boss
-  organization: org-01
-  places:
-  - Monterrey
-  aliases:
-  - El Farol 02
-  - Operador Niebla 002
-  - Reloj de Nacar 002
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-003
-  name: Ilareno Riolumbre
+  places: [manzanillo, colima]
+  aliases: [El Portuario, Anzures, Don Rogelio]
+  membership:
+  - {organization: org-01, from: '2010-03-14', to: '2014-08-02', role: boss}
+  arrest_date: '2014-08-02'
+  extradition_date: '2016-05-19'
+- id: p-olivares-d
+  name: Damián Olivares Rendón
   tier: lieutenant
-  organization: org-01
-  places:
-  - Tijuana
-  aliases:
-  - El Farol 03
-  - Operador Niebla 003
-  - Reloj de Nacar 003
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-004
-  name: Ilareno Nevazul
-  tier: plaza-boss
-  organization: org-01
-  places:
-  - Guadalajara
-  aliases:
-  - El Farol 04
-  - Operador Niebla 004
-  - Reloj de Nacar 004
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-005
-  name: Ilareno Solquino
-  tier: sicario-chief
-  organization: org-01
-  places:
-  - Ciudad Juarez
-  aliases:
-  - El Farol 05
-  - Operador Niebla 005
-  - Reloj de Nacar 005
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-006
-  name: Ilareno Valmirel
-  tier: launderer
-  organization: org-01
-  places:
-  - Nuevo Laredo
-  aliases:
-  - El Farol 06
-  - Operador Niebla 006
-  - Reloj de Nacar 006
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-007
-  name: Ilareno Orveza
-  tier: logistics
-  organization: org-01
-  places:
-  - Reynosa
-  aliases:
-  - El Farol 07
-  - Operador Niebla 007
-  - Reloj de Nacar 007
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-008
-  name: Ilareno Lumacero
-  tier: lawyer
-  organization: org-01
-  places:
-  - Matamoros
-  aliases:
-  - El Farol 08
-  - Operador Niebla 008
-  - Reloj de Nacar 008
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-009
-  name: Ilareno Brisquel
-  tier: corrupt-official
-  organization: org-01
-  places:
-  - Mazatlan
-  aliases:
-  - El Farol 09
-  - Operador Niebla 009
-  - Reloj de Nacar 009
-  alias_history: []
-  arrest_date: null
-  death_date: null
-  official_role: police
-- id: person-010
-  name: Tavireo Vesquinal
-  tier: boss
-  organization: org-02
-  places:
-  - Ciudad Juarez
-  aliases:
-  - El Farol 00
-  - Operador Niebla 010
-  - La Aguja de Vidrio 01
+  places: [colima, manzanillo]
+  aliases: [El Contador, El Portuario, Olivares]
   alias_history:
-  - alias: La Aguja de Vidrio 01
-    from: '2010-01-01'
-    to: '2012-01-01'
-    inherited_from: null
-  arrest_date: '2012-01-01'
-  death_date: null
-- id: person-011
-  name: Tavireo Nuberal
-  tier: boss
-  organization: org-02
-  places:
-  - Nuevo Laredo
-  aliases:
-  - El Farol 01
-  - Operador Niebla 011
-  - La Aguja de Vidrio 01
-  alias_history:
-  - alias: La Aguja de Vidrio 01
-    from: '2012-01-01'
-    to: '2020-01-01'
-    inherited_from: person-010
-  arrest_date: null
-  death_date: '2020-01-01'
-- id: person-012
-  name: Tavireo Cendavelo
-  tier: boss
-  organization: org-02
-  places:
-  - Reynosa
-  aliases:
-  - El Farol 02
-  - Operador Niebla 012
-  - Reloj de Nacar 012
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-013
-  name: Tavireo Riolumbre
+  - {alias: El Portuario, from: '2014-08-02', to: '2020-02-27', inherited_from: p-anzures-r}
+  membership:
+  - {organization: org-01, from: '2010-03-14', to: '2020-02-27', role: lieutenant then boss}
+  death_date: '2020-02-27'
+- id: p-anzures-y
+  name: Yesenia Anzures Ibarra
   tier: lieutenant
-  organization: org-02
-  places:
-  - Matamoros
-  aliases:
-  - El Farol 03
-  - Operador Niebla 013
-  - Reloj de Nacar 013
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-014
-  name: Tavireo Nevazul
+  places: [manzanillo, guadalajara]
+  aliases: [La Doctora, Anzures Ibarra, La Sobrina]
+  membership:
+  - {organization: org-01, from: '2012-01-15', to: '2027-01-01', role: lieutenant then boss}
+- id: p-loera-f
+  name: Fermín Loera Arriaga
+  tier: lieutenant
+  places: [lazaro-cardenas, apatzingan]
+  aliases: [El Relojero, El Cirujano, Loera]
+  alias_history:
+  - {alias: El Cirujano, from: '2018-06-30', to: '2027-01-01', inherited_from: p-montemayor-e}
+  membership:
+  - {organization: org-01, from: '2010-06-01', to: '2017-02-20', role: lieutenant}
+  - {organization: org-05, from: '2017-02-20', to: '2018-06-30', role: lieutenant}
+  - {organization: org-06, from: '2018-06-30', to: '2027-01-01', role: boss}
+- id: p-zepeda-h
+  name: Hilario Zepeda Montaño
   tier: plaza-boss
-  organization: org-02
-  places:
-  - Mazatlan
-  aliases:
-  - El Farol 04
-  - Operador Niebla 014
-  - Reloj de Nacar 014
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-015
-  name: Tavireo Solquino
-  tier: sicario-chief
-  organization: org-02
-  places:
-  - Culiacan
-  aliases:
-  - El Farol 05
-  - Operador Niebla 015
-  - Reloj de Nacar 015
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-016
-  name: Tavireo Valmirel
+  places: [lazaro-cardenas]
+  aliases: [El Hormiga, Zepeda]
+  membership:
+  - {organization: org-01, from: '2010-03-14', to: '2012-07-09', role: plaza boss}
+  death_date: '2012-07-09'
+- id: p-cervera-n
+  name: Nicolás Cervera Ulloa
+  tier: plaza-boss
+  places: [nogales-sonora, hermosillo]
+  aliases: [El Cuatro, Cervera]
+  membership:
+  - {organization: org-01, from: '2011-05-02', to: '2027-01-01', role: plaza boss}
+- id: p-berumen-s
+  name: Saúl Berumen Ledesma
   tier: launderer
-  organization: org-02
-  places:
-  - Hermosillo
-  aliases:
-  - El Farol 06
-  - Operador Niebla 016
-  - Reloj de Nacar 016
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-017
-  name: Tavireo Orveza
+  places: [manzanillo, guadalajara]
+  aliases: [El Notario, Berumen]
+  membership:
+  - {organization: org-01, from: '2010-09-10', to: '2025-03-18', role: launderer}
+  arrest_date: '2025-03-18'
+- id: p-tinoco-g
+  name: Gilberto Tinoco Arzate
   tier: logistics
-  organization: org-02
-  places:
-  - Nogales
-  aliases:
-  - El Farol 07
-  - Operador Niebla 017
-  - Reloj de Nacar 017
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-018
-  name: Tavireo Lumacero
+  places: [manzanillo]
+  aliases: [El Grúa, Tinoco]
+  membership:
+  - {organization: org-01, from: '2010-03-14', to: '2027-01-01', role: port logistics}
+- id: p-medrano-c
+  name: Carolina Medrano Siller
   tier: lawyer
-  organization: org-02
-  places:
-  - Mexicali
-  aliases:
-  - El Farol 08
-  - Operador Niebla 018
-  - Reloj de Nacar 018
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-019
-  name: Tavireo Brisquel
+  places: [guadalajara]
+  aliases: [La Licenciada, Medrano]
+  membership:
+  - {organization: org-01, from: '2013-01-01', to: '2027-01-01', role: lawyer}
+- id: p-prado-e
+  name: Eusebio Prado Camarena
   tier: corrupt-official
-  organization: org-02
-  places:
-  - Ensenada
-  aliases:
-  - El Farol 09
-  - Operador Niebla 019
-  - Reloj de Nacar 019
-  alias_history: []
-  arrest_date: null
-  death_date: null
   official_role: customs
-- id: person-020
-  name: Orenzio Vesquinal
-  tier: boss
-  organization: org-03
-  places:
-  - Culiacan
-  aliases:
-  - El Farol 00
-  - Operador Niebla 020
-  - La Aguja de Vidrio 02
-  alias_history:
-  - alias: La Aguja de Vidrio 02
-    from: '2010-01-01'
-    to: '2012-01-01'
-    inherited_from: null
-  arrest_date: '2012-01-01'
-  death_date: null
-- id: person-021
-  name: Orenzio Nuberal
-  tier: boss
-  organization: org-03
-  places:
-  - Hermosillo
-  aliases:
-  - El Farol 01
-  - Operador Niebla 021
-  - La Aguja de Vidrio 02
-  alias_history:
-  - alias: La Aguja de Vidrio 02
-    from: '2012-01-01'
-    to: '2020-01-01'
-    inherited_from: person-020
-  arrest_date: null
-  death_date: '2020-01-01'
-- id: person-022
-  name: Orenzio Cendavelo
-  tier: boss
-  organization: org-03
-  places:
-  - Nogales
-  aliases:
-  - El Farol 02
-  - Operador Niebla 022
-  - Reloj de Nacar 022
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-023
-  name: Orenzio Riolumbre
-  tier: lieutenant
-  organization: org-03
-  places:
-  - Mexicali
-  aliases:
-  - El Farol 03
-  - Operador Niebla 023
-  - Reloj de Nacar 023
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-024
-  name: Orenzio Nevazul
-  tier: plaza-boss
-  organization: org-03
-  places:
-  - Ensenada
-  aliases:
-  - El Farol 04
-  - Operador Niebla 024
-  - Reloj de Nacar 024
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-025
-  name: Orenzio Solquino
+  places: [manzanillo]
+  aliases: [El Aduanal, Prado]
+  membership:
+  - {organization: org-01, from: '2011-03-01', to: '2019-12-31', role: customs contact}
+- id: p-lira-a
+  name: Abundio Lira Castañeda
   tier: sicario-chief
-  organization: org-03
-  places:
-  - Lazaro Cardenas
-  aliases:
-  - El Farol 05
-  - Operador Niebla 025
-  - Reloj de Nacar 025
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-026
-  name: Orenzio Valmirel
-  tier: launderer
-  organization: org-03
-  places:
-  - Acapulco
-  aliases:
-  - El Farol 06
-  - Operador Niebla 026
-  - Reloj de Nacar 026
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-027
-  name: Orenzio Orveza
-  tier: logistics
-  organization: org-03
-  places:
-  - Tampico
-  aliases:
-  - El Farol 07
-  - Operador Niebla 027
-  - Reloj de Nacar 027
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-028
-  name: Orenzio Lumacero
-  tier: lawyer
-  organization: org-03
-  places:
-  - Cancun
-  aliases:
-  - El Farol 08
-  - Operador Niebla 028
-  - Reloj de Nacar 028
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-029
-  name: Orenzio Brisquel
+  places: [colima, manzanillo]
+  aliases: [El Yunque, Lira]
+  membership:
+  - {organization: org-01, from: '2010-03-14', to: '2027-01-01', role: sicario chief}
+# --- Pacto del Faro Gris ---------------------------------------------------
+- id: p-trevino-i
+  name: Ignacio Treviño Salcido
+  tier: boss
+  places: [veracruz]
+  aliases: [El Faro, Treviño, Don Nacho]
+  membership:
+  - {organization: org-02, from: '2011-01-22', to: '2016-03-09', role: boss}
+  death_date: '2016-03-09'
+- id: p-mijares-l
+  name: Lorena Mijares Ocampo
+  tier: lieutenant
+  places: [veracruz, tuxpan]
+  aliases: [La Garza, El Faro, Mijares]
+  alias_history:
+  - {alias: El Faro, from: '2016-03-09', to: '2023-11-14', inherited_from: p-trevino-i}
+  membership:
+  - {organization: org-02, from: '2011-01-22', to: '2023-11-14', role: lieutenant then boss}
+  arrest_date: '2023-11-14'
+- id: p-barcenas-u
+  name: Ulises Bárcenas Peña
+  tier: plaza-boss
+  places: [veracruz, coatzacoalcos]
+  aliases: [El Timbre, Bárcenas]
+  membership:
+  - {organization: org-02, from: '2011-01-22', to: '2027-01-01', role: plaza boss then boss}
+- id: p-sarabia-b
+  name: Benito Sarabia Olguín
+  tier: plaza-boss
+  places: [tampico]
+  aliases: [El Sastre, Sarabia]
+  membership:
+  - {organization: org-02, from: '2011-01-22', to: '2017-08-25', role: plaza boss}
+  - {organization: org-03, from: '2017-08-25', to: '2027-01-01', role: plaza boss}
+- id: p-pedraza-j
+  name: Joel Pedraza Villaseñor
+  tier: plaza-boss
+  places: [reynosa, mcallen]
+  aliases: [El Diez, Pedraza]
+  membership:
+  - {organization: org-03, from: '2010-09-01', to: '2020-01-10', role: plaza boss}
+  - {organization: org-02, from: '2020-01-10', to: '2021-10-19', role: plaza boss}
+  death_date: '2021-10-19'
+- id: p-quintanilla-r
+  name: Rafael Quintanilla Bravo
   tier: corrupt-official
-  organization: org-03
-  places:
-  - Merida
-  aliases:
-  - El Farol 09
-  - Operador Niebla 029
-  - Reloj de Nacar 029
-  alias_history: []
-  arrest_date: null
-  death_date: null
   official_role: mayor
-- id: person-030
-  name: Belviano Vesquinal
-  tier: boss
-  organization: org-04
-  places:
-  - Lazaro Cardenas
-  aliases:
-  - El Farol 00
-  - Operador Niebla 030
-  - La Aguja de Vidrio 03
-  alias_history:
-  - alias: La Aguja de Vidrio 03
-    from: '2010-01-01'
-    to: '2012-01-01'
-    inherited_from: null
-  arrest_date: '2012-01-01'
-  death_date: null
-- id: person-031
-  name: Belviano Nuberal
-  tier: boss
-  organization: org-04
-  places:
-  - Acapulco
-  aliases:
-  - El Farol 01
-  - Operador Niebla 031
-  - La Aguja de Vidrio 03
-  alias_history:
-  - alias: La Aguja de Vidrio 03
-    from: '2012-01-01'
-    to: '2020-01-01'
-    inherited_from: person-030
-  arrest_date: null
-  death_date: '2020-01-01'
-- id: person-032
-  name: Belviano Cendavelo
-  tier: boss
-  organization: org-04
-  places:
-  - Tampico
-  aliases:
-  - El Farol 02
-  - Operador Niebla 032
-  - Reloj de Nacar 032
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-033
-  name: Belviano Riolumbre
-  tier: lieutenant
-  organization: org-04
-  places:
-  - Cancun
-  aliases:
-  - El Farol 03
-  - Operador Niebla 033
-  - Reloj de Nacar 033
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-034
-  name: Belviano Nevazul
-  tier: plaza-boss
-  organization: org-04
-  places:
-  - Merida
-  aliases:
-  - El Farol 04
-  - Operador Niebla 034
-  - Reloj de Nacar 034
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-035
-  name: Belviano Solquino
-  tier: sicario-chief
-  organization: org-04
-  places:
-  - Puebla
-  aliases:
-  - El Farol 05
-  - Operador Niebla 035
-  - Reloj de Nacar 035
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-036
-  name: Belviano Valmirel
+  places: [coatzacoalcos]
+  aliases: [El Alcalde, Quintanilla]
+  membership:
+  - {organization: org-02, from: '2015-01-01', to: '2024-09-05', role: municipal protection}
+- id: p-ocampo-t
+  name: Tomás Ocampo Lira
   tier: launderer
-  organization: org-04
-  places:
-  - Queretaro
-  aliases:
-  - El Farol 06
-  - Operador Niebla 036
-  - Reloj de Nacar 036
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-037
-  name: Belviano Orveza
-  tier: logistics
-  organization: org-04
-  places:
-  - El Paso
-  aliases:
-  - El Farol 07
-  - Operador Niebla 037
-  - Reloj de Nacar 037
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-038
-  name: Belviano Lumacero
+  places: [tampico, tuxpan]
+  aliases: [El Cambista, Ocampo]
+  membership:
+  - {organization: org-02, from: '2011-01-22', to: '2027-01-01', role: launderer}
+- id: p-nava-r
+  name: Rosalba Nava Cepeda
   tier: lawyer
-  organization: org-04
-  places:
-  - San Diego
-  aliases:
-  - El Farol 08
-  - Operador Niebla 038
-  - Reloj de Nacar 038
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-039
-  name: Belviano Brisquel
+  places: [veracruz]
+  aliases: [La Pluma, Nava]
+  membership:
+  - {organization: org-02, from: '2012-06-01', to: '2027-01-01', role: lawyer}
+- id: p-sierra-d
+  name: Dionisio Sierra Macías
+  tier: logistics
+  places: [veracruz, tampico]
+  aliases: [El Trailero, Sierra]
+  membership:
+  - {organization: org-02, from: '2011-01-22', to: '2027-01-01', role: trucking logistics}
+- id: p-ibanez-p
+  name: Porfirio Ibáñez Solís
+  tier: sicario-chief
+  places: [veracruz, reynosa]
+  aliases: [El Búho, Ibáñez]
+  membership:
+  - {organization: org-02, from: '2011-06-01', to: '2027-01-01', role: sicario chief}
+# --- Círculo del Valle Quieto ----------------------------------------------
+- id: p-castanon-a
+  name: Aurelio Castañón Vidaurri
+  tier: boss
+  places: [monterrey, saltillo]
+  aliases: [El Cartógrafo, Castañón, Don Aurelio]
+  membership:
+  - {organization: org-03, from: '2010-09-01', to: '2019-05-23', role: boss}
+  arrest_date: '2019-05-23'
+- id: p-vidaurri-m
+  name: Marisol Vidaurri Echeverría
+  tier: lieutenant
+  places: [monterrey, nuevo-laredo]
+  aliases: [La Brújula, El Cartógrafo, Vidaurri]
+  alias_history:
+  - {alias: El Cartógrafo, from: '2019-05-23', to: '2027-01-01', inherited_from: p-castanon-a}
+  membership:
+  - {organization: org-03, from: '2010-09-01', to: '2027-01-01', role: lieutenant then boss}
+- id: p-villalpando-e
+  name: Esteban Villalpando Ruelas
   tier: corrupt-official
-  organization: org-04
-  places:
-  - Laredo
-  aliases:
-  - El Farol 09
-  - Operador Niebla 039
-  - Reloj de Nacar 039
-  alias_history: []
-  arrest_date: null
-  death_date: null
+  official_role: mayor
+  places: [reynosa]
+  aliases: [El Presidente, Villalpando]
+  membership:
+  - {organization: org-03, from: '2013-07-07', to: '2016-09-30', role: municipal protection}
+- id: p-gaytan-h
+  name: Hortensia Gaytán Morales
+  tier: corrupt-official
+  official_role: customs
+  places: [nuevo-laredo]
+  aliases: [La Aduana, Gaytán]
+  membership:
+  - {organization: org-03, from: '2011-01-10', to: '2027-01-01', role: customs contact}
+- id: p-elizondo-f
+  name: Fausto Elizondo Marroquín
+  tier: logistics
+  places: [monterrey, nuevo-laredo]
+  aliases: [El Capataz, Elizondo]
+  membership:
+  - {organization: org-03, from: '2010-09-01', to: '2027-01-01', role: trucking logistics}
+- id: p-cantu-e
+  name: Elvira Cantú Zamarripa
+  tier: launderer
+  places: [reynosa, monterrey]
+  aliases: [La Cajera, Cantú]
+  membership:
+  - {organization: org-03, from: '2011-03-01', to: '2027-01-01', role: launderer}
+- id: p-saucedo-l
+  name: Leopoldo Saucedo Narváez
+  tier: sicario-chief
+  places: [monterrey, reynosa]
+  aliases: [El Cometa, Saucedo]
+  membership:
+  - {organization: org-03, from: '2010-09-01', to: '2027-01-01', role: sicario chief}
+- id: p-arizpe-c
+  name: Cristóbal Arizpe Dávalos
+  tier: lawyer
+  places: [monterrey]
+  aliases: [El Perito, Arizpe]
+  membership:
+  - {organization: org-03, from: '2012-01-01', to: '2027-01-01', role: lawyer}
+- id: p-montes-r
+  name: Rubén Montes Galindo
+  tier: plaza-boss
+  places: [piedras-negras, eagle-pass]
+  aliases: [El Relojero, Montes]
+  membership:
+  - {organization: org-03, from: '2014-01-01', to: '2027-01-01', role: plaza boss}
+# --- Red del Horizonte Azul -------------------------------------------------
+- id: p-ferreira-g
+  name: Gonzalo Ferreira Luján
+  tier: boss
+  places: [tijuana, ensenada]
+  aliases: [El Timonel, Ferreira]
+  membership:
+  - {organization: org-04, from: '2010-05-30', to: '2014-11-20', role: boss}
+  arrest_date: '2014-11-20'
+  extradition_date: '2015-02-05'
+- id: p-lizarraga-t
+  name: Teodoro Lizárraga Fonseca
+  tier: lieutenant
+  places: [tijuana]
+  aliases: [El Cerrajero, El Timonel, Lizárraga]
+  alias_history:
+  - {alias: El Timonel, from: '2014-11-20', to: '2027-01-01', inherited_from: p-ferreira-g}
+  membership:
+  - {organization: org-04, from: '2010-05-30', to: '2027-01-01', role: lieutenant then boss}
+- id: p-sandoval-i
+  name: Irene Sandoval Quiroga
+  tier: plaza-boss
+  places: [mexicali, calexico]
+  aliases: [La Garza, Sandoval, La Mexicalense]
+  membership:
+  - {organization: org-04, from: '2012-04-01', to: '2022-08-16', role: plaza boss}
+  - {organization: org-01, from: '2022-08-16', to: '2027-01-01', role: plaza boss}
+- id: p-quiroz-b
+  name: Bernardo Quiroz Haro
+  tier: plaza-boss
+  places: [tecate]
+  aliases: [El Sastre, Quiroz]
+  membership:
+  - {organization: org-04, from: '2011-02-01', to: '2027-01-01', role: plaza boss}
+- id: p-alcazar-r
+  name: Ramiro Alcázar Peniche
+  tier: logistics
+  places: [ensenada, san-diego]
+  aliases: [El Remo, Alcázar]
+  membership:
+  - {organization: org-04, from: '2010-05-30', to: '2027-01-01', role: maritime logistics}
+- id: p-valdes-s
+  name: Sofía Valdés Urquidi
+  tier: launderer
+  places: [tijuana, san-diego]
+  aliases: [La Pecera, Valdés]
+  membership:
+  - {organization: org-04, from: '2012-09-01', to: '2027-01-01', role: launderer}
+- id: p-ojeda-m
+  name: Mauro Ojeda Lugo
+  tier: corrupt-official
+  official_role: police
+  places: [tecate]
+  aliases: [El Comandante, Ojeda]
+  membership:
+  - {organization: org-04, from: '2013-01-01', to: '2024-01-29', role: police protection}
+- id: p-bringas-v
+  name: Víctor Bringas Olmos
+  tier: sicario-chief
+  places: [tijuana]
+  aliases: [El Cartucho, Bringas]
+  membership:
+  - {organization: org-04, from: '2010-05-30', to: '2027-01-01', role: sicario chief}
+- id: p-urquidi-a
+  name: Alma Urquidi Serrano
+  tier: lawyer
+  places: [tijuana]
+  aliases: [La Notaria, Urquidi]
+  membership:
+  - {organization: org-04, from: '2014-01-01', to: '2027-01-01', role: lawyer}
+# --- Liga del Cedro Lunar --------------------------------------------------
+- id: p-montemayor-e
+  name: Everardo Montemayor Ruvalcaba
+  tier: boss
+  places: [guadalajara, apatzingan]
+  aliases: [El Cirujano, Montemayor, El Veterinario]
+  membership:
+  - {organization: org-05, from: '2010-11-18', to: '2018-04-26', role: boss}
+  - {organization: org-05, from: '2024-07-22', to: '2027-01-01', role: adviser}
+  arrest_date: '2018-04-26'
+  release_date: '2024-07-22'
+- id: p-ruvalcaba-r
+  name: Ramona Ruvalcaba Ponce
+  tier: lieutenant
+  places: [guadalajara, morelia]
+  aliases: [La Monja, Ruvalcaba]
+  membership:
+  - {organization: org-05, from: '2010-11-18', to: '2027-01-01', role: lieutenant then boss}
+- id: p-ledezma-c
+  name: Casimiro Ledezma Prieto
+  tier: sicario-chief
+  places: [uruapan, apatzingan]
+  aliases: [El Diez, Ledezma]
+  membership:
+  - {organization: org-05, from: '2011-01-01', to: '2018-06-30', role: sicario chief}
+  - {organization: org-06, from: '2018-06-30', to: '2025-10-02', role: sicario chief}
+  - {organization: org-05, from: '2025-10-02', to: '2027-01-01', role: sicario chief}
+- id: p-aranda-h
+  name: Heriberto Aranda Nieto
+  tier: plaza-boss
+  places: [lazaro-cardenas]
+  aliases: [El Estibador, Aranda]
+  membership:
+  - {organization: org-05, from: '2012-07-09', to: '2027-01-01', role: plaza boss}
+- id: p-ponce-l
+  name: Lucía Ponce Aguirre
+  tier: launderer
+  places: [guadalajara]
+  aliases: [La Hotelera, Ponce]
+  membership:
+  - {organization: org-05, from: '2013-05-01', to: '2027-01-01', role: launderer}
+- id: p-galvan-o
+  name: Octavio Galván Soto
+  tier: logistics
+  places: [apatzingan, lazaro-cardenas]
+  aliases: [El Químico, Galván]
+  membership:
+  - {organization: org-05, from: '2010-11-18', to: '2027-01-01', role: laboratory supply}
+- id: p-cisneros-j
+  name: Jacinto Cisneros Fuentes
+  tier: corrupt-official
+  official_role: police
+  places: [uruapan, morelia]
+  aliases: [El Comisario, Cisneros]
+  membership:
+  - {organization: org-05, from: '2016-01-01', to: '2027-01-01', role: police protection}
+- id: p-barragan-m
+  name: Minerva Barragán Toledo
+  tier: lawyer
+  places: [guadalajara]
+  aliases: [La Togada, Barragán]
+  membership:
+  - {organization: org-05, from: '2011-01-01', to: '2027-01-01', role: lawyer}
+- id: p-resendiz-t
+  name: Tadeo Reséndiz Olvera
+  tier: corrupt-official
   official_role: prosecutor
-- id: person-040
-  name: Celviro Vesquinal
-  tier: boss
-  organization: org-05
-  places:
-  - Puebla
-  aliases:
-  - El Farol 00
-  - Operador Niebla 040
-  - La Aguja de Vidrio 04
-  alias_history:
-  - alias: La Aguja de Vidrio 04
-    from: '2010-01-01'
-    to: '2012-01-01'
-    inherited_from: null
-  arrest_date: '2012-01-01'
-  death_date: null
-- id: person-041
-  name: Celviro Nuberal
-  tier: boss
-  organization: org-05
-  places:
-  - Queretaro
-  aliases:
-  - El Farol 01
-  - Operador Niebla 041
-  - La Aguja de Vidrio 04
-  alias_history:
-  - alias: La Aguja de Vidrio 04
-    from: '2012-01-01'
-    to: '2020-01-01'
-    inherited_from: person-040
-  arrest_date: null
-  death_date: '2020-01-01'
-- id: person-042
-  name: Celviro Cendavelo
-  tier: boss
-  organization: org-05
-  places:
-  - El Paso
-  aliases:
-  - El Farol 02
-  - Operador Niebla 042
-  - Reloj de Nacar 042
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-043
-  name: Celviro Riolumbre
+  places: [guadalajara]
+  aliases: [El Fiscal, Reséndiz]
+  membership:
+  - {organization: org-05, from: '2014-01-01', to: '2027-01-01', role: judicial protection}
+# --- Los del Cedro Partido -------------------------------------------------
+- id: p-anguiano-r
+  name: Rosendo Anguiano Reyes
   tier: lieutenant
-  organization: org-05
-  places:
-  - San Diego
-  aliases:
-  - El Farol 03
-  - Operador Niebla 043
-  - Reloj de Nacar 043
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-044
-  name: Celviro Nevazul
-  tier: plaza-boss
-  organization: org-05
-  places:
-  - Laredo
-  aliases:
-  - El Farol 04
-  - Operador Niebla 044
-  - Reloj de Nacar 044
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-045
-  name: Celviro Solquino
-  tier: sicario-chief
-  organization: org-05
-  places:
-  - Manzanillo
-  aliases:
-  - El Farol 05
-  - Operador Niebla 045
-  - Reloj de Nacar 045
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-046
-  name: Celviro Valmirel
+  places: [apatzingan]
+  aliases: [El Trompo, Anguiano]
+  membership:
+  - {organization: org-06, from: '2018-06-30', to: '2027-01-01', role: lieutenant}
+- id: p-mota-d
+  name: Delfina Mota Carrillo
   tier: launderer
-  organization: org-05
-  places:
-  - Veracruz
-  aliases:
-  - El Farol 06
-  - Operador Niebla 046
-  - Reloj de Nacar 046
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-047
-  name: Celviro Orveza
+  places: [apatzingan, uruapan]
+  aliases: [La Limonera, Mota]
+  membership:
+  - {organization: org-06, from: '2018-06-30', to: '2027-01-01', role: launderer}
+- id: p-lemus-s
+  name: Silvestre Lemus Ochoa
   tier: logistics
-  organization: org-05
-  places:
-  - Monterrey
-  aliases:
-  - El Farol 07
-  - Operador Niebla 047
-  - Reloj de Nacar 047
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-048
-  name: Celviro Lumacero
-  tier: lawyer
-  organization: org-05
-  places:
-  - Tijuana
-  aliases:
-  - El Farol 08
-  - Operador Niebla 048
-  - Reloj de Nacar 048
-  alias_history: []
-  arrest_date: null
-  death_date: null
-- id: person-049
-  name: Celviro Brisquel
+  places: [apatzingan, lazaro-cardenas]
+  aliases: [El Búho, Lemus]
+  membership:
+  - {organization: org-06, from: '2018-06-30', to: '2027-01-01', role: laboratory transport}
+- id: p-bustos-n
+  name: Nazario Bustos Pinto
   tier: corrupt-official
-  organization: org-05
-  places:
-  - Guadalajara
-  aliases:
-  - El Farol 09
-  - Operador Niebla 049
-  - Reloj de Nacar 049
-  alias_history: []
-  arrest_date: null
-  death_date: null
   official_role: military
+  places: [apatzingan, tierra-caliente]
+  aliases: [El Capitán, Bustos]
+  membership:
+  - {organization: org-06, from: '2019-01-01', to: '2027-01-01', role: military protection}
+- id: p-villegas-a
+  name: Araceli Villegas Duarte
+  tier: plaza-boss
+  places: [uruapan]
+  aliases: [La Cuervo, Villegas]
+  membership:
+  - {organization: org-06, from: '2018-06-30', to: '2027-01-01', role: plaza boss}
+
+# ---------------------------------------------------------------------------
+# Front companies. owner and nominee are people; registered is the owns date.
+# ---------------------------------------------------------------------------
 companies:
-- id: company-000
-  name: Casa Vitraleza 000
-  sector: trucking
-  places:
-  - Manzanillo
-  owner: person-006
-  nominee: person-008
-- id: company-001
-  name: Casa Vitraleza 001
-  sector: produce-export
-  places:
-  - Veracruz
-  owner: person-016
-  nominee: null
-- id: company-002
-  name: Casa Vitraleza 002
-  sector: currency-exchange
-  places:
-  - Monterrey
-  owner: person-026
-  nominee: null
-- id: company-003
-  name: Casa Vitraleza 003
-  sector: used-cars
-  places:
-  - Tijuana
-  owner: person-036
-  nominee: person-038
-- id: company-004
-  name: Casa Vitraleza 004
-  sector: mining
-  places:
-  - Guadalajara
-  owner: person-046
-  nominee: null
-- id: company-005
-  name: Casa Vitraleza 005
-  sector: hospitality
-  places:
-  - Ciudad Juarez
-  owner: person-006
-  nominee: null
-- id: company-006
-  name: Casa Vitraleza 006
-  sector: trucking
-  places:
-  - Nuevo Laredo
-  owner: person-016
-  nominee: person-018
-- id: company-007
-  name: Casa Vitraleza 007
-  sector: produce-export
-  places:
-  - Reynosa
-  owner: person-026
-  nominee: null
-- id: company-008
-  name: Casa Vitraleza 008
-  sector: currency-exchange
-  places:
-  - Matamoros
-  owner: person-036
-  nominee: null
-- id: company-009
-  name: Casa Vitraleza 009
-  sector: used-cars
-  places:
-  - Mazatlan
-  owner: person-046
-  nominee: person-048
-- id: company-010
-  name: Casa Vitraleza 010
-  sector: mining
-  places:
-  - Culiacan
-  owner: person-006
-  nominee: null
-- id: company-011
-  name: Casa Vitraleza 011
-  sector: hospitality
-  places:
-  - Hermosillo
-  owner: person-016
-  nominee: null
-- id: company-012
-  name: Casa Vitraleza 012
-  sector: trucking
-  places:
-  - Nogales
-  owner: person-026
-  nominee: person-028
-- id: company-013
-  name: Casa Vitraleza 013
-  sector: produce-export
-  places:
-  - Mexicali
-  owner: person-036
-  nominee: null
-- id: company-014
-  name: Casa Vitraleza 014
-  sector: currency-exchange
-  places:
-  - Ensenada
-  owner: person-046
-  nominee: null
-- id: company-015
-  name: Casa Vitraleza 015
-  sector: used-cars
-  places:
-  - Lazaro Cardenas
-  owner: person-006
-  nominee: person-008
-- id: company-016
-  name: Casa Vitraleza 016
-  sector: mining
-  places:
-  - Acapulco
-  owner: person-016
-  nominee: null
-- id: company-017
-  name: Casa Vitraleza 017
-  sector: hospitality
-  places:
-  - Tampico
-  owner: person-026
-  nominee: null
+- {id: co-01, name: Transportes Cerro Pardo, sector: trucking, places: [manzanillo, guadalajara], owner: p-berumen-s, nominee: p-medrano-c, registered: '2011-02-01'}
+- {id: co-02, name: Agroexportadora Luna Blanca, sector: produce-export, places: [colima], owner: p-berumen-s, nominee: null, registered: '2012-05-10'}
+- {id: co-03, name: Cambios del Pacífico Norte, sector: currency-exchange, places: [guadalajara], owner: p-anzures-y, nominee: p-medrano-c, registered: '2015-03-01'}
+- {id: co-04, name: Hotel Marejada, sector: hospitality, places: [manzanillo], owner: p-olivares-d, nominee: null, registered: '2013-08-15'}
+- {id: co-05, name: Fletes Ribera del Golfo, sector: trucking, places: [veracruz, tampico], owner: p-sierra-d, nominee: p-nava-r, registered: '2011-06-01'}
+- {id: co-06, name: Casa de Cambio Faro Dorado, sector: currency-exchange, places: [tampico], owner: p-ocampo-t, nominee: null, registered: '2012-01-20'}
+- {id: co-07, name: Comercializadora Tuxpan Azul, sector: produce-export, places: [tuxpan], owner: p-ocampo-t, nominee: p-nava-r, registered: '2016-09-01'}
+- {id: co-08, name: Autotransportes Sierra Madre Norte, sector: trucking, places: [monterrey, nuevo-laredo], owner: p-elizondo-f, nominee: p-arizpe-c, registered: '2010-10-01'}
+- {id: co-09, name: Seminuevos del Bravo, sector: used-cars, places: [reynosa], owner: p-cantu-e, nominee: null, registered: '2013-02-11'}
+- {id: co-10, name: Minera Peña Callada, sector: mining, places: [saltillo], owner: p-castanon-a, nominee: p-arizpe-c, registered: '2014-07-01'}
+- {id: co-11, name: Autos Bahía Esmeralda, sector: used-cars, places: [tijuana], owner: p-valdes-s, nominee: p-urquidi-a, registered: '2012-11-05'}
+- {id: co-12, name: Mariscos Cabo Norte, sector: produce-export, places: [ensenada], owner: p-alcazar-r, nominee: null, registered: '2011-04-18'}
+- {id: co-13, name: Hospedaje Las Dunas, sector: hospitality, places: [mexicali], owner: p-sandoval-i, nominee: p-urquidi-a, registered: '2016-02-02'}
+- {id: co-14, name: Agroquímicos Valle Tibio, sector: agricultural-supply, places: [apatzingan, uruapan], owner: p-galvan-o, nominee: p-barragan-m, registered: '2011-09-12'}
+- {id: co-15, name: Posada Cedro Viejo, sector: hospitality, places: [guadalajara], owner: p-ponce-l, nominee: p-barragan-m, registered: '2013-06-01'}
+- {id: co-16, name: Limones del Tepalcatepec, sector: produce-export, places: [apatzingan], owner: p-mota-d, nominee: null, registered: '2018-09-01'}
+- {id: co-17, name: Minera Cerro del Águila, sector: mining, places: [uruapan], owner: p-loera-f, nominee: p-mota-d, registered: '2019-03-01'}
+
+# ---------------------------------------------------------------------------
+# Vessels, aircraft and vehicles. Registrations are deliberately non-real.
+# ---------------------------------------------------------------------------
 assets:
-- id: asset-000
-  name: Unidad Nacarino 000
-  kind: vessel
-  registration: DEMO-REG-0000
-  places:
-  - Manzanillo
-- id: asset-001
-  name: Unidad Nacarino 001
-  kind: aircraft
-  registration: DEMO-REG-0001
-  places:
-  - Veracruz
-- id: asset-002
-  name: Unidad Nacarino 002
-  kind: vehicle
-  registration: DEMO-REG-0002
-  places:
-  - Monterrey
-- id: asset-003
-  name: Unidad Nacarino 003
-  kind: vessel
-  registration: DEMO-REG-0003
-  places:
-  - Tijuana
-- id: asset-004
-  name: Unidad Nacarino 004
-  kind: aircraft
-  registration: DEMO-REG-0004
-  places:
-  - Guadalajara
-- id: asset-005
-  name: Unidad Nacarino 005
-  kind: vehicle
-  registration: DEMO-REG-0005
-  places:
-  - Ciudad Juarez
-- id: asset-006
-  name: Unidad Nacarino 006
-  kind: vessel
-  registration: DEMO-REG-0006
-  places:
-  - Nuevo Laredo
-- id: asset-007
-  name: Unidad Nacarino 007
-  kind: aircraft
-  registration: DEMO-REG-0007
-  places:
-  - Reynosa
-- id: asset-008
-  name: Unidad Nacarino 008
-  kind: vehicle
-  registration: DEMO-REG-0008
-  places:
-  - Matamoros
-- id: asset-009
-  name: Unidad Nacarino 009
-  kind: vessel
-  registration: DEMO-REG-0009
-  places:
-  - Mazatlan
-- id: asset-010
-  name: Unidad Nacarino 010
-  kind: aircraft
-  registration: DEMO-REG-0010
-  places:
-  - Culiacan
-- id: asset-011
-  name: Unidad Nacarino 011
-  kind: vehicle
-  registration: DEMO-REG-0011
-  places:
-  - Hermosillo
+- {id: as-01, name: Estrella Pardo, kind: vessel, registration: DEMO-MX-0417, places: [manzanillo], operator: org-01}
+- {id: as-02, name: Caracol Uno, kind: semi-submersible, registration: DEMO-SUB-0002, places: [lazaro-cardenas], operator: org-05}
+- {id: as-03, name: Avioneta Nube Gris, kind: aircraft, registration: XB-DEMO-011, places: [hermosillo, culiacan], operator: org-01}
+- {id: as-04, name: Tráiler Cerro Pardo Siete, kind: tractor-trailer, registration: DEMO-PLACA-0071, places: [manzanillo, nogales-sonora], operator: org-01}
+- {id: as-05, name: Tráiler Sierra Madre Doce, kind: tractor-trailer, registration: DEMO-PLACA-0112, places: [monterrey, nuevo-laredo], operator: org-03}
+- {id: as-06, name: Panga Coral Tres, kind: panga, registration: DEMO-MX-0303, places: [ensenada], operator: org-04}
+- {id: as-07, name: Camioneta Halcón Negro, kind: vehicle, registration: DEMO-PLACA-0404, places: [tijuana], operator: org-04}
+- {id: as-08, name: Marinera del Golfo, kind: vessel, registration: DEMO-MX-0518, places: [veracruz], operator: org-02}
+- {id: as-09, name: Avioneta Faro Chico, kind: aircraft, registration: XB-DEMO-022, places: [tuxpan], operator: org-02}
+- {id: as-10, name: Pipa Valle Tibio Dos, kind: tanker-truck, registration: DEMO-PLACA-0902, places: [apatzingan], operator: org-06}
+- {id: as-11, name: Camioneta Cedro Rojo, kind: vehicle, registration: DEMO-PLACA-0650, places: [uruapan], operator: org-05}
+- {id: as-12, name: Lancha Brisa Lunar, kind: vessel, registration: DEMO-MX-0777, places: [acapulco], operator: org-05}
+
+# ---------------------------------------------------------------------------
+# Fictional sources. Reliability grades are stable over time.
+# ---------------------------------------------------------------------------
 sources:
-- id: source-000
-  name: SYN-DEA-000
-  agency: DEA
-  reliability: A2
-  places:
-  - Manzanillo
-- id: source-001
-  name: SYN-DEA-001
-  agency: DEA
-  reliability: B2
-  places:
-  - Veracruz
-- id: source-002
-  name: SYN-DEA-002
-  agency: DEA
-  reliability: C3
-  places:
-  - Monterrey
-- id: source-003
-  name: SYN-DEA-003
-  agency: DEA
-  reliability: A2
-  places:
-  - Tijuana
-- id: source-004
-  name: SYN-DEA-004
-  agency: DEA
-  reliability: B2
-  places:
-  - Guadalajara
-- id: source-005
-  name: SYN-DEA-005
-  agency: DEA
-  reliability: C3
-  places:
-  - Ciudad Juarez
-- id: source-006
-  name: SYN-DEA-006
-  agency: DEA
-  reliability: A2
-  places:
-  - Nuevo Laredo
-- id: source-007
-  name: SYN-DEA-007
-  agency: DEA
-  reliability: B2
-  places:
-  - Reynosa
-- id: source-008
-  name: SYN-FBI-000
-  agency: FBI
-  reliability: A2
-  places:
-  - Veracruz
-- id: source-009
-  name: SYN-FBI-001
-  agency: FBI
-  reliability: B2
-  places:
-  - Monterrey
-- id: source-010
-  name: SYN-FBI-002
-  agency: FBI
-  reliability: C3
-  places:
-  - Tijuana
-- id: source-011
-  name: SYN-FBI-003
-  agency: FBI
-  reliability: A2
-  places:
-  - Guadalajara
-- id: source-012
-  name: SYN-FBI-004
-  agency: FBI
-  reliability: B2
-  places:
-  - Ciudad Juarez
-- id: source-013
-  name: SYN-FBI-005
-  agency: FBI
-  reliability: C3
-  places:
-  - Nuevo Laredo
-- id: source-014
-  name: SYN-FBI-006
-  agency: FBI
-  reliability: A2
-  places:
-  - Reynosa
-- id: source-015
-  name: SYN-FBI-007
-  agency: FBI
-  reliability: B2
-  places:
-  - Matamoros
-- id: source-016
-  name: SYN-HSI-000
-  agency: HSI
-  reliability: A2
-  places:
-  - Monterrey
-- id: source-017
-  name: SYN-HSI-001
-  agency: HSI
-  reliability: B2
-  places:
-  - Tijuana
-- id: source-018
-  name: SYN-HSI-002
-  agency: HSI
-  reliability: C3
-  places:
-  - Guadalajara
-- id: source-019
-  name: SYN-HSI-003
-  agency: HSI
-  reliability: A2
-  places:
-  - Ciudad Juarez
-- id: source-020
-  name: SYN-HSI-004
-  agency: HSI
-  reliability: B2
-  places:
-  - Nuevo Laredo
-- id: source-021
-  name: SYN-HSI-005
-  agency: HSI
-  reliability: C3
-  places:
-  - Reynosa
-- id: source-022
-  name: SYN-HSI-006
-  agency: HSI
-  reliability: A2
-  places:
-  - Matamoros
-- id: source-023
-  name: SYN-HSI-007
-  agency: HSI
-  reliability: B2
-  places:
-  - Mazatlan
-- id: source-024
-  name: SYN-CBP-000
-  agency: CBP
-  reliability: A2
-  places:
-  - Tijuana
-- id: source-025
-  name: SYN-CBP-001
-  agency: CBP
-  reliability: B2
-  places:
-  - Guadalajara
-- id: source-026
-  name: SYN-CBP-002
-  agency: CBP
-  reliability: C3
-  places:
-  - Ciudad Juarez
-- id: source-027
-  name: SYN-CBP-003
-  agency: CBP
-  reliability: A2
-  places:
-  - Nuevo Laredo
-- id: source-028
-  name: SYN-CBP-004
-  agency: CBP
-  reliability: B2
-  places:
-  - Reynosa
-- id: source-029
-  name: SYN-CBP-005
-  agency: CBP
-  reliability: C3
-  places:
-  - Matamoros
-- id: source-030
-  name: SYN-CBP-006
-  agency: CBP
-  reliability: A2
-  places:
-  - Mazatlan
-- id: source-031
-  name: SYN-CBP-007
-  agency: CBP
-  reliability: B2
-  places:
-  - Culiacan
-- id: source-032
-  name: SYN-DIA-000
-  agency: DIA
-  reliability: A2
-  places:
-  - Guadalajara
-- id: source-033
-  name: SYN-DIA-001
-  agency: DIA
-  reliability: B2
-  places:
-  - Ciudad Juarez
-- id: source-034
-  name: SYN-DIA-002
-  agency: DIA
-  reliability: C3
-  places:
-  - Nuevo Laredo
-- id: source-035
-  name: SYN-DIA-003
-  agency: DIA
-  reliability: A2
-  places:
-  - Reynosa
-- id: source-036
-  name: SYN-DIA-004
-  agency: DIA
-  reliability: B2
-  places:
-  - Matamoros
-- id: source-037
-  name: SYN-DIA-005
-  agency: DIA
-  reliability: C3
-  places:
-  - Mazatlan
-- id: source-038
-  name: SYN-DIA-006
-  agency: DIA
-  reliability: A2
-  places:
-  - Culiacan
-- id: source-039
-  name: SYN-DIA-007
-  agency: DIA
-  reliability: B2
-  places:
-  - Hermosillo
-- id: source-040
-  name: SYN-TREASURY-000
-  agency: TREASURY
-  reliability: A2
-  places:
-  - Ciudad Juarez
-- id: source-041
-  name: SYN-TREASURY-001
-  agency: TREASURY
-  reliability: B2
-  places:
-  - Nuevo Laredo
-- id: source-042
-  name: SYN-TREASURY-002
-  agency: TREASURY
-  reliability: C3
-  places:
-  - Reynosa
-- id: source-043
-  name: SYN-TREASURY-003
-  agency: TREASURY
-  reliability: A2
-  places:
-  - Matamoros
-- id: source-044
-  name: SYN-TREASURY-004
-  agency: TREASURY
-  reliability: B2
-  places:
-  - Mazatlan
-- id: source-045
-  name: SYN-TREASURY-005
-  agency: TREASURY
-  reliability: C3
-  places:
-  - Culiacan
-- id: source-046
-  name: SYN-TREASURY-006
-  agency: TREASURY
-  reliability: A2
-  places:
-  - Hermosillo
-- id: source-047
-  name: SYN-TREASURY-007
-  agency: TREASURY
-  reliability: B2
-  places:
-  - Nogales
-- id: source-048
-  name: SYN-OSINT-000
-  agency: OSINT
-  reliability: A2
-  places:
-  - Nuevo Laredo
-- id: source-049
-  name: SYN-OSINT-001
-  agency: OSINT
-  reliability: B2
-  places:
-  - Reynosa
-- id: source-050
-  name: SYN-OSINT-002
-  agency: OSINT
-  reliability: C3
-  places:
-  - Matamoros
-- id: source-051
-  name: SYN-OSINT-003
-  agency: OSINT
-  reliability: A2
-  places:
-  - Mazatlan
-- id: source-052
-  name: SYN-OSINT-004
-  agency: OSINT
-  reliability: B2
-  places:
-  - Culiacan
-- id: source-053
-  name: SYN-OSINT-005
-  agency: OSINT
-  reliability: C3
-  places:
-  - Hermosillo
-- id: source-054
-  name: SYN-OSINT-006
-  agency: OSINT
-  reliability: A2
-  places:
-  - Nogales
-- id: source-055
-  name: SYN-OSINT-007
-  agency: OSINT
-  reliability: B2
-  places:
-  - Mexicali
+- {id: src-dea-401, name: SYN-DEA-401, agency: DEA, reliability: A1, kind: port worker, places: [manzanillo]}
+- {id: src-dea-402, name: SYN-DEA-402, agency: DEA, reliability: B2, kind: trucking dispatcher, places: [guadalajara, hermosillo]}
+- {id: src-dea-403, name: SYN-DEA-403, agency: DEA, reliability: B2, kind: detained courier, places: [nogales-sonora]}
+- {id: src-dea-404, name: SYN-DEA-404, agency: DEA, reliability: C3, kind: former lab worker, places: [apatzingan]}
+- {id: src-dea-405, name: SYN-DEA-405, agency: DEA, reliability: A2, kind: dock supervisor, places: [veracruz]}
+- {id: src-dea-406, name: SYN-DEA-406, agency: DEA, reliability: B3, kind: taxi operator, places: [tijuana]}
+- {id: src-dea-407, name: SYN-DEA-407, agency: DEA, reliability: C3, kind: bar owner, places: [reynosa, monterrey]}
+- {id: src-fbi-501, name: SYN-FBI-501, agency: FBI, reliability: B2, kind: cooperating defendant, places: [el-paso]}
+- {id: src-fbi-502, name: SYN-FBI-502, agency: FBI, reliability: A2, kind: bank compliance officer, places: [san-diego]}
+- {id: src-fbi-503, name: SYN-FBI-503, agency: FBI, reliability: C3, kind: former bodyguard, places: [monterrey]}
+- {id: src-fbi-504, name: SYN-FBI-504, agency: FBI, reliability: B3, kind: real estate broker, places: [houston]}
+- {id: src-fbi-505, name: SYN-FBI-505, agency: FBI, reliability: B2, kind: cooperating defendant, places: [laredo]}
+- {id: src-fbi-506, name: SYN-FBI-506, agency: FBI, reliability: C4, kind: nightclub manager, places: [cancun]}
+- {id: src-fbi-507, name: SYN-FBI-507, agency: FBI, reliability: A2, kind: cooperating defendant, places: [chicago]}
+- {id: src-hsi-601, name: SYN-HSI-601, agency: HSI, reliability: B2, kind: customs broker, places: [laredo, nuevo-laredo]}
+- {id: src-hsi-602, name: SYN-HSI-602, agency: HSI, reliability: A2, kind: freight forwarder, places: [otay-mesa]}
+- {id: src-hsi-603, name: SYN-HSI-603, agency: HSI, reliability: C3, kind: warehouse worker, places: [mcallen]}
+- {id: src-hsi-604, name: SYN-HSI-604, agency: HSI, reliability: B3, kind: produce importer, places: [nogales-arizona]}
+- {id: src-hsi-605, name: SYN-HSI-605, agency: HSI, reliability: B2, kind: used car exporter, places: [calexico]}
+- {id: src-hsi-606, name: SYN-HSI-606, agency: HSI, reliability: C3, kind: port security guard, places: [brownsville]}
+- {id: src-hsi-607, name: SYN-HSI-607, agency: HSI, reliability: A2, kind: shipping agent, places: [houston]}
+- {id: src-cbp-701, name: SYN-CBP-701, agency: CBP, reliability: A1, kind: inspection record, places: [nogales-arizona]}
+- {id: src-cbp-702, name: SYN-CBP-702, agency: CBP, reliability: A1, kind: inspection record, places: [laredo]}
+- {id: src-cbp-703, name: SYN-CBP-703, agency: CBP, reliability: A1, kind: inspection record, places: [san-ysidro]}
+- {id: src-cbp-704, name: SYN-CBP-704, agency: CBP, reliability: A2, kind: canine unit log, places: [eagle-pass]}
+- {id: src-cbp-705, name: SYN-CBP-705, agency: CBP, reliability: A2, kind: marine patrol log, places: [san-diego]}
+- {id: src-cbp-706, name: SYN-CBP-706, agency: CBP, reliability: B2, kind: trusted trader audit, places: [calexico]}
+- {id: src-cbp-707, name: SYN-CBP-707, agency: CBP, reliability: A2, kind: inspection record, places: [presidio]}
+- {id: src-dia-801, name: SYN-DIA-801, agency: DIA, reliability: B2, kind: liaison report, places: [mexico-city]}
+- {id: src-dia-802, name: SYN-DIA-802, agency: DIA, reliability: B3, kind: liaison report, places: [morelia]}
+- {id: src-dia-803, name: SYN-DIA-803, agency: DIA, reliability: C3, kind: liaison report, places: [chihuahua]}
+- {id: src-dia-804, name: SYN-DIA-804, agency: DIA, reliability: B2, kind: maritime liaison, places: [manzanillo]}
+- {id: src-dia-805, name: SYN-DIA-805, agency: DIA, reliability: B2, kind: liaison report, places: [saltillo]}
+- {id: src-dia-806, name: SYN-DIA-806, agency: DIA, reliability: C3, kind: liaison report, places: [tuxpan]}
+- {id: src-dia-807, name: SYN-DIA-807, agency: DIA, reliability: B3, kind: liaison report, places: [ensenada]}
+- {id: src-tre-901, name: SYN-TREASURY-901, agency: TREASURY, reliability: A1, kind: financial institution filing, places: [guadalajara]}
+- {id: src-tre-902, name: SYN-TREASURY-902, agency: TREASURY, reliability: A1, kind: financial institution filing, places: [san-diego]}
+- {id: src-tre-903, name: SYN-TREASURY-903, agency: TREASURY, reliability: A2, kind: corporate registry extract, places: [monterrey]}
+- {id: src-tre-904, name: SYN-TREASURY-904, agency: TREASURY, reliability: A2, kind: corporate registry extract, places: [veracruz]}
+- {id: src-tre-905, name: SYN-TREASURY-905, agency: TREASURY, reliability: B2, kind: currency exchange audit, places: [tampico]}
+- {id: src-tre-906, name: SYN-TREASURY-906, agency: TREASURY, reliability: A1, kind: financial institution filing, places: [houston]}
+- {id: src-tre-907, name: SYN-TREASURY-907, agency: TREASURY, reliability: B2, kind: property registry extract, places: [mexicali]}
+- {id: src-osi-101, name: SYN-OSINT-101, agency: OSINT, reliability: F6, kind: regional press digest, places: [colima]}
+- {id: src-osi-102, name: SYN-OSINT-102, agency: OSINT, reliability: F6, kind: regional press digest, places: [veracruz]}
+- {id: src-osi-103, name: SYN-OSINT-103, agency: OSINT, reliability: F6, kind: regional press digest, places: [monterrey]}
+- {id: src-osi-104, name: SYN-OSINT-104, agency: OSINT, reliability: F6, kind: regional press digest, places: [tijuana]}
+- {id: src-osi-105, name: SYN-OSINT-105, agency: OSINT, reliability: F6, kind: regional press digest, places: [guadalajara]}
+- {id: src-osi-106, name: SYN-OSINT-106, agency: OSINT, reliability: F6, kind: regional press digest, places: [morelia]}
+- {id: src-osi-107, name: SYN-OSINT-107, agency: OSINT, reliability: F6, kind: court record summary, places: [mexico-city]}
+
+# ---------------------------------------------------------------------------
+# Timeline beats. Roles map to edges: reported-participant -> participated_in,
+# organization/counterparty -> linked_to, arrested -> arrested_in,
+# victim -> killed_in, extradited -> extradited_in, released -> released_in,
+# incoming-official -> elected_in, outgoing-official -> removed_in,
+# payee -> paid_in, designated -> designated_in, company -> supported,
+# asset -> involved_in.
+# ---------------------------------------------------------------------------
 timeline:
-- id: beat-000
+- id: beat-01
   type: Founding
-  date: '2010-01-01'
-  place: Manzanillo
+  name: Founding of Bruma del Cobre
+  date: '2010-03-14'
+  place: manzanillo
   organization: org-01
+  corridor: cor-manzanillo-port
+  description: >-
+    Rogelio Anzures Tapia, a former customs broker known on the docks as
+    El Portuario, consolidated three Manzanillo stevedore crews into a single
+    network that bought container slots for precursor chemicals.
   participants:
-  - id: person-000
-    role: reported-participant
-  - id: org-01
-    role: organization
-- id: beat-001
-  type: Arrest
-  date: '2012-01-01'
-  place: Manzanillo
-  organization: org-01
-  participants:
-  - id: person-000
-    role: reported-participant
-  - id: org-01
-    role: organization
-- id: beat-002
-  type: Alliance
-  date: '2014-01-01'
-  place: Manzanillo
-  organization: org-01
-  participants:
-  - id: person-001
-    role: reported-participant
-  - id: org-01
-    role: organization
-  - id: org-02
-    role: counterparty
-- id: beat-003
-  type: Split
-  date: '2017-01-01'
-  place: Manzanillo
-  organization: org-01
-  participants:
-  - id: person-001
-    role: reported-participant
-  - id: org-01
-    role: organization
-  - id: person-003
-    role: departing-leader
-  - id: org-02
-    role: counterparty
-- id: beat-004
-  type: Killing
-  date: '2020-01-01'
-  place: Manzanillo
-  organization: org-01
-  participants:
-  - id: person-001
-    role: reported-participant
-  - id: org-01
-    role: organization
-- id: beat-005
-  type: AllianceBreak
-  date: '2023-01-01'
-  place: Manzanillo
-  organization: org-01
-  participants:
-  - id: person-002
-    role: reported-participant
-  - id: org-01
-    role: organization
-  - id: org-02
-    role: counterparty
-- id: beat-006
-  type: Operation
-  date: '2026-01-01'
-  place: Manzanillo
-  organization: org-01
-  participants:
-  - id: person-002
-    role: reported-participant
-  - id: org-01
-    role: organization
-  name: Operation Vitral Sereno 00
-- id: beat-007
+  - {id: p-anzures-r, role: reported-participant}
+  - {id: p-tinoco-g, role: reported-participant}
+  - {id: p-lira-a, role: reported-participant}
+  - {id: org-01, role: organization}
+- id: beat-02
   type: Founding
-  date: '2010-01-01'
-  place: Veracruz
-  organization: org-02
+  name: Founding of Red del Horizonte Azul
+  date: '2010-05-30'
+  place: tijuana
+  organization: org-04
+  corridor: cor-tijuana
+  description: >-
+    Gonzalo Ferreira Luján, a former fishing fleet owner called El Timonel,
+    organized tunnel diggers and panga crews in Tijuana and Ensenada into one
+    crossing service that charged other groups per load.
   participants:
-  - id: person-010
-    role: reported-participant
-  - id: org-02
-    role: organization
-- id: beat-008
-  type: Extradition
-  date: '2012-01-01'
-  place: Veracruz
-  organization: org-02
-  participants:
-  - id: person-010
-    role: reported-participant
-  - id: org-02
-    role: organization
-- id: beat-009
-  type: Alliance
-  date: '2014-01-01'
-  place: Veracruz
-  organization: org-02
-  participants:
-  - id: person-011
-    role: reported-participant
-  - id: org-02
-    role: organization
-  - id: org-03
-    role: counterparty
-- id: beat-010
-  type: Split
-  date: '2017-01-01'
-  place: Veracruz
-  organization: org-02
-  participants:
-  - id: person-011
-    role: reported-participant
-  - id: org-02
-    role: organization
-  - id: person-013
-    role: departing-leader
-  - id: org-03
-    role: counterparty
-- id: beat-011
-  type: Killing
-  date: '2020-01-01'
-  place: Veracruz
-  organization: org-02
-  participants:
-  - id: person-011
-    role: reported-participant
-  - id: org-02
-    role: organization
-- id: beat-012
-  type: AllianceBreak
-  date: '2023-01-01'
-  place: Veracruz
-  organization: org-02
-  participants:
-  - id: person-012
-    role: reported-participant
-  - id: org-02
-    role: organization
-  - id: org-03
-    role: counterparty
-- id: beat-013
-  type: Seizure
-  date: '2026-01-01'
-  place: Veracruz
-  organization: org-02
-  participants:
-  - id: person-012
-    role: reported-participant
-  - id: org-02
-    role: organization
-  quantity:
-    value: 155
-    unit: kg
-    commodity: synthetic training cargo
-- id: beat-014
+  - {id: p-ferreira-g, role: reported-participant}
+  - {id: p-lizarraga-t, role: reported-participant}
+  - {id: p-alcazar-r, role: reported-participant}
+  - {id: org-04, role: organization}
+- id: beat-03
   type: Founding
-  date: '2010-01-01'
-  place: Monterrey
+  name: Founding of Círculo del Valle Quieto
+  date: '2010-09-01'
+  place: monterrey
   organization: org-03
+  corridor: cor-highway-85
+  description: >-
+    Aurelio Castañón Vidaurri, a Monterrey trucking owner nicknamed
+    El Cartógrafo for the route maps he kept, put his fleet and a customs
+    contact in Nuevo Laredo at the service of a new northeastern network.
   participants:
-  - id: person-020
-    role: reported-participant
-  - id: org-03
-    role: organization
-- id: beat-015
-  type: Arrest
-  date: '2012-01-01'
-  place: Monterrey
-  organization: org-03
+  - {id: p-castanon-a, role: reported-participant}
+  - {id: p-elizondo-f, role: reported-participant}
+  - {id: p-vidaurri-m, role: reported-participant}
+  - {id: org-03, role: organization}
+  - {id: co-08, role: company}
+- id: beat-04
+  type: Founding
+  name: Founding of Liga del Cedro Lunar
+  date: '2010-11-18'
+  place: guadalajara
+  organization: org-05
+  corridor: cor-tierra-caliente
+  description: >-
+    Everardo Montemayor Ruvalcaba, a veterinarian who ran a feed business,
+    financed the first synthetic laboratories in the Tierra Caliente and
+    recruited chemists through Octavio Galván Soto.
   participants:
-  - id: person-020
-    role: reported-participant
-  - id: org-03
-    role: organization
-- id: beat-016
-  type: Alliance
-  date: '2014-01-01'
-  place: Monterrey
-  organization: org-03
+  - {id: p-montemayor-e, role: reported-participant}
+  - {id: p-galvan-o, role: reported-participant}
+  - {id: p-ruvalcaba-r, role: reported-participant}
+  - {id: org-05, role: organization}
+- id: beat-05
+  type: Founding
+  name: Founding of Pacto del Faro Gris
+  date: '2011-01-22'
+  place: veracruz
+  organization: org-02
+  corridor: cor-veracruz-port
+  description: >-
+    A pact among three Gulf port crews formed under Ignacio Treviño Salcido, called
+    El Faro, that pooled dock access in Veracruz, Tuxpan and Tampico and split
+    the Highway 180 trucking lanes among them.
   participants:
-  - id: person-021
-    role: reported-participant
-  - id: org-03
-    role: organization
-  - id: org-04
-    role: counterparty
-- id: beat-017
-  type: Split
-  date: '2017-01-01'
-  place: Monterrey
-  organization: org-03
-  participants:
-  - id: person-021
-    role: reported-participant
-  - id: org-03
-    role: organization
-  - id: person-023
-    role: departing-leader
-  - id: org-04
-    role: counterparty
-- id: beat-018
+  - {id: p-trevino-i, role: reported-participant}
+  - {id: p-mijares-l, role: reported-participant}
+  - {id: p-sarabia-b, role: reported-participant}
+  - {id: p-barcenas-u, role: reported-participant}
+  - {id: org-02, role: organization}
+- id: beat-06
   type: Killing
-  date: '2020-01-01'
-  place: Monterrey
-  organization: org-03
+  name: Killing of Hilario Zepeda
+  date: '2012-07-09'
+  place: lazaro-cardenas
+  organization: org-05
+  corridor: cor-lazaro-port
+  description: >-
+    Gunmen loyal to Liga del Cedro Lunar killed Hilario Zepeda Montaño, the
+    Bruma del Cobre plaza boss at the Lázaro Cárdenas docks, and installed
+    Heriberto Aranda Nieto in his place within the week.
   participants:
-  - id: person-021
-    role: reported-participant
-  - id: org-03
-    role: organization
-- id: beat-019
-  type: AllianceBreak
-  date: '2023-01-01'
-  place: Monterrey
-  organization: org-03
+  - {id: p-zepeda-h, role: victim}
+  - {id: p-ledezma-c, role: reported-participant}
+  - {id: p-aranda-h, role: reported-participant}
+  - {id: org-05, role: organization}
+  - {id: org-01, role: counterparty}
+- id: beat-07
+  type: Alliance
+  name: Reynosa pact of 2012
+  date: '2012-10-03'
+  place: reynosa
+  organization: org-02
+  corridor: cor-reynosa
+  description: >-
+    Ignacio Treviño Salcido and Aurelio Castañón Vidaurri met in Reynosa and
+    agreed to share the Reynosa and Piedras Negras crossings, with Joel Pedraza
+    Villaseñor running the Reynosa plaza for both groups.
   participants:
-  - id: person-022
-    role: reported-participant
-  - id: org-03
-    role: organization
-  - id: org-04
-    role: counterparty
-- id: beat-020
+  - {id: p-trevino-i, role: reported-participant}
+  - {id: p-castanon-a, role: reported-participant}
+  - {id: p-pedraza-j, role: reported-participant}
+  - {id: org-02, role: organization}
+  - {id: org-03, role: counterparty}
+- id: beat-08
+  type: Alliance
+  name: Hermosillo accord of 2013
+  date: '2013-06-11'
+  place: hermosillo
+  organization: org-01
+  corridor: cor-nogales
+  description: >-
+    Rogelio Anzures Tapia and Gonzalo Ferreira Luján agreed in Hermosillo
+    that Bruma del Cobre would run the Nogales crossing and the Highway 15
+    route in exchange for a share of every load crossing at San Luis Río
+    Colorado and Mexicali.
+  participants:
+  - {id: p-anzures-r, role: reported-participant}
+  - {id: p-ferreira-g, role: reported-participant}
+  - {id: p-cervera-n, role: reported-participant}
+  - {id: org-01, role: organization}
+  - {id: org-04, role: counterparty}
+- id: beat-09
   type: Election
-  date: '2026-01-01'
-  place: Monterrey
+  name: Reynosa municipal election of 2013
+  date: '2013-07-07'
+  place: reynosa
   organization: org-03
+  corridor: cor-reynosa
+  description: >-
+    Esteban Villalpando Ruelas won the Reynosa mayoralty with campaign money
+    routed through Seminuevos del Bravo, and the municipal police stopped
+    patrolling the river crossings used by the Círculo.
   participants:
-  - id: person-029
-    role: incoming-official
-  - id: org-03
-    role: organization
-- id: beat-021
+  - {id: p-villalpando-e, role: incoming-official}
+  - {id: p-cantu-e, role: reported-participant}
+  - {id: org-03, role: organization}
+  - {id: co-09, role: company}
+- id: beat-10
+  type: Alliance
+  name: Puebla accord of 2014
+  date: '2014-02-14'
+  place: puebla
+  organization: org-05
+  corridor: cor-highway-57
+  description: >-
+    Everardo Montemayor Ruvalcaba and Lorena Mijares Ocampo agreed in Puebla
+    that Liga del Cedro Lunar could move methamphetamine along the Highway 180
+    route to Tampico in exchange for laboratory chemicals landed at Veracruz.
+  participants:
+  - {id: p-montemayor-e, role: reported-participant}
+  - {id: p-mijares-l, role: reported-participant}
+  - {id: org-05, role: organization}
+  - {id: org-02, role: counterparty}
+- id: beat-11
+  type: Arrest
+  name: Operation Marea Baja
+  date: '2014-08-02'
+  place: manzanillo
+  organization: org-01
+  corridor: cor-manzanillo-port
+  description: >-
+    Mexican federal forces arrested Rogelio Anzures Tapia at a Manzanillo
+    marina in Operation Marea Baja, seizing the fishing vessel Estrella Pardo.
+    Damián Olivares Rendón took over the network the same week.
+  participants:
+  - {id: p-anzures-r, role: arrested}
+  - {id: p-olivares-d, role: reported-participant}
+  - {id: org-01, role: organization}
+  - {id: as-01, role: asset}
+- id: beat-12
+  type: Arrest
+  name: Operation Rompiente
+  date: '2014-11-20'
+  place: ensenada
+  organization: org-04
+  corridor: cor-ensenada-maritime
+  description: >-
+    Gonzalo Ferreira Luján was arrested aboard a panga off Ensenada in
+    Operation Rompiente after a marine patrol tracked Panga Coral Tres from
+    San Diego. Teodoro Lizárraga Fonseca assumed control of the network.
+  participants:
+  - {id: p-ferreira-g, role: arrested}
+  - {id: p-lizarraga-t, role: reported-participant}
+  - {id: org-04, role: organization}
+  - {id: as-06, role: asset}
+- id: beat-13
+  type: Extradition
+  name: Extradition of Gonzalo Ferreira
+  date: '2015-02-05'
+  place: tijuana
+  organization: org-04
+  description: >-
+    Gonzalo Ferreira Luján was extradited through Tijuana to face charges in
+    San Diego. His lawyer Alma Urquidi Serrano contested the transfer.
+  participants:
+  - {id: p-ferreira-g, role: extradited}
+  - {id: p-urquidi-a, role: reported-participant}
+  - {id: org-04, role: organization}
+- id: beat-14
+  type: AllianceBreak
+  name: Collapse of the Reynosa pact
+  date: '2015-07-14'
+  place: reynosa
+  organization: org-03
+  corridor: cor-reynosa
+  description: >-
+    Círculo del Valle Quieto took sole control of the Reynosa plaza after
+    Joel Pedraza Villaseñor refused to pass Pacto del Faro Gris loads, ending the 2012
+    pact with Pacto del Faro Gris.
+  participants:
+  - {id: p-pedraza-j, role: reported-participant}
+  - {id: p-castanon-a, role: reported-participant}
+  - {id: org-03, role: organization}
+  - {id: org-02, role: counterparty}
+- id: beat-15
+  type: Killing
+  name: Killing of Ignacio Treviño
+  date: '2016-03-09'
+  place: veracruz
+  organization: org-02
+  corridor: cor-veracruz-port
+  description: >-
+    Ignacio Treviño Salcido was shot outside a Veracruz restaurant. Reporting
+    attributed the killing to a Círculo del Valle Quieto crew. Lorena Mijares
+    Ocampo succeeded him and the docks began calling her El Faro.
+  participants:
+  - {id: p-trevino-i, role: victim}
+  - {id: p-mijares-l, role: reported-participant}
+  - {id: p-saucedo-l, role: reported-participant}
+  - {id: org-02, role: organization}
+  - {id: org-03, role: counterparty}
+- id: beat-16
+  type: AllianceBreak
+  name: Collapse of the Puebla accord
+  date: '2016-04-20'
+  place: veracruz
+  organization: org-02
+  corridor: cor-gulf-180
+  description: >-
+    Lorena Mijares Ocampo ended the Puebla accord and expelled Liga del Cedro
+    Lunar couriers from the Highway 180 route, blaming the Liga for failing to
+    protect Ignacio Treviño Salcido.
+  participants:
+  - {id: p-mijares-l, role: reported-participant}
+  - {id: p-ruvalcaba-r, role: reported-participant}
+  - {id: org-02, role: organization}
+  - {id: org-05, role: counterparty}
+- id: beat-17
+  type: Extradition
+  name: Extradition of Rogelio Anzures
+  date: '2016-05-19'
+  place: mexico-city
+  organization: org-01
+  description: >-
+    Rogelio Anzures Tapia was flown from Mexico City to face trafficking
+    charges in Phoenix. Carolina Medrano Siller continued to manage his assets
+    through Transportes Cerro Pardo.
+  participants:
+  - {id: p-anzures-r, role: extradited}
+  - {id: p-medrano-c, role: reported-participant}
+  - {id: org-01, role: organization}
+  - {id: co-01, role: company}
+- id: beat-18
+  type: Seizure
+  name: Operation Cauce Seco
+  date: '2016-12-02'
+  place: laredo
+  organization: org-03
+  corridor: cor-nuevo-laredo
+  quantity: {value: 870, unit: kg, commodity: cocaine}
+  description: >-
+    Inspectors at the Laredo port of entry found 870 kg of cocaine inside
+    Tráiler Sierra Madre Doce, a tractor-trailer registered to Autotransportes
+    Sierra Madre Norte, during Operation Cauce Seco.
+  participants:
+  - {id: p-elizondo-f, role: reported-participant}
+  - {id: org-03, role: organization}
+  - {id: co-08, role: company}
+  - {id: as-05, role: asset}
+- id: beat-19
+  type: Split
+  name: Defection of Fermín Loera
+  date: '2017-02-20'
+  place: lazaro-cardenas
+  organization: org-01
+  corridor: cor-lazaro-port
+  description: >-
+    Fermín Loera Arriaga, called El Relojero, left Bruma del Cobre with his
+    Lázaro Cárdenas crew after Damián Olivares Rendón refused to contest the
+    port, and joined Liga del Cedro Lunar.
+  participants:
+  - {id: p-loera-f, role: departing-leader}
+  - {id: p-olivares-d, role: reported-participant}
+  - {id: org-01, role: organization}
+  - {id: org-05, role: counterparty}
+- id: beat-20
+  type: Split
+  name: Defection of the Tampico crew
+  date: '2017-08-25'
+  place: tampico
+  organization: org-02
+  corridor: cor-tampico-port
+  description: >-
+    Benito Sarabia Olguín took the Tampico dock crew out of Pacto del Faro
+    Gris and placed it under Círculo del Valle Quieto, which gained the Tampico
+    and Matamoros plazas without a fight.
+  participants:
+  - {id: p-sarabia-b, role: departing-leader}
+  - {id: p-mijares-l, role: reported-participant}
+  - {id: org-02, role: organization}
+  - {id: org-03, role: counterparty}
+- id: beat-21
+  type: Seizure
+  name: Otay Mesa tunnel seizure
+  date: '2017-12-13'
+  place: otay-mesa
+  organization: org-04
+  corridor: cor-tijuana
+  quantity: {value: 4100, unit: kg, commodity: cannabis}
+  description: >-
+    A tunnel running from a Tijuana warehouse to an Otay Mesa industrial lot
+    was found with 4,100 kg of cannabis staged at the exit. The warehouse lease
+    was held by Autos Bahía Esmeralda.
+  participants:
+  - {id: p-bringas-v, role: reported-participant}
+  - {id: p-valdes-s, role: reported-participant}
+  - {id: org-04, role: organization}
+  - {id: co-11, role: company}
+- id: beat-22
+  type: Arrest
+  name: Operation Luna Nueva
+  date: '2018-04-26'
+  place: guadalajara
+  organization: org-05
+  corridor: cor-pacific-15
+  description: >-
+    Everardo Montemayor Ruvalcaba was arrested at a Guadalajara clinic in
+    Operation Luna Nueva. Ramona Ruvalcaba Ponce took command while Fermín
+    Loera Arriaga demanded the Tierra Caliente laboratories for himself.
+  participants:
+  - {id: p-montemayor-e, role: arrested}
+  - {id: p-ruvalcaba-r, role: reported-participant}
+  - {id: p-resendiz-t, role: reported-participant}
+  - {id: org-05, role: organization}
+- id: beat-23
+  type: Split
+  name: Founding of Los del Cedro Partido
+  date: '2018-06-30'
+  place: apatzingan
+  organization: org-05
+  corridor: cor-tierra-caliente
+  description: >-
+    Fermín Loera Arriaga broke with Ramona Ruvalcaba Ponce and founded Los
+    del Cedro Partido with the Apatzingán and Uruapan crews, taking the Lázaro
+    Cárdenas docks and the name El Cirujano with him.
+  participants:
+  - {id: p-loera-f, role: departing-leader}
+  - {id: p-ledezma-c, role: reported-participant}
+  - {id: p-anguiano-r, role: reported-participant}
+  - {id: org-05, role: organization}
+  - {id: org-06, role: counterparty}
+- id: beat-24
+  type: Seizure
+  name: Manzanillo precursor seizure of 2018
+  date: '2018-11-07'
+  place: manzanillo
+  organization: org-01
+  corridor: cor-manzanillo-port
+  quantity: {value: 1240, unit: kg, commodity: methamphetamine precursor}
+  description: >-
+    Customs inspectors at Manzanillo opened a container consigned to
+    Agroexportadora Luna Blanca and found 1,240 kg of methamphetamine
+    precursor packed under frozen fruit pulp.
+  participants:
+  - {id: p-tinoco-g, role: reported-participant}
+  - {id: p-prado-e, role: reported-participant}
+  - {id: org-01, role: organization}
+  - {id: co-02, role: company}
+- id: beat-25
+  type: Arrest
+  name: Arrest of Aurelio Castañón
+  date: '2019-05-23'
+  place: monterrey
+  organization: org-03
+  corridor: cor-highway-85
+  description: >-
+    Aurelio Castañón Vidaurri was arrested at a Monterrey office of Minera
+    Peña Callada. Marisol Vidaurri Echeverría, known as La Brújula, assumed
+    command and inherited the name El Cartógrafo in later reporting.
+  participants:
+  - {id: p-castanon-a, role: arrested}
+  - {id: p-vidaurri-m, role: reported-participant}
+  - {id: org-03, role: organization}
+  - {id: co-10, role: company}
+- id: beat-26
+  type: AllianceBreak
+  name: Collapse of the Hermosillo accord
+  date: '2019-09-30'
+  place: nogales-sonora
+  organization: org-04
+  corridor: cor-nogales
+  description: >-
+    Red del Horizonte Azul seized the Nogales crossing from Bruma del Cobre
+    after a dispute over unpaid crossing fees, ending the Hermosillo accord.
+    Bruma del Cobre answered by taking San Luis Río Colorado.
+  participants:
+  - {id: p-lizarraga-t, role: reported-participant}
+  - {id: p-cervera-n, role: reported-participant}
+  - {id: org-04, role: organization}
+  - {id: org-01, role: counterparty}
+- id: beat-27
+  type: Split
+  name: Defection of Joel Pedraza
+  date: '2020-01-10'
+  place: reynosa
+  organization: org-03
+  corridor: cor-reynosa
+  description: >-
+    Joel Pedraza Villaseñor, El Diez, moved the Reynosa plaza back to Pacto
+    del Faro Gris after Marisol Vidaurri Echeverría cut his share, giving
+    the Faros Reynosa and the Nuevo Laredo lanes for a year.
+  participants:
+  - {id: p-pedraza-j, role: departing-leader}
+  - {id: p-vidaurri-m, role: reported-participant}
+  - {id: org-03, role: organization}
+  - {id: org-02, role: counterparty}
+- id: beat-28
+  type: Killing
+  name: Killing of Damián Olivares
+  date: '2020-02-27'
+  place: colima
+  organization: org-01
+  corridor: cor-manzanillo-port
+  description: >-
+    Damián Olivares Rendón was ambushed on the Colima road and killed.
+    Yesenia Anzures Ibarra, La Doctora, took control of Bruma del Cobre;
+    only Secret reporting identifies her as the new boss.
+  participants:
+  - {id: p-olivares-d, role: victim}
+  - {id: p-anzures-y, role: reported-participant}
+  - {id: p-lira-a, role: reported-participant}
+  - {id: org-01, role: organization}
+- id: beat-29
+  type: Alliance
+  name: Saltillo accord of 2020
+  date: '2020-05-15'
+  place: saltillo
+  organization: org-03
+  corridor: cor-ojinaga
+  description: >-
+    Marisol Vidaurri Echeverría and Fermín Loera Arriaga agreed in Saltillo
+    that Los del Cedro Partido would move methamphetamine through Ojinaga and
+    the Highway 57 route under Círculo protection.
+  participants:
+  - {id: p-vidaurri-m, role: reported-participant}
+  - {id: p-loera-f, role: reported-participant}
+  - {id: org-03, role: organization}
+  - {id: org-06, role: counterparty}
+- id: beat-30
+  type: Payment
+  name: Uruapan police payment of 2021
+  date: '2021-03-03'
+  place: uruapan
+  organization: org-05
+  corridor: cor-tierra-caliente
+  quantity: {value: 2500000, unit: MXN, commodity: cash}
+  description: >-
+    Lucía Ponce Aguirre delivered 2,500,000 MXN in cash to Jacinto Cisneros
+    Fuentes, the state police commander in Uruapan, through Posada Cedro Viejo
+    to keep patrols away from the Liga laboratories.
+  participants:
+  - {id: p-ponce-l, role: reported-participant}
+  - {id: p-cisneros-j, role: payee}
+  - {id: org-05, role: organization}
+  - {id: co-15, role: company}
+- id: beat-31
+  type: Seizure
+  name: Tuxpan seizure of 2021
+  date: '2021-06-02'
+  place: tuxpan
+  organization: org-02
+  corridor: cor-gulf-180
+  quantity: {value: 2300, unit: kg, commodity: cocaine}
+  description: >-
+    Naval inspectors boarded Marinera del Golfo at Tuxpan and found 2,300 kg
+    of cocaine under the ballast. Shipping papers named Comercializadora
+    Tuxpan Azul as the consignee.
+  participants:
+  - {id: p-ocampo-t, role: reported-participant}
+  - {id: p-sierra-d, role: reported-participant}
+  - {id: org-02, role: organization}
+  - {id: co-07, role: company}
+  - {id: as-08, role: asset}
+- id: beat-32
+  type: Killing
+  name: Killing of Joel Pedraza
+  date: '2021-10-19'
+  place: reynosa
+  organization: org-03
+  corridor: cor-reynosa
+  description: >-
+    Joel Pedraza Villaseñor was killed in Reynosa by a Círculo del Valle
+    Quieto crew under Leopoldo Saucedo Narváez, and the Reynosa plaza
+    returned to the Círculo.
+  participants:
+  - {id: p-pedraza-j, role: victim}
+  - {id: p-saucedo-l, role: reported-participant}
+  - {id: org-03, role: organization}
+  - {id: org-02, role: counterparty}
+- id: beat-33
   type: Designation
-  date: '2010-01-01'
-  place: Tijuana
-  organization: org-04
+  name: Designation of the Anzures network
+  date: '2022-04-12'
+  place: manzanillo
+  organization: org-01
+  description: >-
+    Treasury officials designated Yesenia Anzures Ibarra together with Transportes
+    Cerro Pardo, Cambios del Pacífico Norte and Hotel Marejada as a sanctioned
+    network controlled by Bruma del Cobre.
   participants:
-  - id: person-030
-    role: reported-participant
-  - id: org-04
-    role: organization
-- id: beat-022
-  type: Extradition
-  date: '2012-01-01'
-  place: Tijuana
-  organization: org-04
-  participants:
-  - id: person-030
-    role: reported-participant
-  - id: org-04
-    role: organization
-- id: beat-023
-  type: Alliance
-  date: '2014-01-01'
-  place: Tijuana
-  organization: org-04
-  participants:
-  - id: person-031
-    role: reported-participant
-  - id: org-04
-    role: organization
-  - id: org-05
-    role: counterparty
-- id: beat-024
+  - {id: p-anzures-y, role: designated}
+  - {id: co-01, role: designated}
+  - {id: co-03, role: designated}
+  - {id: co-04, role: designated}
+  - {id: org-01, role: organization}
+- id: beat-34
   type: Split
-  date: '2017-01-01'
-  place: Tijuana
+  name: Defection of Irene Sandoval
+  date: '2022-08-16'
+  place: mexicali
   organization: org-04
+  corridor: cor-mexicali
+  description: >-
+    Irene Sandoval Quiroga, the Mexicali plaza boss called La Garza, moved
+    her crossing crew and Hospedaje Las Dunas to Bruma del Cobre, handing the
+    Mexicali and Nogales crossings to Yesenia Anzures Ibarra.
   participants:
-  - id: person-031
-    role: reported-participant
-  - id: org-04
-    role: organization
-  - id: person-033
-    role: departing-leader
-  - id: org-05
-    role: counterparty
-- id: beat-025
-  type: Killing
-  date: '2020-01-01'
-  place: Tijuana
-  organization: org-04
-  participants:
-  - id: person-031
-    role: reported-participant
-  - id: org-04
-    role: organization
-- id: beat-026
-  type: AllianceBreak
-  date: '2023-01-01'
-  place: Tijuana
-  organization: org-04
-  participants:
-  - id: person-032
-    role: reported-participant
-  - id: org-04
-    role: organization
-  - id: org-05
-    role: counterparty
-- id: beat-027
-  type: Operation
-  date: '2026-01-01'
-  place: Tijuana
-  organization: org-04
-  participants:
-  - id: person-032
-    role: reported-participant
-  - id: org-04
-    role: organization
-  name: Operation Vitral Sereno 03
-- id: beat-028
-  type: Election
-  date: '2010-01-01'
-  place: Guadalajara
-  organization: org-05
-  participants:
-  - id: person-049
-    role: outgoing-official
-  - id: org-05
-    role: organization
-- id: beat-029
-  type: Arrest
-  date: '2012-01-01'
-  place: Guadalajara
-  organization: org-05
-  participants:
-  - id: person-040
-    role: reported-participant
-  - id: org-05
-    role: organization
-- id: beat-030
-  type: Alliance
-  date: '2014-01-01'
-  place: Guadalajara
-  organization: org-05
-  participants:
-  - id: person-041
-    role: reported-participant
-  - id: org-05
-    role: organization
-  - id: org-01
-    role: counterparty
-- id: beat-031
-  type: Split
-  date: '2017-01-01'
-  place: Guadalajara
-  organization: org-05
-  participants:
-  - id: person-041
-    role: reported-participant
-  - id: org-05
-    role: organization
-  - id: person-043
-    role: departing-leader
-  - id: org-01
-    role: counterparty
-- id: beat-032
-  type: Killing
-  date: '2020-01-01'
-  place: Guadalajara
-  organization: org-05
-  participants:
-  - id: person-041
-    role: reported-participant
-  - id: org-05
-    role: organization
-- id: beat-033
-  type: AllianceBreak
-  date: '2023-01-01'
-  place: Guadalajara
-  organization: org-05
-  participants:
-  - id: person-042
-    role: reported-participant
-  - id: org-05
-    role: organization
-  - id: org-01
-    role: counterparty
-- id: beat-034
+  - {id: p-sandoval-i, role: departing-leader}
+  - {id: p-lizarraga-t, role: reported-participant}
+  - {id: org-04, role: organization}
+  - {id: org-01, role: counterparty}
+  - {id: co-13, role: company}
+- id: beat-35
   type: Seizure
-  date: '2026-01-01'
-  place: Guadalajara
-  organization: org-05
+  name: Apatzingán laboratory seizure
+  date: '2022-11-21'
+  place: apatzingan
+  organization: org-06
+  corridor: cor-tierra-caliente
+  quantity: {value: 15000, unit: L, commodity: precursor chemicals}
+  description: >-
+    Soldiers dismantled a laboratory outside Apatzingán and seized 15,000 L
+    of precursor chemicals delivered by Pipa Valle Tibio Dos, a tanker truck
+    operated for Los del Cedro Partido by Silvestre Lemus Ochoa.
   participants:
-  - id: person-042
-    role: reported-participant
-  - id: org-05
-    role: organization
-  quantity:
-    value: 260
-    unit: kg
-    commodity: synthetic training cargo
+  - {id: p-lemus-s, role: reported-participant}
+  - {id: org-06, role: organization}
+  - {id: as-10, role: asset}
+- id: beat-36
+  type: Arrest
+  name: Operation Faro Apagado
+  date: '2023-11-14'
+  place: veracruz
+  organization: org-02
+  corridor: cor-veracruz-port
+  description: >-
+    Lorena Mijares Ocampo was arrested in Veracruz in Operation Faro Apagado.
+    Ulises Bárcenas Peña took over the pact; Secret reporting alone names him
+    as the successor.
+  participants:
+  - {id: p-mijares-l, role: arrested}
+  - {id: p-barcenas-u, role: reported-participant}
+  - {id: p-nava-r, role: reported-participant}
+  - {id: org-02, role: organization}
+- id: beat-37
+  type: AllianceBreak
+  name: Collapse of the Saltillo accord
+  date: '2024-03-08'
+  place: piedras-negras
+  organization: org-03
+  corridor: cor-ojinaga
+  description: >-
+    Círculo del Valle Quieto closed Ojinaga and the Highway 57 route to Los
+    del Cedro Partido after a dispute over a lost load, ending the Saltillo
+    accord.
+  participants:
+  - {id: p-montes-r, role: reported-participant}
+  - {id: p-anguiano-r, role: reported-participant}
+  - {id: org-03, role: organization}
+  - {id: org-06, role: counterparty}
+- id: beat-38
+  type: Release
+  name: Release of Everardo Montemayor
+  date: '2024-07-22'
+  place: guadalajara
+  organization: org-05
+  description: >-
+    Everardo Montemayor Ruvalcaba was released from custody in Guadalajara on
+    a procedural ruling argued by Minerva Barragán Toledo and returned to the
+    Liga as an adviser to Ramona Ruvalcaba Ponce.
+  participants:
+  - {id: p-montemayor-e, role: released}
+  - {id: p-barragan-m, role: reported-participant}
+  - {id: org-05, role: organization}
+- id: beat-39
+  type: Election
+  name: Coatzacoalcos municipal election of 2024
+  date: '2024-09-05'
+  place: coatzacoalcos
+  organization: org-02
+  corridor: cor-veracruz-port
+  description: >-
+    Rafael Quintanilla Bravo lost the Coatzacoalcos mayoralty, ending nine
+    years of municipal protection for Pacto del Faro Gris dock operations.
+  participants:
+  - {id: p-quintanilla-r, role: outgoing-official}
+  - {id: org-02, role: organization}
+- id: beat-40
+  type: Arrest
+  name: Operation Vidrio Negro
+  date: '2025-03-18'
+  place: guadalajara
+  organization: org-01
+  corridor: cor-pacific-15
+  description: >-
+    Saúl Berumen Ledesma, the Bruma del Cobre launderer called El Notario,
+    was arrested in Guadalajara in Operation Vidrio Negro, and accounts of
+    Cambios del Pacífico Norte were frozen.
+  participants:
+  - {id: p-berumen-s, role: arrested}
+  - {id: org-01, role: organization}
+  - {id: co-03, role: company}
+- id: beat-41
+  type: Split
+  name: Return of Casimiro Ledezma
+  date: '2025-10-02'
+  place: uruapan
+  organization: org-06
+  corridor: cor-tierra-caliente
+  description: >-
+    Casimiro Ledezma Prieto, El Diez, took his gunmen out of Los del Cedro
+    Partido and rejoined Liga del Cedro Lunar after Fermín Loera Arriaga
+    blamed him for the Apatzingán laboratory loss.
+  participants:
+  - {id: p-ledezma-c, role: departing-leader}
+  - {id: p-loera-f, role: reported-participant}
+  - {id: org-06, role: organization}
+  - {id: org-05, role: counterparty}
+- id: beat-42
+  type: Designation
+  name: Designation of the Valle Quieto trucking network
+  date: '2026-02-11'
+  place: monterrey
+  organization: org-03
+  description: >-
+    Treasury officials designated Autotransportes Sierra Madre Norte and Fausto
+    Elizondo Marroquín as part of the Círculo del Valle Quieto transport
+    network.
+  participants:
+  - {id: co-08, role: designated}
+  - {id: p-elizondo-f, role: designated}
+  - {id: org-03, role: organization}

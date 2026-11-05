@@ -1,20 +1,40 @@
 # Public reference seeds: https://www.dea.gov/ndta and
 # https://www.state.gov/foreign-terrorist-organizations/
 # Small starter list, not an exhaustive real-name safety guarantee. Expand before export.
+# The seed validator and the cable checker both reject any match (accent- and case-insensitive).
 organizations:
-  - Sinaloa Cartel
-  - Jalisco New Generation Cartel
-  - Cartel Jalisco Nueva Generacion
-  - Los Zetas
-  - Gulf Cartel
-  - La Familia Michoacana
-  - Cartel del Noreste
-  - Beltran Leyva
+- Sinaloa Cartel
+- Jalisco New Generation Cartel
+- Cartel Jalisco Nueva Generacion
+- Los Zetas
+- Gulf Cartel
+- La Familia Michoacana
+- Cartel del Noreste
+- Beltran Leyva
+- Cartel de Sinaloa
+- Cartel Jalisco
+- CJNG
+- Los Chapitos
+- La Linea
+- Cartel de Juarez
+- Juarez Cartel
+- Arellano Felix
+- Tijuana Cartel
+- Caballeros Templarios
+- Knights Templar
+- Santa Rosa de Lima
+- Guerreros Unidos
+- Union Tepito
+- Cartel del Golfo
+- Los Viagras
+- Carteles Unidos
+- Los Rojos
+- Nueva Plaza
 people:
-  - Joaquin Guzman
-  - Ismael Zambada
-  - Nemesio Oseguera
-  - Andres Manuel Lopez Obrador
-  - Claudia Sheinbaum
-  - Felipe Calderon
-  - Enrique Pena Nieto
+- Joaquin Guzman
+- Ismael Zambada
+- Nemesio Oseguera
+- Andres Manuel Lopez Obrador
+- Claudia Sheinbaum
+- Felipe Calderon
+- Enrique Pena Nieto
