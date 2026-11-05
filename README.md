@@ -55,6 +55,17 @@ The new task must separately have `INTELDOC_OPENAI_API_KEY2` (or a supported fal
 .venv/bin/python -m scripts.validate_seed
 ```
 
+## Hand-written pilot narratives
+
+The first 50 planned cables of the default corpus have hand-written narratives under [`exemplars/narratives/`](exemplars/README.md), written in this repository's sessions without any model API call. They read as agency reporting (source access, caveats, partial views) around the planted anchor sentences, and they pass the same deterministic checker as model output. The default `config/corpus.yaml` sets `narratives_dir`, so `scripts/setup.sh` builds a corpus in which those 50 cables carry the authored prose and the remaining 4,950 carry templates; the record's `authored` flag and the manifest state `authored` mark them. `config/authored-50.yaml` is the strict form that fails any of the 50 without a file:
+
+```sh
+.venv/bin/python -m scripts.narrative_worksheet --max 50
+INTELDOC_CORPUS_DIR=corpus/authored-pilot .venv/bin/python -m scripts.demo build --config config/authored-50.yaml --count 5000
+```
+
+The worksheet prints, for each planned cable, the marks, the anchor sentence each planted fact must appear as, the event context, planted quantities and the usable aliases. Writing more narratives is a matter of adding files; a later model-rendering pass can use these as exemplars.
+
 ## 50-document API pilot
 
 The pilot below ran against the earlier schema-2 template seed; its preserved world under `artifacts/pilot-50/world/pilot` is not the current seed. Re-running the pilot requires a fresh `--world-dir` expansion of the current seed.

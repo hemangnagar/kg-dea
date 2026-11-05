@@ -251,6 +251,26 @@ def draft(cable, world):
     return cable
 
 
+def authored_narrative(cable, cfg):
+    """Hand-written narrative for this cable, if one exists under narratives_dir. Checked like model output."""
+    folder = cfg.get('narratives_dir')
+    if not folder:
+        return None
+    path = ROOT / folder / f'{cable.cable_id}.json'
+    if not path.exists():
+        if cfg.get('provider') == 'authored':
+            raise ValueError('No authored narrative for ' + cable.cable_id)
+        return None
+    data = json.loads(path.read_text())
+    paragraphs = data['paragraphs']
+    if [p['number'] for p in paragraphs] != [p.number for p in cable.paragraphs]:
+        raise ValueError('Authored narrative paragraph numbering does not match the record')
+    result = cable.model_copy(deep=True, update={'authored': True})
+    for target, source in zip(result.paragraphs, paragraphs):
+        target.text = ' '.join(source['text'].split())
+    return result
+
+
 def check(cable, world):
     entities = {e['id']: e for e in world['entities']}
     _, scrubber, _, blocked = tables(world)
@@ -333,7 +353,7 @@ def run(limit=None, retry_failed=False, config=None):
         if limit:
             sql += ' LIMIT ?'; args.append(limit)
         rows = db.execute(sql, args).fetchall()
-    provider = provider_from_config(cfg) if rows and cfg.get('provider', 'offline') != 'offline' else None
+    provider = provider_from_config(cfg) if rows and cfg.get('provider', 'offline') not in ('offline', 'authored') else None
     for row in rows:
         c = Cable.model_validate_json(row['record'])
         try:
@@ -342,10 +362,11 @@ def run(limit=None, retry_failed=False, config=None):
             if provider:
                 c = render_narrative(c, world, provider, cfg, row['error'])
             else:
-                c = draft(c, world)
+                authored = authored_narrative(c, cfg)
+                c = authored or draft(c, world)
                 check(c, world)
                 with connect() as db:
-                    db.execute("UPDATE cables SET state='critiqued' WHERE id=?", (c.cable_id,))
+                    db.execute("UPDATE cables SET state=? WHERE id=?", ('authored' if authored else 'critiqued', c.cable_id))
             xml = render(c)
             claims = (extract_claims(c, world, provider, cfg) if cfg.get('extraction') == 'model' else
                       [(p.number, f) for p in c.paragraphs for f in extract(p.text, world)])
@@ -386,7 +407,9 @@ def score():
         counts = dict(db.execute('SELECT state,count(*) FROM cables GROUP BY state').fetchall())
         settings_row = db.execute("SELECT value FROM metadata WHERE key='generation_settings'").fetchone()
         settings = json.loads(settings_row[0]) if settings_row else {}
-    online = settings.get('provider', 'offline') != 'offline'
+    online = settings.get('provider', 'offline') not in ('offline', 'authored')
+    with connect() as db:
+        authored = db.execute("SELECT count(*) FROM cables WHERE state='validated' AND record LIKE '%\"authored\": true%'").fetchone()[0]
     tp = len(recovered & truth)
     disputed = {k for k in recovered if (k[0], k[1], k[2], k[3]) in contradictions}
     undisputed = recovered - disputed
@@ -399,7 +422,7 @@ def score():
                 precision=tp / len(recovered) if recovered else 0,
                 precision_excluding_contradictions=len(undisputed & truth) / len(undisputed) if undisputed else 0,
                 world_recall=tp / len(truth) if truth else 0, planted_recall=len(recovered & planted) / len(planted) if planted else 0,
-                contradiction_edges=len(disputed), correction_cables=corrections, recall_by_predicate=by_predicate, states=counts,
+                contradiction_edges=len(disputed), correction_cables=corrections, authored_narratives=authored, recall_by_predicate=by_predicate, states=counts,
                 limitations=('Model-generated prose retains canonical fact-sentence anchors. Scores measure constrained extraction, not unrestricted real-world prose.' if online else
                              'Baseline only. The offline drafter and the extractor share one sentence grammar, so planted recall is high by construction. Deliberate contradictions are reported separately.'),
                 schema_validated=(ROOT / 'schemas/pubs.xsd').exists())

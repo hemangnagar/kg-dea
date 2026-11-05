@@ -112,7 +112,7 @@ def query(body:Question):
     mode='Deterministic graph retrieval · 2 hops · offline answer'
     cfg=load_config()
     query_provider=cfg.get('query_provider','offline')
-    if query_provider!='offline' and facts and not ambiguity:
+    if query_provider not in ('offline','authored') and facts and not ambiguity:
         try:
             provider=provider_from_config({**cfg,'provider':query_provider})
             accessible_names={id:entities()[id] for id in allowed}
@@ -183,5 +183,5 @@ def runtime():
     cfg=load_config()
     return {'query_provider':cfg.get('query_provider','offline'),
             'narrative_provider':cfg.get('provider','offline'),
-            'extraction':cfg.get('extraction','deterministic'),
+            'extraction':cfg.get('extraction','deterministic'),'authored':bool(cfg.get('narratives_dir')),
             'model':cfg.get('openai_model') if cfg.get('query_provider')=='openai' else cfg.get('ollama_model')}

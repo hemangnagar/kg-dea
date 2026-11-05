@@ -116,3 +116,23 @@ def test_temporal_query_and_shared_alias(corpus):
     assert result['facts'] and all(f['predicate']=='controls' or any(k.startswith('cor-') for k in [f['subject'],f['object']]) for f in result['facts'])
     assert client.get('/api/world').json()['organizations'][0]['leadership']
     web.world.cache_clear();web.entities.cache_clear()
+
+def test_authored_narrative_replaces_template_and_is_checked(corpus,monkeypatch):
+    import json
+    w,path=corpus
+    with store.connect() as db:r=db.execute("SELECT record FROM cables WHERE state='validated' ORDER BY rowid LIMIT 1").fetchone()
+    c=Cable.model_validate_json(r[0])
+    folder=path/'exemplars/narratives';folder.mkdir(parents=True)
+    cfg={'narratives_dir':'exemplars/narratives'}
+    assert pipeline.authored_narrative(c,cfg) is None
+    paragraphs=[{'number':p.number,'text':p.text+' Written by hand for this test.'} for p in c.paragraphs]
+    (folder/f'{c.cable_id}.json').write_text(json.dumps({'paragraphs':paragraphs}))
+    authored=pipeline.authored_narrative(c,cfg)
+    assert authored.authored and 'Written by hand' in authored.paragraphs[0].text
+    pipeline.check(authored,w)
+    paragraphs[1]['text']=paragraphs[1]['text'].replace('participated in','avoided') if 'participated in' in paragraphs[1]['text'] else paragraphs[1]['text']+' Someone met Joaquin Guzman.'
+    (folder/f'{c.cable_id}.json').write_text(json.dumps({'paragraphs':paragraphs}))
+    with pytest.raises(ValueError):pipeline.check(pipeline.authored_narrative(c,cfg),w)
+    (folder/f'{c.cable_id}.json').write_text(json.dumps({'paragraphs':paragraphs[:-1]}))
+    with pytest.raises(ValueError,match='numbering'):pipeline.authored_narrative(c,cfg)
+    with pytest.raises(ValueError,match='No authored narrative'):pipeline.authored_narrative(c.model_copy(update={'cable_id':'X-000000-IIR-00'}),{**cfg,'provider':'authored'})

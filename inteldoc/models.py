@@ -48,6 +48,7 @@ class Cable(BaseModel):
     dispute: dict | None = None
     description: str = ''
     quantities: list[str] = Field(default_factory=list)
+    authored: bool = False
 
     @property
     def classification(self):

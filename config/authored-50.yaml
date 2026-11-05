@@ -1,0 +1,19 @@
+# Strict pilot: the first 50 cables must each have a hand-written narrative under exemplars/narratives.
+count: 5000
+seed: 42
+provider: authored
+query_provider: offline
+extraction: deterministic
+narratives_dir: exemplars/narratives
+max_cables: 50
+max_spend_usd: 0.01
+core_fraction: 0.75
+secret_fraction: 0.65
+agencies:
+  DEA: 55
+  FBI: 12
+  HSI: 8
+  CBP: 4
+  DIA: 6
+  TREASURY: 5
+  OSINT: 10
