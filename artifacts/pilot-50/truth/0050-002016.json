@@ -1,0 +1,100 @@
+{
+  "cable_id": "DEA-000050-IIR-16",
+  "agency": "DEA",
+  "office": "DEA Synthetic Reporting Office",
+  "report_date": "2016-04-04",
+  "subject": "Shipment reporting in Laredo",
+  "event_id": "event-0049",
+  "source_id": "SYN-DEA-001",
+  "reliability": "B2",
+  "place": "Laredo",
+  "keywords": [
+    "Shipment",
+    "Laredo"
+  ],
+  "ntk": [
+    "DEA"
+  ],
+  "relevance": "core",
+  "paragraphs": [
+    {
+      "number": 1,
+      "classification": "U",
+      "controls": [],
+      "text": "Celviro Nuberal participated in Shipment 0049 on 2016-03-28. Liga del Cedro Lunar was linked to Shipment 0049 on 2016-03-28. The source provided a limited account of the activity. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process. This fictional reporting is intended solely for a controlled demonstration of document processing.",
+      "facts": [
+        {
+          "subject": "person-041",
+          "predicate": "participated_in",
+          "object": "event-0049",
+          "date": "2016-03-28",
+          "until": null
+        },
+        {
+          "subject": "org-05",
+          "predicate": "linked_to",
+          "object": "event-0049",
+          "date": "2016-03-28",
+          "until": null
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "classification": "S",
+      "controls": [
+        "NF"
+      ],
+      "text": "Casa Vitraleza 049 supported Shipment 0049 on 2016-03-28. Celviro Nuberal used DEMO-TEL-00049 on 2016-03-28. The source provided a limited account of the activity. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process. This fictional reporting is intended solely for a controlled demonstration of document processing.",
+      "facts": [
+        {
+          "subject": "company-049",
+          "predicate": "supported",
+          "object": "event-0049",
+          "date": "2016-03-28",
+          "until": null
+        },
+        {
+          "subject": "person-041",
+          "predicate": "uses",
+          "object": "contact-049",
+          "date": "2016-03-28",
+          "until": null
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "classification": "S",
+      "controls": [
+        "NF"
+      ],
+      "text": "Unidad Nacarino 004 was involved in Shipment 0049 on 2016-03-28. Shipment 0049 occurred at Laredo on 2016-03-28. Celviro Nuberal led Liga del Cedro Lunar on 2012-01-01 until 2020-01-01. The source provided a limited account of the activity. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process. This fictional reporting is intended solely for a controlled demonstration of document processing.",
+      "facts": [
+        {
+          "subject": "asset-004",
+          "predicate": "involved_in",
+          "object": "event-0049",
+          "date": "2016-03-28",
+          "until": null
+        },
+        {
+          "subject": "event-0049",
+          "predicate": "occurred_at",
+          "object": "place-24",
+          "date": "2016-03-28",
+          "until": null
+        },
+        {
+          "subject": "person-041",
+          "predicate": "leads",
+          "object": "org-05",
+          "date": "2012-01-01",
+          "until": "2020-01-01"
+        }
+      ]
+    }
+  ],
+  "corrects": null,
+  "disputed": false
+}

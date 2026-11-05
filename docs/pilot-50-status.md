@@ -2,13 +2,17 @@
 
 Completed: 2026-11-05.
 
-The live first-50 pilot produced **39 validated documents and 11 rejected outputs**. The original world, manifest plan and fixed selection were retained; no records beyond 50 were attempted. The remaining 4,950 records are planned.
+**Exactly 50 validated documents, zero failed documents**, from the original fixed record numbers 1–50. The earlier 39 validated documents, original world and selection were preserved. No records beyond 50 were attempted; the other 4,950 are planned.
 
-Accounted spend: **$0.2766388** ($0.2644876 settled usage and $0.0121512 retained reservations), below the unchanged $5 cap. The critique token allowance was increased to 2,400 after a truncated response; completed checkpoints were reused.
+Accounted spend including all retries: **$0.3259604** ($0.3138092 settled usage plus $0.0121512 retained reservations), below the unchanged $5 cap.
 
-All 39 XML documents passed internal record/well-formedness checks, and all 192 extracted fact citations matched their exact source paragraphs and world facts. The 180 unique extracted facts matched all planted facts in successful documents. Official XSD/Schematron conformance remains unverified because no schema package is bundled.
+All 50 XML documents passed internal record/well-formedness checks. All 248 extracted fact citations matched exact source paragraphs and world facts; the 231 unique extracted facts matched all planted facts in the successful documents. Official XSD/Schematron conformance is unverified because no schema package is bundled.
 
-Browse [results and world bible](../artifacts/pilot-50/README.md), [failure details and validation](../artifacts/pilot-50/run-report.json), or [download the ZIP](../artifacts/pilot-50-results.zip).
+The last failures were resolved by clarifying the separation of rendered metadata from prose and prioritizing grounding constraints over mistaken model critiques. The misleading last critique was archived in stage history and regenerated. Fourteen relevant model/provider checks passed.
+
+The world contains 180 non-dialable telephone labels and 180 account labels. It does not contain CDR data.
+
+Browse [documents, world bible and reports](../artifacts/pilot-50/README.md), or [download the ZIP](../artifacts/pilot-50-results.zip).
 
 The recovery archive below is the earlier zero-spend snapshot. Never restore it over the paid run ledger.
 

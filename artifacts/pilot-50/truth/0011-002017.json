@@ -1,0 +1,116 @@
+{
+  "cable_id": "FBI-000011-IIR-17",
+  "agency": "FBI",
+  "office": "FBI Synthetic Reporting Office",
+  "report_date": "2017-01-11",
+  "subject": "Split reporting in Veracruz",
+  "event_id": "event-0010",
+  "source_id": "SYN-FBI-002",
+  "reliability": "C3",
+  "place": "Veracruz",
+  "keywords": [
+    "Split",
+    "Veracruz"
+  ],
+  "ntk": [
+    "FBI"
+  ],
+  "relevance": "core",
+  "paragraphs": [
+    {
+      "number": 1,
+      "classification": "U",
+      "controls": [
+        "FOUO"
+      ],
+      "text": "Tavireo Nuberal participated in Split 0010 on 2017-01-01. Pacto del Faro Gris was linked to Split 0010 on 2017-01-01. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "person-011",
+          "predicate": "participated_in",
+          "object": "event-0010",
+          "date": "2017-01-01",
+          "until": null
+        },
+        {
+          "subject": "org-02",
+          "predicate": "linked_to",
+          "object": "event-0010",
+          "date": "2017-01-01",
+          "until": null
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "classification": "U",
+      "controls": [
+        "FOUO"
+      ],
+      "text": "Casa Vitraleza 010 supported Split 0010 on 2017-01-01. Tavireo Nuberal used DEMO-ACCT-00010 on 2017-01-01. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "company-010",
+          "predicate": "supported",
+          "object": "event-0010",
+          "date": "2017-01-01",
+          "until": null
+        },
+        {
+          "subject": "person-011",
+          "predicate": "uses",
+          "object": "contact-010",
+          "date": "2017-01-01",
+          "until": null
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "classification": "U",
+      "controls": [
+        "FOUO"
+      ],
+      "text": "Unidad Nacarino 010 was involved in Split 0010 on 2017-01-01. Split 0010 occurred at Veracruz on 2017-01-01. Tavireo Riolumbre participated in Split 0010 on 2017-01-01. Circulo del Valle Quieto was linked to Split 0010 on 2017-01-01. Tavireo Nuberal led Pacto del Faro Gris on 2012-01-01 until 2020-01-01. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "asset-010",
+          "predicate": "involved_in",
+          "object": "event-0010",
+          "date": "2017-01-01",
+          "until": null
+        },
+        {
+          "subject": "event-0010",
+          "predicate": "occurred_at",
+          "object": "place-01",
+          "date": "2017-01-01",
+          "until": null
+        },
+        {
+          "subject": "person-013",
+          "predicate": "participated_in",
+          "object": "event-0010",
+          "date": "2017-01-01",
+          "until": null
+        },
+        {
+          "subject": "org-03",
+          "predicate": "linked_to",
+          "object": "event-0010",
+          "date": "2017-01-01",
+          "until": null
+        },
+        {
+          "subject": "person-011",
+          "predicate": "leads",
+          "object": "org-02",
+          "date": "2012-01-01",
+          "until": "2020-01-01"
+        }
+      ]
+    }
+  ],
+  "corrects": null,
+  "disputed": false
+}

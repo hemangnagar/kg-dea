@@ -1,22 +1,21 @@
 {
-  "successful_documents": 39,
+  "successful_documents": 50,
   "states": {
-    "failed": 11,
     "planned": 4950,
-    "validated": 39
+    "validated": 50
   },
-  "xml_files": 39,
-  "xml_and_record_checks_passed": 39,
-  "extracted_fact_citations_verified": 192,
-  "unique_extracted_facts": 180,
-  "unique_planted_facts": 180,
+  "xml_files": 50,
+  "xml_and_record_checks_passed": 50,
+  "extracted_fact_citations_verified": 248,
+  "unique_extracted_facts": 231,
+  "unique_planted_facts": 231,
   "precision": 1.0,
   "planted_recall": 1.0,
   "omitted_planted_facts": [],
-  "settled_api_spend_usd": 0.2644876,
+  "settled_api_spend_usd": 0.3138092,
   "unsettled_reservations_usd": 0.012151200000000001,
-  "accounted_api_spend_usd": 0.2766388,
-  "request_reservations": 188,
+  "accounted_api_spend_usd": 0.32596040000000004,
+  "request_reservations": 223,
   "cap_usd": 5,
   "beyond_first_50_attempted": 0,
   "preserved_artifacts": {
@@ -27,50 +26,5 @@
     "corpus/api-pilot/selection.json": true
   },
   "official_schema_validation": "Unavailable: no XSD or Schematron package is bundled",
-  "errors": [
-    {
-      "id": "TREASURY-000003-IIR-14",
-      "error": "Unknown capitalized proper name"
-    },
-    {
-      "id": "DIA-000007-IIR-26",
-      "error": "Unknown capitalized proper name"
-    },
-    {
-      "id": "DEA-000010-IIR-14",
-      "error": "Unknown capitalized proper name"
-    },
-    {
-      "id": "FBI-000011-IIR-17",
-      "error": "1 validation error for Critique\ndefects_count\n  Extra inputs are not permitted [type=extra_forbidden, input_value=14, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.12/v/extra_forbidden"
-    },
-    {
-      "id": "DEA-000012-IIR-20",
-      "error": "Narrative relation mismatch in paragraph 1"
-    },
-    {
-      "id": "DEA-000016-IIR-12",
-      "error": "1 validation error for Critique\ndefects_count\n  Extra inputs are not permitted [type=extra_forbidden, input_value=27, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.12/v/extra_forbidden"
-    },
-    {
-      "id": "FBI-000020-IIR-23",
-      "error": "Unknown capitalized proper name"
-    },
-    {
-      "id": "DIA-000023-IIR-12",
-      "error": "Narrative relation mismatch in paragraph 1"
-    },
-    {
-      "id": "OSINT-000034-IIR-23",
-      "error": "1 validation error for Critique\ndefects\n  List should have at most 30 items after validation, not 31 [type=too_long, input_value=[\"The draft does not ment...content or commentary.'], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.12/v/too_long"
-    },
-    {
-      "id": "TREASURY-000046-IIR-22",
-      "error": "Narrative relation mismatch in paragraph 1"
-    },
-    {
-      "id": "DEA-000050-IIR-16",
-      "error": "1 validation error for Critique\ndefects_count\n  Extra inputs are not permitted [type=extra_forbidden, input_value=26, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.12/v/extra_forbidden"
-    }
-  ]
+  "errors": []
 }
