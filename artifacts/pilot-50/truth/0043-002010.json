@@ -1,0 +1,73 @@
+{
+  "cable_id": "DEA-000043-IIR-10",
+  "agency": "DEA",
+  "office": "DEA Synthetic Reporting Office",
+  "report_date": "2010-09-02",
+  "subject": "Shipment reporting in Tampico",
+  "event_id": "event-0042",
+  "source_id": "SYN-DEA-002",
+  "reliability": "C3",
+  "place": "Tampico",
+  "keywords": [
+    "Shipment",
+    "Tampico"
+  ],
+  "ntk": [
+    "DEA"
+  ],
+  "relevance": "core",
+  "paragraphs": [
+    {
+      "number": 1,
+      "classification": "U",
+      "controls": [
+        "FOUO"
+      ],
+      "text": "Orenzio Solquino participated in Shipment 0042 on 2010-09-02. Circulo del Valle Quieto was linked to Shipment 0042 on 2010-09-02. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "person-025",
+          "predicate": "participated_in",
+          "object": "event-0042",
+          "date": "2010-09-02",
+          "until": null
+        },
+        {
+          "subject": "org-03",
+          "predicate": "linked_to",
+          "object": "event-0042",
+          "date": "2010-09-02",
+          "until": null
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "classification": "U",
+      "controls": [
+        "FOUO"
+      ],
+      "text": "Orenzio Vesquinal led Circulo del Valle Quieto on 2010-01-01 until 2012-01-01. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "person-020",
+          "predicate": "leads",
+          "object": "org-03",
+          "date": "2010-01-01",
+          "until": "2012-01-01"
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "classification": "U",
+      "controls": [
+        "FOUO"
+      ],
+      "text": "This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": []
+    }
+  ],
+  "corrects": null,
+  "disputed": false
+}

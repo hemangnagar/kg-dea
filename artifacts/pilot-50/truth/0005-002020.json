@@ -1,0 +1,100 @@
+{
+  "cable_id": "DEA-000005-IIR-20",
+  "agency": "DEA",
+  "office": "DEA Synthetic Reporting Office",
+  "report_date": "2020-01-05",
+  "subject": "Killing reporting in Manzanillo",
+  "event_id": "event-0004",
+  "source_id": "SYN-DEA-004",
+  "reliability": "B2",
+  "place": "Manzanillo",
+  "keywords": [
+    "Killing",
+    "Manzanillo"
+  ],
+  "ntk": [
+    "DEA"
+  ],
+  "relevance": "core",
+  "paragraphs": [
+    {
+      "number": 1,
+      "classification": "U",
+      "controls": [],
+      "text": "Ilareno Nuberal participated in Killing 0004 on 2020-01-01. Bruma del Cobre was linked to Killing 0004 on 2020-01-01. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "person-001",
+          "predicate": "participated_in",
+          "object": "event-0004",
+          "date": "2020-01-01",
+          "until": null
+        },
+        {
+          "subject": "org-01",
+          "predicate": "linked_to",
+          "object": "event-0004",
+          "date": "2020-01-01",
+          "until": null
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "classification": "S",
+      "controls": [
+        "NF"
+      ],
+      "text": "Casa Vitraleza 004 supported Killing 0004 on 2020-01-01. Ilareno Nuberal used DEMO-ACCT-00004 on 2020-01-01. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "company-004",
+          "predicate": "supported",
+          "object": "event-0004",
+          "date": "2020-01-01",
+          "until": null
+        },
+        {
+          "subject": "person-001",
+          "predicate": "uses",
+          "object": "contact-004",
+          "date": "2020-01-01",
+          "until": null
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "classification": "S",
+      "controls": [
+        "NF"
+      ],
+      "text": "Unidad Nacarino 004 was involved in Killing 0004 on 2020-01-01. Killing 0004 occurred at Manzanillo on 2020-01-01. Ilareno Cendavelo led Bruma del Cobre on 2020-01-01 until 2027-01-01. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "asset-004",
+          "predicate": "involved_in",
+          "object": "event-0004",
+          "date": "2020-01-01",
+          "until": null
+        },
+        {
+          "subject": "event-0004",
+          "predicate": "occurred_at",
+          "object": "place-00",
+          "date": "2020-01-01",
+          "until": null
+        },
+        {
+          "subject": "person-002",
+          "predicate": "leads",
+          "object": "org-01",
+          "date": "2020-01-01",
+          "until": "2027-01-01"
+        }
+      ]
+    }
+  ],
+  "corrects": null,
+  "disputed": false
+}

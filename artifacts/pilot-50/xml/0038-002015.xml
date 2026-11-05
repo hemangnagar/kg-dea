@@ -1,0 +1,121 @@
+<?xml version='1.0' encoding='utf-8'?>
+<pubs:IntelDoc xmlns:pubs="urn:us:gov:ic:pubs:relaxed" xmlns:ism="urn:us:gov:ic:ism" xmlns:irm="urn:us:gov:ic:irm" xmlns:ntk="urn:us:gov:ic:ntk" xmlns:cia="urn:us:gov:cia" xmlns:xlink="http://www.w3.org/1999/xlink" ism:classification="S" ism:ownerProducer="USA" ism:createDate="2015-07-09" ism:compliesWith="ICD-710" ism:disseminationControls="NF" ism:classificationReason="1.4(c)" ism:declassDate="2040-07-09" ism:declassException="25X1" ism:derivedFrom="Unspecified" ism:derivativelyClassifiedBy="Unspecified" COIProtectionLevel="3" DESVersion="5" irm:DESVersion="3" ism:DESVersion="5" ntk:DESVersion="3" ism:resourceElement="true">
+  <ntk:Access ism:classification="U" ism:ownerProducer="USA">
+    <ntk:AccessProfileList ism:classification="U" ism:ownerProducer="USA">
+      <ntk:AccessProfile ism:classification="U" ism:ownerProducer="USA">
+        <ntk:AccessSystemName ism:classification="U" ism:ownerProducer="USA">IC_COI4</ntk:AccessSystemName>
+        <ntk:AccessProfileValue ism:classification="U" ism:ownerProducer="USA" ntk:vocabulary="IC_COI4_DISSEMTO">DEA</ntk:AccessProfileValue>
+        <ntk:AccessProfileValue ism:classification="U" ism:ownerProducer="USA" ntk:vocabulary="IC_COI4_ISSUE">CN</ntk:AccessProfileValue>
+      </ntk:AccessProfile>
+      <ntk:AccessProfile ism:classification="U" ism:ownerProducer="USA">
+        <ntk:AccessSystemName ism:classification="U" ism:ownerProducer="USA">POLICY-URI</ntk:AccessSystemName>
+        <ntk:AccessProfileValue ism:classification="U" ism:ownerProducer="USA" ntk:vocabulary="URI">policy://1000/1-1</ntk:AccessProfileValue>
+      </ntk:AccessProfile>
+    </ntk:AccessProfileList>
+  </ntk:Access>
+  <irm:NoticeList ism:classification="S" ism:ownerProducer="USA" ism:createDate="2015-07-09" ism:compliesWith="ICD-710" ism:disseminationControls="NF" ism:classificationReason="1.4(c)" ism:declassDate="2040-07-09" ism:declassException="25X1" ism:derivedFrom="Unspecified" ism:derivativelyClassifiedBy="Unspecified">
+    <irm:Notice ism:classification="S" ism:ownerProducer="USA" ism:createDate="2015-07-09" ism:compliesWith="ICD-710" ism:disseminationControls="NF" ism:classificationReason="1.4(c)" ism:declassDate="2040-07-09" ism:declassException="25X1" ism:derivedFrom="Unspecified" ism:derivativelyClassifiedBy="Unspecified" irm:nonISMNoticeType="BANNER">
+      <irm:NoticeText ism:classification="S" ism:ownerProducer="USA" ism:createDate="2015-07-09" ism:compliesWith="ICD-710" ism:disseminationControls="NF" ism:classificationReason="1.4(c)" ism:declassDate="2040-07-09" ism:declassException="25X1" ism:derivedFrom="Unspecified" ism:derivativelyClassifiedBy="Unspecified">SYNTHETIC DEMO ONLY — NO REAL INTELLIGENCE</irm:NoticeText>
+    </irm:Notice>
+  </irm:NoticeList>
+  <pubs:PublicationMetadataList>
+    <pubs:PublicationMetadata>
+      <pubs:AdministrativeMetadata>
+        <pubs:IdentifierList>
+          <pubs:DocumentID>DEA-000038-IIR-15</pubs:DocumentID>
+          <pubs:InternalID internalIDtype="IngestionID">000000038</pubs:InternalID>
+          <pubs:InternalID internalIDtype="GUIDE">guide://0038/002015</pubs:InternalID>
+          <pubs:InternalID internalIDtype="messagingSystemID">15-HQS0000038</pubs:InternalID>
+        </pubs:IdentifierList>
+        <pubs:Publisher>
+          <pubs:AgencyAcronym acronym="DEA" vocabulary="Nautilus"/>
+          <pubs:AuthorInfo>
+            <pubs:OfficeName>DEA Synthetic Reporting Office</pubs:OfficeName>
+          </pubs:AuthorInfo>
+          <pubs:POCInfo>
+            <pubs:OfficeName>DEA</pubs:OfficeName>
+            <pubs:EmailAddress/>
+          </pubs:POCInfo>
+          <pubs:AttributionText ism:classification="S" ism:ownerProducer="USA" ism:createDate="2015-07-09" ism:compliesWith="ICD-710" ism:disseminationControls="NF" ism:classificationReason="1.4(c)" ism:declassDate="2040-07-09" ism:declassException="25X1" ism:derivedFrom="Unspecified" ism:derivativelyClassifiedBy="Unspecified">Fictional training source</pubs:AttributionText>
+        </pubs:Publisher>
+        <pubs:DateList>
+          <pubs:DatePublished>2015-07-09T12:00:00Z</pubs:DatePublished>
+          <pubs:ExtensionElements>
+            <cia:DateReceived>2015-07-09T12:00:00Z</cia:DateReceived>
+          </pubs:ExtensionElements>
+        </pubs:DateList>
+        <pubs:Rights>
+          <pubs:PrivacyActIndicator indicator="false"/>
+          <pubs:CopyrightActIndicator indicator="false"/>
+        </pubs:Rights>
+        <pubs:Relation>
+          <pubs:AlternateFormat xlink:href="https://nautilus.example.ic.gov/resource/bacbdd10-cd6d-5524-a33e-b1e672b744e8/entities" xlink:role="https://www.iana.org/assignments/link-relation/alternate" xlink:title="entities"/>
+          <pubs:AlternateFormat xlink:href="https://nautilus.example.ic.gov/resource/bacbdd10-cd6d-5524-a33e-b1e672b744e8/DEA-000038-IIR-15.orig" xlink:role="https://www.iana.org/assignments/link-relation/alternate" xlink:title="DEA-000038-IIR-15.orig"/>
+        </pubs:Relation>
+        <irm:ProductionMetricsList ism:classification="S" ism:ownerProducer="USA" ism:createDate="2015-07-09" ism:compliesWith="ICD-710" ism:disseminationControls="NF" ism:classificationReason="1.4(c)" ism:declassDate="2040-07-09" ism:declassException="25X1" ism:derivedFrom="Unspecified" ism:derivativelyClassifiedBy="Unspecified">
+          <irm:ProductionMetric ism:classification="S" ism:ownerProducer="USA" ism:createDate="2015-07-09" ism:compliesWith="ICD-710" ism:disseminationControls="NF" ism:classificationReason="1.4(c)" ism:declassDate="2040-07-09" ism:declassException="25X1" ism:derivedFrom="Unspecified" ism:derivativelyClassifiedBy="Unspecified">
+            <irm:ProductionMetricsSubject ism:classification="S" ism:ownerProducer="USA" ism:createDate="2015-07-09" ism:compliesWith="ICD-710" ism:disseminationControls="NF" ism:classificationReason="1.4(c)" ism:declassDate="2040-07-09" ism:declassException="25X1" ism:derivedFrom="Unspecified" ism:derivativelyClassifiedBy="Unspecified">Unspecified</irm:ProductionMetricsSubject>
+            <irm:ProductionMetricsCoverage ism:classification="S" ism:ownerProducer="USA" ism:createDate="2015-07-09" ism:compliesWith="ICD-710" ism:disseminationControls="NF" ism:classificationReason="1.4(c)" ism:declassDate="2040-07-09" ism:declassException="25X1" ism:derivedFrom="Unspecified" ism:derivativelyClassifiedBy="Unspecified">Unspecified</irm:ProductionMetricsCoverage>
+          </irm:ProductionMetric>
+        </irm:ProductionMetricsList>
+        <pubs:OtherProperty qualifier="DocumentPrecedence">0</pubs:OtherProperty>
+        <pubs:OtherProperty qualifier="HEADER">DEA SYNTHETIC IIR</pubs:OtherProperty>
+        <pubs:ExtensionElements>
+          <cia:AdminstrativeMetadataExtensions>
+            <cia:DocumentStatus>ACTIVE</cia:DocumentStatus>
+            <cia:OrigintingSystem>LEGACY</cia:OrigintingSystem>
+          </cia:AdminstrativeMetadataExtensions>
+        </pubs:ExtensionElements>
+      </pubs:AdministrativeMetadata>
+      <pubs:DescriptiveMetadata>
+        <pubs:Title ism:classification="S" ism:ownerProducer="USA" ism:createDate="2015-07-09" ism:compliesWith="ICD-710" ism:disseminationControls="NF" ism:classificationReason="1.4(c)" ism:declassDate="2040-07-09" ism:declassException="25X1" ism:derivedFrom="Unspecified" ism:derivativelyClassifiedBy="Unspecified">SUBJ: (S//NF) Meeting reporting in Nogales</pubs:Title>
+        <pubs:Language encoding="ISO639-3">eng</pubs:Language>
+        <pubs:Description ism:classification="S" ism:ownerProducer="USA" ism:createDate="2015-07-09" ism:compliesWith="ICD-710" ism:disseminationControls="NF" ism:classificationReason="1.4(c)" ism:declassDate="2040-07-09" ism:declassException="25X1" ism:derivedFrom="Unspecified" ism:derivativelyClassifiedBy="Unspecified">Synthetic demonstration record</pubs:Description>
+        <pubs:Coverage>
+          <pubs:GeospatialExtent>
+            <pubs:GeographicIdentifier>
+              <pubs:PlaceName ism:classification="S" ism:ownerProducer="USA" ism:createDate="2015-07-09" ism:compliesWith="ICD-710" ism:disseminationControls="NF" ism:classificationReason="1.4(c)" ism:declassDate="2040-07-09" ism:declassException="25X1" ism:derivedFrom="Unspecified" ism:derivativelyClassifiedBy="Unspecified">Nogales</pubs:PlaceName>
+            </pubs:GeographicIdentifier>
+          </pubs:GeospatialExtent>
+        </pubs:Coverage>
+        <pubs:Subject>
+          <pubs:Keyword>Meeting</pubs:Keyword>
+          <pubs:Keyword>Nogales</pubs:Keyword>
+        </pubs:Subject>
+        <pubs:IntelType>
+          <pubs:IntelDiscipline>HUMINT</pubs:IntelDiscipline>
+        </pubs:IntelType>
+        <pubs:ProductLine qualifier="true">Unspecified</pubs:ProductLine>
+        <pubs:CollectSourceList>
+          <pubs:CollectSource>
+            <pubs:CollectSourceDescription>
+              <pubs:Para ism:classification="S" ism:ownerProducer="USA" ism:createDate="2015-07-09" ism:compliesWith="ICD-710" ism:disseminationControls="NF" ism:classificationReason="1.4(c)" ism:declassDate="2040-07-09" ism:declassException="25X1" ism:derivedFrom="Unspecified" ism:derivativelyClassifiedBy="Unspecified">SOURCE: SYN-DEA-005 CONTEXT: C3</pubs:Para>
+            </pubs:CollectSourceDescription>
+          </pubs:CollectSource>
+        </pubs:CollectSourceList>
+        <pubs:ExtensionElements>
+          <cia:DescriptiveMetaDataExtensions>
+            <cia:Collection>CC</cia:Collection>
+          </cia:DescriptiveMetaDataExtensions>
+        </pubs:ExtensionElements>
+      </pubs:DescriptiveMetadata>
+    </pubs:PublicationMetadata>
+  </pubs:PublicationMetadataList>
+  <pubs:DocumentBody ism:classification="S" ism:ownerProducer="USA" ism:createDate="2015-07-09" ism:compliesWith="ICD-710" ism:disseminationControls="NF" ism:classificationReason="1.4(c)" ism:declassDate="2040-07-09" ism:declassException="25X1" ism:derivedFrom="Unspecified" ism:derivativelyClassifiedBy="Unspecified">
+    <pubs:PreformattedText ism:classification="S" ism:ownerProducer="USA" ism:createDate="2015-07-09" ism:compliesWith="ICD-710" ism:disseminationControls="NF" ism:classificationReason="1.4(c)" ism:declassDate="2040-07-09" ism:declassException="25X1" ism:derivedFrom="Unspecified" ism:derivativelyClassifiedBy="Unspecified">SUBJ: (S//NF) Meeting reporting in Nogales
+
+1. (U) Operador Vitranelo 077 participated in Meeting 0037 on 2015-06-30. Circulo del Valle Quieto was linked to Meeting 0037 on 2015-06-30. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.
+
+2. (S//NF) Casa Vitraleza 037 supported Meeting 0037 on 2015-06-30. Operador Vitranelo 077 used DEMO-TEL-00037 on 2015-06-30. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.
+
+3. (S//NF) Unidad Nacarino 037 was involved in Meeting 0037 on 2015-06-30. Meeting 0037 occurred at Nogales on 2015-06-30. Orenzio Nuberal led Circulo del Valle Quieto on 2012-01-01 until 2020-01-01. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.
+TOPIC: CN
+REQUIREMENT: DEMO
+DATE OF ACQUISITION: 2015-07-09
+POC: DEA Synthetic Reporting Office
+WARNING: FICTIONAL TRAINING DATA
+AGENCY: DEA
+DECLASSIFY ON: 2040-07-09
+END OF MESSAGE S//NF</pubs:PreformattedText>
+  </pubs:DocumentBody>
+</pubs:IntelDoc>

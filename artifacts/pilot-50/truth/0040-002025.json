@@ -1,0 +1,100 @@
+{
+  "cable_id": "DEA-000040-IIR-25",
+  "agency": "DEA",
+  "office": "DEA Synthetic Reporting Office",
+  "report_date": "2025-03-17",
+  "subject": "Operation reporting in Ensenada",
+  "event_id": "event-0039",
+  "source_id": "SYN-DEA-007",
+  "reliability": "B2",
+  "place": "Ensenada",
+  "keywords": [
+    "Operation",
+    "Ensenada"
+  ],
+  "ntk": [
+    "DEA"
+  ],
+  "relevance": "core",
+  "paragraphs": [
+    {
+      "number": 1,
+      "classification": "U",
+      "controls": [],
+      "text": "Operador Vitranelo 184 participated in Operation 0039 on 2025-03-06. Liga del Cedro Lunar was linked to Operation 0039 on 2025-03-06. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "person-184",
+          "predicate": "participated_in",
+          "object": "event-0039",
+          "date": "2025-03-06",
+          "until": null
+        },
+        {
+          "subject": "org-05",
+          "predicate": "linked_to",
+          "object": "event-0039",
+          "date": "2025-03-06",
+          "until": null
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "classification": "S",
+      "controls": [
+        "NF"
+      ],
+      "text": "Casa Vitraleza 039 supported Operation 0039 on 2025-03-06. Operador Vitranelo 184 used DEMO-TEL-00039 on 2025-03-06. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "company-039",
+          "predicate": "supported",
+          "object": "event-0039",
+          "date": "2025-03-06",
+          "until": null
+        },
+        {
+          "subject": "person-184",
+          "predicate": "uses",
+          "object": "contact-039",
+          "date": "2025-03-06",
+          "until": null
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "classification": "S",
+      "controls": [
+        "NF"
+      ],
+      "text": "Unidad Nacarino 039 was involved in Operation 0039 on 2025-03-06. Operation 0039 occurred at Ensenada on 2025-03-06. Celviro Cendavelo led Liga del Cedro Lunar on 2020-01-01 until 2027-01-01. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "asset-039",
+          "predicate": "involved_in",
+          "object": "event-0039",
+          "date": "2025-03-06",
+          "until": null
+        },
+        {
+          "subject": "event-0039",
+          "predicate": "occurred_at",
+          "object": "place-14",
+          "date": "2025-03-06",
+          "until": null
+        },
+        {
+          "subject": "person-042",
+          "predicate": "leads",
+          "object": "org-05",
+          "date": "2020-01-01",
+          "until": "2027-01-01"
+        }
+      ]
+    }
+  ],
+  "corrects": null,
+  "disputed": false
+}

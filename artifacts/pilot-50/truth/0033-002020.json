@@ -1,0 +1,100 @@
+{
+  "cable_id": "DEA-000033-IIR-20",
+  "agency": "DEA",
+  "office": "DEA Synthetic Reporting Office",
+  "report_date": "2020-01-05",
+  "subject": "Killing reporting in Guadalajara",
+  "event_id": "event-0032",
+  "source_id": "SYN-DEA-000",
+  "reliability": "A2",
+  "place": "Guadalajara",
+  "keywords": [
+    "Killing",
+    "Guadalajara"
+  ],
+  "ntk": [
+    "DEA"
+  ],
+  "relevance": "core",
+  "paragraphs": [
+    {
+      "number": 1,
+      "classification": "U",
+      "controls": [],
+      "text": "Celviro Nuberal participated in Killing 0032 on 2020-01-01. Liga del Cedro Lunar was linked to Killing 0032 on 2020-01-01. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "person-041",
+          "predicate": "participated_in",
+          "object": "event-0032",
+          "date": "2020-01-01",
+          "until": null
+        },
+        {
+          "subject": "org-05",
+          "predicate": "linked_to",
+          "object": "event-0032",
+          "date": "2020-01-01",
+          "until": null
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "classification": "S",
+      "controls": [
+        "NF"
+      ],
+      "text": "Casa Vitraleza 032 supported Killing 0032 on 2020-01-01. Celviro Nuberal used DEMO-ACCT-00032 on 2020-01-01. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "company-032",
+          "predicate": "supported",
+          "object": "event-0032",
+          "date": "2020-01-01",
+          "until": null
+        },
+        {
+          "subject": "person-041",
+          "predicate": "uses",
+          "object": "contact-032",
+          "date": "2020-01-01",
+          "until": null
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "classification": "S",
+      "controls": [
+        "NF"
+      ],
+      "text": "Unidad Nacarino 032 was involved in Killing 0032 on 2020-01-01. Killing 0032 occurred at Guadalajara on 2020-01-01. Celviro Cendavelo led Liga del Cedro Lunar on 2020-01-01 until 2027-01-01. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "asset-032",
+          "predicate": "involved_in",
+          "object": "event-0032",
+          "date": "2020-01-01",
+          "until": null
+        },
+        {
+          "subject": "event-0032",
+          "predicate": "occurred_at",
+          "object": "place-04",
+          "date": "2020-01-01",
+          "until": null
+        },
+        {
+          "subject": "person-042",
+          "predicate": "leads",
+          "object": "org-05",
+          "date": "2020-01-01",
+          "until": "2027-01-01"
+        }
+      ]
+    }
+  ],
+  "corrects": null,
+  "disputed": false
+}

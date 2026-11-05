@@ -11,6 +11,7 @@ openai_model: gpt-4.1-mini
 input_usd_per_million: 0.4
 output_usd_per_million: 1.6
 narrative_max_output_tokens: 2400
+critique_max_output_tokens: 2400
 extraction_max_output_tokens: 2400
 answer_max_output_tokens: 2000
 core_fraction: 0.75

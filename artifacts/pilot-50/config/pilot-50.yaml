@@ -1,0 +1,27 @@
+# Published model/prices: OpenAI Cookbook model-selection guide (April 2025 table).
+# Reconfirm account pricing before execution if provider pricing changes.
+# Safety: only original cable numbers 1..50 are eligible, including on resume.
+count: 5000
+seed: 42
+provider: openai
+query_provider: openai
+extraction: model
+max_spend_usd: 5
+openai_model: gpt-4.1-mini
+input_usd_per_million: 0.4
+output_usd_per_million: 1.6
+narrative_max_output_tokens: 2400
+critique_max_output_tokens: 2400
+extraction_max_output_tokens: 2400
+answer_max_output_tokens: 2000
+core_fraction: 0.75
+secret_fraction: 0.65
+agencies:
+  DEA: 55
+  FBI: 12
+  HSI: 8
+  CBP: 4
+  DIA: 6
+  TREASURY: 5
+  OSINT: 10
+max_cables: 50

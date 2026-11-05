@@ -98,7 +98,8 @@ def render_narrative(cable, world, provider, settings, previous_error=None):
                          lambda: request(provider, 'Critique the draft against the supplied constraints. '
                                          'Check fidelity of every required sentence and assigned paragraph, '
                                          'word count, invented claims and sober IIR style. List defects only.',
-                                         {'constraints': data, 'draft': first.model_dump()}, Critique, 900))
+                                         {'constraints': data, 'draft': first.model_dump()}, Critique,
+                                         settings.get('critique_max_output_tokens', 900)))
     with connect() as db:
         db.execute("UPDATE cables SET state='critiqued' WHERE id=?", (cable.cable_id,))
 

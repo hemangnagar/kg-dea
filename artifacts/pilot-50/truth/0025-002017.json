@@ -1,0 +1,50 @@
+{
+  "cable_id": "DEA-000025-IIR-17",
+  "agency": "DEA",
+  "office": "DEA Synthetic Reporting Office",
+  "report_date": "2017-01-11",
+  "subject": "Split reporting in Tijuana",
+  "event_id": "event-0024",
+  "source_id": "SYN-DEA-000",
+  "reliability": "A2",
+  "place": "Tijuana",
+  "keywords": [
+    "Split",
+    "Tijuana"
+  ],
+  "ntk": [
+    "DEA"
+  ],
+  "relevance": "background",
+  "paragraphs": [
+    {
+      "number": 1,
+      "classification": "U",
+      "controls": [
+        "FOUO"
+      ],
+      "text": "U//FOUO This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": []
+    },
+    {
+      "number": 2,
+      "classification": "U",
+      "controls": [
+        "FOUO"
+      ],
+      "text": "U//FOUO This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": []
+    },
+    {
+      "number": 3,
+      "classification": "U",
+      "controls": [
+        "FOUO"
+      ],
+      "text": "U//FOUO This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": []
+    }
+  ],
+  "corrects": null,
+  "disputed": false
+}

@@ -1,0 +1,100 @@
+{
+  "cable_id": "DEA-000015-IIR-10",
+  "agency": "DEA",
+  "office": "DEA Synthetic Reporting Office",
+  "report_date": "2010-01-01",
+  "subject": "Founding reporting in Monterrey",
+  "event_id": "event-0014",
+  "source_id": "SYN-DEA-006",
+  "reliability": "A2",
+  "place": "Monterrey",
+  "keywords": [
+    "Founding",
+    "Monterrey"
+  ],
+  "ntk": [
+    "DEA"
+  ],
+  "relevance": "core",
+  "paragraphs": [
+    {
+      "number": 1,
+      "classification": "U",
+      "controls": [],
+      "text": "Orenzio Vesquinal participated in Founding 0014 on 2010-01-01. Circulo del Valle Quieto was linked to Founding 0014 on 2010-01-01. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "person-020",
+          "predicate": "participated_in",
+          "object": "event-0014",
+          "date": "2010-01-01",
+          "until": null
+        },
+        {
+          "subject": "org-03",
+          "predicate": "linked_to",
+          "object": "event-0014",
+          "date": "2010-01-01",
+          "until": null
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "classification": "S",
+      "controls": [
+        "NF"
+      ],
+      "text": "Casa Vitraleza 014 supported Founding 0014 on 2010-01-01. Orenzio Vesquinal used DEMO-ACCT-00014 on 2010-01-01. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "company-014",
+          "predicate": "supported",
+          "object": "event-0014",
+          "date": "2010-01-01",
+          "until": null
+        },
+        {
+          "subject": "person-020",
+          "predicate": "uses",
+          "object": "contact-014",
+          "date": "2010-01-01",
+          "until": null
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "classification": "S",
+      "controls": [
+        "NF"
+      ],
+      "text": "Unidad Nacarino 014 was involved in Founding 0014 on 2010-01-01. Founding 0014 occurred at Monterrey on 2010-01-01. Orenzio Vesquinal led Circulo del Valle Quieto on 2010-01-01 until 2012-01-01. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "asset-014",
+          "predicate": "involved_in",
+          "object": "event-0014",
+          "date": "2010-01-01",
+          "until": null
+        },
+        {
+          "subject": "event-0014",
+          "predicate": "occurred_at",
+          "object": "place-02",
+          "date": "2010-01-01",
+          "until": null
+        },
+        {
+          "subject": "person-020",
+          "predicate": "leads",
+          "object": "org-03",
+          "date": "2010-01-01",
+          "until": "2012-01-01"
+        }
+      ]
+    }
+  ],
+  "corrects": null,
+  "disputed": false
+}

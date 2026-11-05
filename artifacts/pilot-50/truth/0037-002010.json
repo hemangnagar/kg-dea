@@ -1,0 +1,100 @@
+{
+  "cable_id": "DEA-000037-IIR-10",
+  "agency": "DEA",
+  "office": "DEA Synthetic Reporting Office",
+  "report_date": "2010-08-01",
+  "subject": "Seizure reporting in Hermosillo",
+  "event_id": "event-0036",
+  "source_id": "SYN-DEA-004",
+  "reliability": "B2",
+  "place": "Hermosillo",
+  "keywords": [
+    "Seizure",
+    "Hermosillo"
+  ],
+  "ntk": [
+    "DEA"
+  ],
+  "relevance": "core",
+  "paragraphs": [
+    {
+      "number": 1,
+      "classification": "U",
+      "controls": [],
+      "text": "Operador Vitranelo 086 participated in Seizure 0036 on 2010-07-24. Pacto del Faro Gris was linked to Seizure 0036 on 2010-07-24. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "person-086",
+          "predicate": "participated_in",
+          "object": "event-0036",
+          "date": "2010-07-24",
+          "until": null
+        },
+        {
+          "subject": "org-02",
+          "predicate": "linked_to",
+          "object": "event-0036",
+          "date": "2010-07-24",
+          "until": null
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "classification": "S",
+      "controls": [
+        "NF"
+      ],
+      "text": "Casa Vitraleza 036 supported Seizure 0036 on 2010-07-24. Operador Vitranelo 086 used DEMO-ACCT-00036 on 2010-07-24. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "company-036",
+          "predicate": "supported",
+          "object": "event-0036",
+          "date": "2010-07-24",
+          "until": null
+        },
+        {
+          "subject": "person-086",
+          "predicate": "uses",
+          "object": "contact-036",
+          "date": "2010-07-24",
+          "until": null
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "classification": "S",
+      "controls": [
+        "NF"
+      ],
+      "text": "Unidad Nacarino 036 was involved in Seizure 0036 on 2010-07-24. Seizure 0036 occurred at Hermosillo on 2010-07-24. Tavireo Vesquinal led Pacto del Faro Gris on 2010-01-01 until 2012-01-01. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "asset-036",
+          "predicate": "involved_in",
+          "object": "event-0036",
+          "date": "2010-07-24",
+          "until": null
+        },
+        {
+          "subject": "event-0036",
+          "predicate": "occurred_at",
+          "object": "place-11",
+          "date": "2010-07-24",
+          "until": null
+        },
+        {
+          "subject": "person-010",
+          "predicate": "leads",
+          "object": "org-02",
+          "date": "2010-01-01",
+          "until": "2012-01-01"
+        }
+      ]
+    }
+  ],
+  "corrects": null,
+  "disputed": false
+}

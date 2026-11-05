@@ -1,0 +1,65 @@
+{
+  "cable_id": "FBI-000013-IIR-23",
+  "agency": "FBI",
+  "office": "FBI Synthetic Reporting Office",
+  "report_date": "2023-01-13",
+  "subject": "AllianceBreak reporting in Veracruz",
+  "event_id": "event-0012",
+  "source_id": "SYN-FBI-004",
+  "reliability": "B2",
+  "place": "Veracruz",
+  "keywords": [
+    "AllianceBreak",
+    "Veracruz"
+  ],
+  "ntk": [
+    "FBI"
+  ],
+  "relevance": "core",
+  "paragraphs": [
+    {
+      "number": 1,
+      "classification": "U",
+      "controls": [
+        "FOUO"
+      ],
+      "text": "Tavireo Cendavelo participated in AllianceBreak 0012 on 2023-01-01. Pacto del Faro Gris was linked to AllianceBreak 0012 on 2023-01-01. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "person-012",
+          "predicate": "participated_in",
+          "object": "event-0012",
+          "date": "2023-01-01",
+          "until": null
+        },
+        {
+          "subject": "org-02",
+          "predicate": "linked_to",
+          "object": "event-0012",
+          "date": "2023-01-01",
+          "until": null
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "classification": "U",
+      "controls": [
+        "FOUO"
+      ],
+      "text": "This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": []
+    },
+    {
+      "number": 3,
+      "classification": "U",
+      "controls": [
+        "FOUO"
+      ],
+      "text": "This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": []
+    }
+  ],
+  "corrects": null,
+  "disputed": false
+}

@@ -1,0 +1,100 @@
+{
+  "cable_id": "DEA-000028-IIR-26",
+  "agency": "DEA",
+  "office": "DEA Synthetic Reporting Office",
+  "report_date": "2026-01-14",
+  "subject": "Operation reporting in Tijuana",
+  "event_id": "event-0027",
+  "source_id": "SYN-DEA-003",
+  "reliability": "A2",
+  "place": "Tijuana",
+  "keywords": [
+    "Operation",
+    "Tijuana"
+  ],
+  "ntk": [
+    "DEA"
+  ],
+  "relevance": "core",
+  "paragraphs": [
+    {
+      "number": 1,
+      "classification": "U",
+      "controls": [],
+      "text": "Belviano Cendavelo participated in Operation 0027 on 2026-01-01. Red del Horizonte Azul was linked to Operation 0027 on 2026-01-01. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "person-032",
+          "predicate": "participated_in",
+          "object": "event-0027",
+          "date": "2026-01-01",
+          "until": null
+        },
+        {
+          "subject": "org-04",
+          "predicate": "linked_to",
+          "object": "event-0027",
+          "date": "2026-01-01",
+          "until": null
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "classification": "S",
+      "controls": [
+        "NF"
+      ],
+      "text": "Casa Vitraleza 027 supported Operation 0027 on 2026-01-01. Belviano Cendavelo used DEMO-TEL-00027 on 2026-01-01. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "company-027",
+          "predicate": "supported",
+          "object": "event-0027",
+          "date": "2026-01-01",
+          "until": null
+        },
+        {
+          "subject": "person-032",
+          "predicate": "uses",
+          "object": "contact-027",
+          "date": "2026-01-01",
+          "until": null
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "classification": "S",
+      "controls": [
+        "NF"
+      ],
+      "text": "Unidad Nacarino 027 was involved in Operation 0027 on 2026-01-01. Operation 0027 occurred at Tijuana on 2026-01-01. Belviano Cendavelo led Red del Horizonte Azul on 2020-01-01 until 2027-01-01. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "asset-027",
+          "predicate": "involved_in",
+          "object": "event-0027",
+          "date": "2026-01-01",
+          "until": null
+        },
+        {
+          "subject": "event-0027",
+          "predicate": "occurred_at",
+          "object": "place-03",
+          "date": "2026-01-01",
+          "until": null
+        },
+        {
+          "subject": "person-032",
+          "predicate": "leads",
+          "object": "org-04",
+          "date": "2020-01-01",
+          "until": "2027-01-01"
+        }
+      ]
+    }
+  ],
+  "corrects": null,
+  "disputed": false
+}

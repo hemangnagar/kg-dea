@@ -1,0 +1,100 @@
+{
+  "cable_id": "HSI-000008-IIR-10",
+  "agency": "HSI",
+  "office": "HSI Synthetic Reporting Office",
+  "report_date": "2010-01-08",
+  "subject": "Founding reporting in Veracruz",
+  "event_id": "event-0007",
+  "source_id": "SYN-HSI-007",
+  "reliability": "B2",
+  "place": "Veracruz",
+  "keywords": [
+    "Founding",
+    "Veracruz"
+  ],
+  "ntk": [
+    "HSI"
+  ],
+  "relevance": "core",
+  "paragraphs": [
+    {
+      "number": 1,
+      "classification": "U",
+      "controls": [],
+      "text": "Tavireo Vesquinal participated in Founding 0007 on 2010-01-01. Pacto del Faro Gris was linked to Founding 0007 on 2010-01-01. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "person-010",
+          "predicate": "participated_in",
+          "object": "event-0007",
+          "date": "2010-01-01",
+          "until": null
+        },
+        {
+          "subject": "org-02",
+          "predicate": "linked_to",
+          "object": "event-0007",
+          "date": "2010-01-01",
+          "until": null
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "classification": "S",
+      "controls": [
+        "NF"
+      ],
+      "text": "Casa Vitraleza 007 supported Founding 0007 on 2010-01-01. Tavireo Vesquinal used DEMO-TEL-00007 on 2010-01-01. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "company-007",
+          "predicate": "supported",
+          "object": "event-0007",
+          "date": "2010-01-01",
+          "until": null
+        },
+        {
+          "subject": "person-010",
+          "predicate": "uses",
+          "object": "contact-007",
+          "date": "2010-01-01",
+          "until": null
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "classification": "S",
+      "controls": [
+        "NF"
+      ],
+      "text": "Unidad Nacarino 007 was involved in Founding 0007 on 2010-01-01. Founding 0007 occurred at Veracruz on 2010-01-01. Tavireo Vesquinal led Pacto del Faro Gris on 2010-01-01 until 2012-01-01. This fictional reporting is intended solely for a controlled demonstration of document processing. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "asset-007",
+          "predicate": "involved_in",
+          "object": "event-0007",
+          "date": "2010-01-01",
+          "until": null
+        },
+        {
+          "subject": "event-0007",
+          "predicate": "occurred_at",
+          "object": "place-01",
+          "date": "2010-01-01",
+          "until": null
+        },
+        {
+          "subject": "person-010",
+          "predicate": "leads",
+          "object": "org-02",
+          "date": "2010-01-01",
+          "until": "2012-01-01"
+        }
+      ]
+    }
+  ],
+  "corrects": null,
+  "disputed": false
+}

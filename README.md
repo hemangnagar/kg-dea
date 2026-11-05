@@ -57,7 +57,7 @@ bash scripts/pilot50.sh
 
 The pilot script plans all 5,000 records against a separate expanded world in `world/pilot`, then makes only original record numbers 1–50 eligible for generation. It uses `config/pilot-50.yaml`: OpenAI `gpt-4.1-mini`, a $5 local cap, 3-pass narratives plus model extraction. The configured $0.40 input / $1.60 output per million rates come from [OpenAI's published model-selection guide](https://github.com/openai/openai-cookbook/blob/main/examples/partners/model_selection_guide/model_selection_guide.ipynb), whose pricing table is dated April 2025. Reconfirm your account's current pricing before execution. The local accountant is not a provider billing limit.
 
-Supply `INTELDOC_OPENAI_API_KEY2` (or `INTELDOC_OPENAI_API_KEY`) securely in environment settings, with HTTPS access to `api.openai.com`. There is no saved key binding or injected key in the current environment. **The first run was attempted and stopped before any API request.** Its manifest has 5,000 planned / zero API-validated records. No API-generated pilot documents are claimed yet.
+Supply `INTELDOC_OPENAI_API_KEY2` (or `INTELDOC_OPENAI_API_KEY`) securely in environment settings, with HTTPS access to `api.openai.com`. The live pilot completed on 2026-11-05 with **39 validated documents and 11 rejected outputs** from the fixed first 50. Accounted spend was **$0.2766388**, including $0.0121512 in retained reservations. Browse the [documents, world bible, validation report and spend ledger](artifacts/pilot-50/README.md), or [download the results ZIP](artifacts/pilot-50-results.zip).
 
 The fixed selection contains DEA 30, FBI 5, HSI 1, CBP 2, DIA 2, Treasury 3, and OSINT 7 cables; 33 are Secret, 17 Unclassified, and 38 core / 12 background. Re-running the script resumes these same 50, not another 50. Output goes to `corpus/api-pilot`; the initial selection is recorded in `selection.json` there. Its XML/truth directories appear as successful records are validated. Remove or raise `max_cables` only when deliberately moving beyond the pilot.
 
@@ -82,7 +82,7 @@ Seed validation checks all references, leadership/control intervals, inherited-a
 
 `world/seed.yaml` is the draft editorial input. Scripted expansion creates 200 people, 80 companies, 45 assets, 360 non-operational identifiers, 56 sources in v2 (50 in the preserved v1 baseline), 25 places, five organizations, 600 events and non-overlapping leadership windows. The v2 seed contains 35 exact-dated timeline beats; the preserved v1 baseline used 35 template arc beats. Shared nicknames are intentional. This is a mechanical synthetic baseline, not a hand-authored geopolitical simulation.
 
-Generated outputs are ignored by Git and reproducible:
+Working generated outputs are ignored by Git; the completed pilot run is preserved under [`artifacts/pilot-50`](artifacts/pilot-50/README.md):
 
 - `world/expanded.json`: full fictional world.
 - `world/graph_truth.json`: world relationships, derived by code.
@@ -147,7 +147,7 @@ One-off requests remain available via `.venv/bin/python -m scripts.model_prompt 
 
 The accountant atomically reserves a conservative request bound before network I/O, records returned input and output usage (including billed reasoning output), and retains reservations after uncertain failures. All corpus directories share the baseline ledger at `corpus/manifest.sqlite`; switching to a pilot directory does not reset the spend cap. `MAX_SPEND_USD` overrides config `max_spend_usd`, defaulting to $40. This is a local ledger guard based on configured pricing, not a provider billing limit. Incomplete responses and refusals are accounted and reported as errors. No automatic retry or provider batch workflow is implemented. Responses use `store: false`; this does not guarantee provider-side zero retention.
 
-No live OpenAI run has been validated in this environment: there is no configured API key. Tests exercise the full provider-backed pipeline through mocked HTTP Responses API replies, including failures, resume behavior, extraction omissions, persona isolation and invented citations. This distinction is intentional; simulated success is not a live model-quality measurement.
+The live OpenAI pilot validated 39 documents; [its report](artifacts/pilot-50/run-report.json) records all successes, failures and accounted spend. Official XML schema conformance remains unverified because no XSD/Schematron package is bundled. Tests also exercise the provider-backed pipeline through mocked HTTP Responses API replies, including failures, resume behavior, extraction omissions, persona isolation and invented citations. Mocked tests are distinct from the live pilot results.
 
 ## Validation
 

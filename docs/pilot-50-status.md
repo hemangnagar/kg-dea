@@ -1,5 +1,20 @@
 # API pilot status
 
+Completed: 2026-11-05.
+
+The live first-50 pilot produced **39 validated documents and 11 rejected outputs**. The original world, manifest plan and fixed selection were retained; no records beyond 50 were attempted. The remaining 4,950 records are planned.
+
+Accounted spend: **$0.2766388** ($0.2644876 settled usage and $0.0121512 retained reservations), below the unchanged $5 cap. The critique token allowance was increased to 2,400 after a truncated response; completed checkpoints were reused.
+
+All 39 XML documents passed internal record/well-formedness checks, and all 192 extracted fact citations matched their exact source paragraphs and world facts. The 180 unique extracted facts matched all planted facts in successful documents. Official XSD/Schematron conformance remains unverified because no schema package is bundled.
+
+Browse [results and world bible](../artifacts/pilot-50/README.md), [failure details and validation](../artifacts/pilot-50/run-report.json), or [download the ZIP](../artifacts/pilot-50-results.zip).
+
+The recovery archive below is the earlier zero-spend snapshot. Never restore it over the paid run ledger.
+
+## Historical preparation record
+
+
 Prepared: 2026-11-04.
 
 - World: schema-v2 draft seed, independently expanded under `world/pilot`.
