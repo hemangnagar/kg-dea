@@ -15,3 +15,9 @@ Prepared: 2026-11-04.
 Add the key securely in environment settings for `api.openai.com`, apply the settings, and rerun the same command. Keep the key out of Git and chat. Review and publish environment configuration if the UI requires it. Existing validated stages will resume; failed records are retried explicitly by the script.
 
 See README.md for the seed contents, validation constraints, model-price reference, and matching corpus/world startup configuration.
+
+## Recovery for the new task
+
+The original workspace retained the state. A SHA-256 indexed recovery snapshot now ships in `artifacts/pilot-recovery-2026-11-05.tar.gz`, together with the standard-library restore command `python3 scripts/restore_pilot.py`. The snapshot was tested by restoring all 10,008 files, verifying both databases, checking a repeat restore, and rejecting a conflicting local file. Its historical spend ledger records zero API requests and $0 spend.
+
+The new task reports that KEY2 is present but API network access and `.venv` are missing. Restore the archive, create `.venv`, install `requirements.lock`, then resume `bash scripts/pilot50.sh` after its API allowlist change is applied. See README.md for exact commands. The snapshot contains no credentials, and the original live task's absent-key observations do not describe the new task's credentials.

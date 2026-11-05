@@ -27,6 +27,25 @@ Use the existing checkout in cloud tasks. Tasks are already isolated; do not cre
 
 The query engine uses deterministic entity matching and at most two graph hops. It supports relationship, geography, leadership and year queries, not arbitrary natural-language reasoning. Ambiguous shared nicknames prompt disambiguation. Offline answers are evidence statements with citations. Online answers use the model to select relevant source quotations, then verify each quotation and cited relation deterministically.
 
+## Restore the original state in a new task
+
+The generated artifacts and `.venv` were ignored by Git. A new checkout therefore needs both the state snapshot and dependency installation before resuming. A verified recovery snapshot is now included at `artifacts/pilot-recovery-2026-11-05.tar.gz` with a SHA-256 sidecar. It contains only synthetic worlds/documents, both SQLite manifests, the selection, scorecard and spend ledger. It contains no API key, `.env`, or virtual environment.
+
+From a clean checkout of the latest `origin/main`:
+
+```sh
+python3 scripts/restore_pilot.py
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.lock
+bash scripts/pilot50.sh
+```
+
+The restore command uses only Python's standard library, so it works before `.venv` exists. It verifies every archived file and database, restores the exact original state, and refuses to overwrite differing existing files. A repeated identical restore is safe. If it reports a conflict, preserve and inspect that existing state; do not delete a ledger to make the command pass.
+
+Expected restored state: 5,000 validated **offline** cables, 5,000 planned pilot records, zero API-validated pilot records, and the original ledger recording **$0 historical API spend**. Restoring makes no API requests and does not expand the world or regenerate documents. The archive is a point-in-time snapshot from before live generation; never restore it over a later run's spend ledger.
+
+The new task must separately have `INTELDOC_OPENAI_API_KEY2` (or a supported fallback) and allowed HTTPS access to `api.openai.com`. If its allowlist draft is pending, review/save/publish that change in environment settings and verify the task's actual network policy before the paid run. The snapshot cannot grant network access or inject credentials.
+
 ## 50-document API pilot
 
 The detailed Claude-style seed requirements are now represented in `world/seed.yaml` (schema v2): five organizations with exact leadership windows, dated fractures/alliances, 25 corridor control histories, 50 people across all required tiers and official roles, 15 shared aliases including five inherited aliases, 18 companies with nominee ownership, 12 registered assets, 56 sources (eight per agency), and 35 dated timeline beats. It remains **draft-unreviewed**; automated integrity checks are not editorial approval or proof that every invented name is globally unique.
