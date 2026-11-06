@@ -22,9 +22,10 @@ Use the existing checkout in cloud tasks. Tasks are already isolated; do not cre
 1. Ask **Which companies connect to Bruma del Cobre?** The graph traverses organization → event → front company.
 2. Click a bracketed citation to open the exact cable and highlighted paragraph. Click an entity to see its one-hop neighborhood; switch to Timeline.
 3. Ask **Who led Bruma del Cobre in 2021?** Then switch from Secret // NOFORN to Unclassified // FOUO. Yesenia Anzures Ibarra's leadership window is marked `secret_only` in the seed and is planted only in Secret cables, so the same question now has no supported answer. Changing persona clears the prior graph, answer, and document before fetching.
-4. Ask **Which corridors did Bruma del Cobre control?** for the dated `controls` windows, and **Who is El Relojero?** for a nickname shared by two people; the engine asks you to disambiguate.
-5. Open **Extraction scorecard**. Precision, whole-world recall, planted-fact recall, per-edge-type recall and the count of deliberate contradictions are computed from extracted text relationships, not hard-coded scores.
-6. Open **World bible** for the six factions, their arcs, the corridors and the graph schema.
+4. Open **Graph explorer** for the whole extracted graph: the structural edges of all six factions by default, then type any entity as the center, raise the hops, switch the edge preset, filter by node kind, reporting agency or years, and click a node for its edges and citations. Double-click a node to expand from it. The accessible graph exports as GraphML or as Neo4j-style `nodes.csv` and `edges.csv`.
+5. Ask **Which corridors did Bruma del Cobre control?** for the dated `controls` windows, and **Who is El Relojero?** for a nickname shared by two people; the engine asks you to disambiguate.
+6. Open **Extraction scorecard**. Precision (with and without the planted contradictions), whole-world recall, planted-fact recall, recall per edge type, and the contradiction, correction and rejected-claim counts are computed from extracted text relationships, not hard-coded scores.
+7. Open **World bible** for the six factions, their arcs, the corridors and the graph schema.
 
 The query engine uses deterministic entity matching (canonical names and unique aliases, longest match wins) and at most two graph hops. It supports relationship, geography, leadership, membership, ownership, corridor and year queries, not arbitrary natural-language reasoning. Ambiguous shared nicknames prompt disambiguation. Offline answers are evidence statements with citations. Online answers use the model to select relevant source quotations, then verify each quotation and cited relation deterministically.
 

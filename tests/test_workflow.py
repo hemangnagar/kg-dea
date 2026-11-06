@@ -136,3 +136,27 @@ def test_authored_narrative_replaces_template_and_is_checked(corpus,monkeypatch)
     (folder/f'{c.cable_id}.json').write_text(json.dumps({'paragraphs':paragraphs[:-1]}))
     with pytest.raises(ValueError,match='numbering'):pipeline.authored_narrative(c,cfg)
     with pytest.raises(ValueError,match='No authored narrative'):pipeline.authored_narrative(c.model_copy(update={'cable_id':'X-000000-IIR-00'}),{**cfg,'provider':'authored'})
+
+def test_graph_explorer_and_exports(corpus):
+    from inteldoc import app as web
+    from lxml import etree
+    web.world.cache_clear();web.entities.cache_clear()
+    client=TestClient(web.app)
+    low=client.get('/api/explore?persona=unclassified&predicates=structure,events&limit=50').json()
+    assert low['edges'] and all(e['classification']=='U' for e in low['edges']) and all(e['count']>=1 and e['agencies'] for e in low['edges'])
+    assert len(low['edges'])<=50 and {n['id'] for n in low['nodes']}=={e[k] for e in low['edges'] for k in ['subject','object']}
+    high=client.get('/api/explore?persona=secret&center=org-01&hops=2&predicates=controls').json()
+    assert high['edges'] and all(e['predicate']=='controls' for e in high['edges']) and high['centers']==['org-01']
+    assert client.get('/api/explore?center=nonexistent').status_code==404
+    years=client.get('/api/explore?persona=secret&year_from=2020&year_to=2021&predicates=events').json()
+    assert all(e['date']<='2021-12-31' and (e['until_date'] or e['date'])>='2020-01-01' for e in years['edges'])
+    g=client.get('/api/export/graphml?persona=unclassified')
+    assert g.status_code==200 and 'attachment' in g.headers['content-disposition']
+    root=etree.fromstring(g.content); ns={'g':'http://graphml.graphdrawing.org/xmlns'}
+    nodes=root.findall('.//g:node',ns); edges=root.findall('.//g:edge',ns)
+    assert nodes and edges and all(e.get('source') and e.get('target') for e in edges)
+    assert all(d.text=='U' for d in root.findall('.//g:edge/g:data[@key="classification"]',ns))
+    csv_edges=client.get('/api/export/edges.csv?persona=secret').text.splitlines()
+    assert csv_edges[0].startswith(':START_ID,subject_name,:TYPE,:END_ID') and len(csv_edges)>1
+    assert client.get('/api/export/nodes.csv?persona=secret').text.startswith('id:ID,name,:LABEL')
+    web.world.cache_clear();web.entities.cache_clear()

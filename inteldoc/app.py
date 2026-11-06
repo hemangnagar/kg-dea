@@ -3,7 +3,7 @@ import re
 from functools import lru_cache
 from typing import Literal
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse, HTMLResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, Response, PlainTextResponse
 from pydantic import BaseModel, Field
 from .world import ROOT, load_world
 from .store import connect, connect_spend
@@ -41,9 +41,11 @@ def compact(rows,limit=60):
     grouped={}
     for r in sorted(rows,key=lambda r:(r['date'],r['cable'],r['paragraph']),reverse=True):
         key=(r['subject'],r['predicate'],r['object'],r['date'],r['until_date'])
-        if key not in grouped:grouped[key]={**r,'citations':[]}
+        if key not in grouped:grouped[key]={**r,'citations':[],'count':0,'agencies':[]}
         item=grouped[key]
         citation={'cable':r['cable'],'paragraph':r['paragraph'],'mark':r['classification']+('//'+r['controls'].replace(',','//') if r['controls'] else '')}
+        item['count']+=1
+        if r['agency'] not in item['agencies']:item['agencies'].append(r['agency'])
         if len(item['citations'])<3 and citation not in item['citations']:item['citations'].append(citation)
     return list(grouped.values())[:limit]
 
@@ -185,3 +187,83 @@ def runtime():
             'narrative_provider':cfg.get('provider','offline'),
             'extraction':cfg.get('extraction','deterministic'),'authored':bool(cfg.get('narratives_dir')),
             'model':cfg.get('openai_model') if cfg.get('query_provider')=='openai' else cfg.get('ollama_model')}
+
+
+PREDICATE_GROUPS={'structure':['leads','member_of','controls','allied_with','split_from','owns','nominee_for'],
+                  'events':['participated_in','linked_to','occurred_at','transited','supported','involved_in','arrested_in','killed_in','extradited_in','released_in','elected_in','removed_in','paid_in','designated_in'],
+                  'identifiers':['uses']}
+
+def filtered_rows(persona,predicates='',year_from=None,year_to=None,agencies='',kinds=''):
+    rows=visible(persona)
+    preds={x for x in predicates.split(',') if x}
+    for group,members in PREDICATE_GROUPS.items():
+        if group in preds:preds|=set(members)
+    if preds:rows=[r for r in rows if r['predicate'] in preds]
+    agency_set={x for x in agencies.split(',') if x}
+    if agency_set:rows=[r for r in rows if r['agency'] in agency_set]
+    if year_from or year_to:
+        lo,hi=f'{year_from or 2010}-01-01',f'{year_to or 2027}-12-31'
+        rows=[r for r in rows if r['date']<=hi and ((r['until_date']>lo) if r['until_date'] else (r['date']>=lo))]
+    kind_set={x for x in kinds.split(',') if x}
+    if kind_set:rows=[r for r in rows if entities()[r['subject']]['kind'] in kind_set and entities()[r['object']]['kind'] in kind_set]
+    return rows
+
+@app.get('/api/explore')
+def explore_graph(persona:Persona='secret',center:str='',hops:int=1,predicates:str='',kinds:str='',year_from:int|None=None,year_to:int|None=None,agencies:str='',limit:int=300):
+    """Persona-filtered subgraph for the explorer: deduplicated edges with citation counts, ranked around the centers."""
+    hops=max(1,min(hops,3)); limit=max(10,min(limit,1500))
+    rows=filtered_rows(persona,predicates,year_from,year_to,agencies,kinds)
+    allowed={r[k] for r in visible(persona) for k in ['subject','object']}
+    centers=[c for c in center.split(',') if c] if center else [e['id'] for e in entities().values() if e['kind']=='organization']
+    centers=[c for c in centers if c in allowed]
+    if center and not centers:raise HTTPException(404,'No accessible entity')
+    selected=neighborhood(rows,centers,hops) if centers else rows
+    facts=compact(selected,10**6)
+    touching=set(centers)
+    facts.sort(key=lambda f:(not (f['subject'] in touching or f['object'] in touching),-f['count'],f['date']),reverse=False)
+    truncated=len(facts)>limit; facts=facts[:limit]
+    degree={}
+    for f in facts:
+        for k in ['subject','object']:degree[f[k]]=degree.get(f[k],0)+1
+    nodes=[{**entities()[i],'degree':degree[i],'center':i in touching} for i in sorted(degree)]
+    return {'nodes':nodes,'edges':facts,'centers':centers,'total_edges':len(selected),'truncated':truncated,'predicate_groups':PREDICATE_GROUPS}
+
+@app.get('/api/export/graphml')
+def export_graphml(persona:Persona='secret',predicates:str='',year_from:int|None=None,year_to:int|None=None,agencies:str=''):
+    from lxml import etree as E
+    facts=compact(filtered_rows(persona,predicates,year_from,year_to,agencies),10**6)
+    ids=sorted({f[k] for f in facts for k in ['subject','object']})
+    NS='http://graphml.graphdrawing.org/xmlns'
+    root=E.Element('{%s}graphml'%NS,nsmap={None:NS})
+    for key,for_,type_ in [('name','node','string'),('kind','node','string'),('place','node','string'),('predicate','edge','string'),('date','edge','string'),('until','edge','string'),('citations','edge','int'),('agencies','edge','string'),('classification','edge','string')]:
+        E.SubElement(root,'{%s}key'%NS,id=key,attrib={'for':for_,'attr.name':key,'attr.type':type_})
+    g=E.SubElement(root,'{%s}graph'%NS,id='inteldoc-'+persona,edgedefault='directed')
+    for i in ids:
+        e=entities()[i]; n=E.SubElement(g,'{%s}node'%NS,id=i)
+        for key in ['name','kind','place']:E.SubElement(n,'{%s}data'%NS,key=key).text=str(e.get(key,''))
+    for k,f in enumerate(facts):
+        ed=E.SubElement(g,'{%s}edge'%NS,id=f'e{k}',source=f['subject'],target=f['object'])
+        for key,val in [('predicate',f['predicate']),('date',f['date']),('until',f['until_date']),('citations',f['count']),('agencies',','.join(f['agencies'])),('classification',f['classification'])]:
+            E.SubElement(ed,'{%s}data'%NS,key=key).text=str(val)
+    return Response(E.tostring(root,xml_declaration=True,encoding='utf-8',pretty_print=True),media_type='application/xml',headers={'Content-Disposition':f'attachment; filename="inteldoc-{persona}.graphml"'})
+
+@app.get('/api/export/edges.csv')
+def export_edges(persona:Persona='secret',predicates:str='',year_from:int|None=None,year_to:int|None=None,agencies:str=''):
+    import csv,io
+    facts=compact(filtered_rows(persona,predicates,year_from,year_to,agencies),10**6)
+    out=io.StringIO(); w=csv.writer(out)
+    w.writerow([':START_ID','subject_name',':TYPE',':END_ID','object_name','date','until','citations:int','agencies','classification','sample_cable','sample_paragraph:int'])
+    for f in facts:
+        c=f['citations'][0]
+        w.writerow([f['subject'],entities()[f['subject']]['name'],f['predicate'],f['object'],entities()[f['object']]['name'],f['date'],f['until_date'],f['count'],'|'.join(f['agencies']),f['classification'],c['cable'],c['paragraph']])
+    return PlainTextResponse(out.getvalue(),media_type='text/csv',headers={'Content-Disposition':f'attachment; filename="inteldoc-{persona}-edges.csv"'})
+
+@app.get('/api/export/nodes.csv')
+def export_nodes(persona:Persona='secret'):
+    import csv,io
+    allowed={r[k] for r in visible(persona) for k in ['subject','object']}
+    out=io.StringIO(); w=csv.writer(out)
+    w.writerow(['id:ID','name',':LABEL','place','aliases'])
+    for i in sorted(allowed):
+        e=entities()[i]; w.writerow([i,e['name'],e['kind'],e['place'],'|'.join(e['aliases'])])
+    return PlainTextResponse(out.getvalue(),media_type='text/csv',headers={'Content-Disposition':f'attachment; filename="inteldoc-{persona}-nodes.csv"'})
