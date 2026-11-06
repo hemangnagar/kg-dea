@@ -63,7 +63,7 @@ The new task must separately have `INTELDOC_OPENAI_API_KEY2` (or a supported fal
 INTELDOC_CORPUS_DIR=corpus/haiku-pilot .venv/bin/python -m scripts.demo build --config config/anthropic-pilot.yaml --count 5000 --retry-failed --workers 4
 ```
 
-Measured on the pilot: 20 cables validated, about $0.003 per cable at the configured prices, about four cables per minute per worker. Model extraction keeps only claims whose quote and relation the anchor grammar confirms; dropped claims are counted in the scorecard as `rejected_model_claims`.
+Measured on the pilot: 20 cables validated, about $0.003 per cable at the configured prices, about four cables per minute per worker. The full run completed on 2026-11-06: **5,000 validated cables for $12.17**, 4,949 by the model and 51 hand-written, in about 2.5 hours at eight workers. See [docs/haiku-5000-status.md](docs/haiku-5000-status.md) and [artifacts/haiku-5000/README.md](artifacts/haiku-5000/README.md) for the scorecard, the run report and how to serve the archive. Model extraction keeps only claims whose quote and relation the anchor grammar confirms; dropped claims are counted in the scorecard as `rejected_model_claims`.
 
 ## Hand-written pilot narratives
 
