@@ -22,10 +22,11 @@ Use the existing checkout in cloud tasks. Tasks are already isolated; do not cre
 1. Ask **Which companies connect to Bruma del Cobre?** The graph traverses organization → event → front company.
 2. Click a bracketed citation to open the exact cable and highlighted paragraph. Click an entity to see its one-hop neighborhood; switch to Timeline.
 3. Ask **Who led Bruma del Cobre in 2021?** Then switch from Secret // NOFORN to Unclassified // FOUO. Yesenia Anzures Ibarra's leadership window is marked `secret_only` in the seed and is planted only in Secret cables, so the same question now has no supported answer. Changing persona clears the prior graph, answer, and document before fetching.
-4. Open **Graph explorer** for the whole extracted graph: the structural edges of all six factions by default, then type any entity as the center, raise the hops, switch the edge preset, filter by node kind, reporting agency or years, and click a node for its edges and citations. Double-click a node to expand from it. The accessible graph exports as GraphML or as Neo4j-style `nodes.csv` and `edges.csv`.
-5. Ask **Which corridors did Bruma del Cobre control?** for the dated `controls` windows, and **Who is El Relojero?** for a nickname shared by two people; the engine asks you to disambiguate.
-6. Open **Extraction scorecard**. Precision (with and without the planted contradictions), whole-world recall, planted-fact recall, recall per edge type, and the contradiction, correction and rejected-claim counts are computed from extracted text relationships, not hard-coded scores.
-7. Open **World bible** for the six factions, their arcs, the corridors and the graph schema.
+4. Ask **Who did Yesenia Anzures Ibarra call in 2022?** for the partner-agency call records fused into the graph (Secret persona only; the chips open the record and its number-to-person resolution). Open a leadership citation to see the corroborating calls between the people in the cable.
+5. Open **Graph explorer** for the whole extracted graph: the structural edges of all six factions by default, then type any entity as the center, raise the hops, switch the edge preset, filter by node kind, reporting agency or years, and click a node for its edges and citations. Double-click a node to expand from it. The accessible graph exports as GraphML or as Neo4j-style `nodes.csv` and `edges.csv`.
+6. Ask **Which corridors did Bruma del Cobre control?** for the dated `controls` windows, and **Who is El Relojero?** for a nickname shared by two people; the engine asks you to disambiguate.
+7. Open **Extraction scorecard**. Precision (with and without the planted contradictions), whole-world recall, planted-fact recall, recall per edge type, and the contradiction, correction and rejected-claim counts are computed from extracted text relationships, not hard-coded scores.
+8. Open **World bible** for the six factions, their arcs, the corridors and the graph schema.
 
 The query engine uses deterministic entity matching (canonical names and unique aliases, longest match wins) and at most two graph hops. It supports relationship, geography, leadership, membership, ownership, corridor and year queries, not arbitrary natural-language reasoning. Ambiguous shared nicknames prompt disambiguation. Offline answers are evidence statements with citations. Online answers use the model to select relevant source quotations, then verify each quotation and cited relation deterministically.
 
@@ -65,6 +66,12 @@ INTELDOC_CORPUS_DIR=corpus/haiku-pilot .venv/bin/python -m scripts.demo build --
 ```
 
 Measured on the pilot: 20 cables validated, about $0.003 per cable at the configured prices, about four cables per minute per worker. The full run completed on 2026-11-06: **5,000 validated cables for $12.17**, 4,949 by the model and 51 hand-written, in about 2.5 hours at eight workers. See [docs/haiku-5000-status.md](docs/haiku-5000-status.md) and [artifacts/haiku-5000/README.md](artifacts/haiku-5000/README.md) for the scorecard, the run report and how to serve the archive. Model extraction keeps only claims whose quote and relation the anchor grammar confirms; dropped claims are counted in the scorecard as `rejected_model_claims`.
+
+## Partner data: FBI call records
+
+A second source, structured rather than narrative, provided by a different agency. `scripts/demo cdr` generates `corpus/cdr/fbi-cdr.csv` from the world: 14,000 synthetic call records between the world's phone labels (DEMO-TEL-nnnnn, deliberately non-dialable; call start, duration, direction, no cell-site data), sampled around the world's events and among members of the same organization, always using the label each person held on that day. The generator writes a truth file with the real caller and callee of every record. Ingestion resolves each label to the person holding it on the day of the call through the dated holder windows in the world, and writes a `called` edge with the record as provenance. The records carry `U//LES` handling from FBI, which the demo models as available to the Secret persona only.
+
+What it adds to the demo: cross-source fusion with per-edge provenance (a cable paragraph on one side, a partner record on the other), corroboration inside a cable (calls between the people in a report in the week before its event), and identifier resolution over time (59 phones change hands; a number resolves to different people in different years). The scorecard reports resolution accuracy against the generator's truth, overall and on the numbers that changed hands, next to a naive first-known-holder baseline. Link analysis beyond this is deliberately out of scope.
 
 ## Hand-written pilot narratives
 

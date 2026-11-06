@@ -423,6 +423,7 @@ def expand(seed=42, total_events=500):
                     plant(o['id'], 'split_from', o['founding']['split_from'])
         if e['type'] in ('Arrest', 'Killing', 'Extradition', 'Release') and e['seed_event']:
             pass  # status edges are the role predicates above
+    assign_identifier_holders(entities, events, people, rng)
     unique = {}
     for f in facts:
         unique.setdefault(Fact(**f).key(), f)
@@ -435,6 +436,57 @@ def expand(seed=42, total_events=500):
     (output / 'expanded.json').write_text(json.dumps(world, indent=1, ensure_ascii=False))
     (output / 'graph_truth.json').write_text(json.dumps(truth, indent=1, ensure_ascii=False))
     return world
+
+
+def assign_identifier_holders(entities, events, people, rng):
+    """Replace the provisional holder windows with ones derived from how the events actually use each identifier.
+
+    Every (person, date) that uses an identifier in an event falls inside that person's window, windows are
+    continuous and non-overlapping per identifier, and a share of phones is handed to a colleague after the last
+    use, so some numbers change hands. Event facts are not touched, so graph truth is unaffected.
+    """
+    by_id = {e['id']: e for e in entities}
+    usage = {}
+    for e in events:
+        if e.get('contact'):
+            usage.setdefault(e['contact'], {}).setdefault(e['person'], []).append(e['date'])
+    counts = {p['id']: 0 for p in people}
+    for ident in [e for e in entities if e['kind'] == 'identifier']:
+        windows = []
+        groups = sorted(usage.get(ident['id'], {}).items(), key=lambda kv: min(kv[1]))
+        for person, dates in groups:
+            start = max('2010-01-01', str(date.fromisoformat(min(dates)) - timedelta(days=rng.randrange(30, 400))))
+            end = min(str(date.fromisoformat(max(dates)) + timedelta(days=rng.randrange(60, 900))), SENTINEL)
+            windows.append({'person': person, 'from': start, 'to': end})
+        for a, b in zip(windows, windows[1:]):  # make consecutive windows meet without overlapping
+            if a['to'] > b['from']:
+                a['to'] = b['from']
+        windows = [w for w in windows if w['from'] < w['to']]
+        if not windows:
+            holder = min(people, key=lambda p: (counts[p['id']], p['id']))
+            start = max(min(m['from'] for m in holder['membership']), '2010-01-01')
+            start = str(date.fromisoformat(start) + timedelta(days=rng.randrange(0, 1500)))
+            end = min(str(date.fromisoformat(start) + timedelta(days=rng.randrange(300, 1500))), SENTINEL)
+            windows.append({'person': holder['id'], 'from': start, 'to': end})
+        last = windows[-1]
+        if 'TEL' in ident['name'] and last['to'] < '2025-01-01' and rng.random() < 0.35:  # the handover trap
+            donor = by_id[last['person']]
+            crew = [p for p in people if p['organization'] == donor['organization'] and p['id'] != donor['id']]
+            if crew:
+                heir = rng.choice(crew)
+                windows.append({'person': heir['id'], 'from': last['to'], 'to': min(str(date.fromisoformat(last['to']) + timedelta(days=rng.randrange(300, 1500))), SENTINEL)})
+        ident['holders'] = windows
+        for w in windows:
+            counts[w['person']] += 1
+
+
+def world_signature(world):
+    """Hash of what cables depend on: entity identities and names, events and facts. Identifier holder windows are excluded."""
+    import hashlib
+    slim = {'entities': [{k: v for k, v in e.items() if k != 'holders'} for e in world['entities']], 'events': world['events'],
+            'leadership': world.get('leadership'), 'membership': world.get('membership'), 'ownership': world.get('ownership'),
+            'control': world.get('control'), 'alliances': world.get('alliances'), 'seed': world.get('seed')}
+    return hashlib.sha256(json.dumps(slim, sort_keys=True).encode()).hexdigest()
 
 
 def validate_world(world):
