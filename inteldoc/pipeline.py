@@ -192,7 +192,7 @@ def plan(count=5000, seed=42, config=None):
         if old and old[0] != identity:
             raise ValueError('Existing manifest has a different plan. Use a separate corpus directory or remove generated corpus deliberately.')
         db.execute("INSERT OR IGNORE INTO metadata VALUES('plan',?)", (identity,))
-        settings = json.dumps({k: cfg.get(k) for k in ['provider', 'extraction', 'openai_model', 'ollama_model']}, sort_keys=True)
+        settings = json.dumps({k: cfg.get(k) for k in ['provider', 'extraction', 'anthropic_model', 'openai_model', 'ollama_model']}, sort_keys=True)
         old_settings = db.execute("SELECT value FROM metadata WHERE key='generation_settings'").fetchone()
         if old_settings and old_settings[0] != settings:
             raise ValueError('Dataset provider changed; choose a new --output-dir')

@@ -183,9 +183,16 @@ def world_summary():
 @app.get('/api/runtime')
 def runtime():
     cfg=load_config()
+    # The served corpus records how it was generated; that beats the serving config for the narrative labels.
+    with connect() as db:
+        row=db.execute("SELECT value FROM metadata WHERE key='generation_settings'").fetchone()
+        authored=db.execute("SELECT count(*) FROM cables WHERE state='validated' AND record LIKE '%\"authored\":true%'").fetchone()[0]
+    generated=json.loads(row[0]) if row else {}
     return {'query_provider':cfg.get('query_provider','offline'),
-            'narrative_provider':cfg.get('provider','offline'),
-            'extraction':cfg.get('extraction','deterministic'),'authored':bool(cfg.get('narratives_dir')),
+            'narrative_provider':generated.get('provider') or cfg.get('provider','offline'),
+            'extraction':generated.get('extraction') or cfg.get('extraction','deterministic'),
+            'authored':authored>0 or bool(cfg.get('narratives_dir')),'authored_count':authored,
+            'generation_model':generated.get('anthropic_model') or generated.get('openai_model') or generated.get('ollama_model'),
             'model':cfg.get('openai_model') if cfg.get('query_provider')=='openai' else cfg.get('ollama_model')}
 
 
@@ -221,12 +228,12 @@ def explore_graph(persona:Persona='secret',center:str='',hops:int=1,predicates:s
     facts=compact(selected,10**6)
     touching=set(centers)
     facts.sort(key=lambda f:(not (f['subject'] in touching or f['object'] in touching),-f['count'],f['date']),reverse=False)
-    truncated=len(facts)>limit; facts=facts[:limit]
+    unique=len(facts); truncated=unique>limit; facts=facts[:limit]
     degree={}
     for f in facts:
         for k in ['subject','object']:degree[f[k]]=degree.get(f[k],0)+1
     nodes=[{**entities()[i],'degree':degree[i],'center':i in touching} for i in sorted(degree)]
-    return {'nodes':nodes,'edges':facts,'centers':centers,'total_edges':len(selected),'truncated':truncated,'predicate_groups':PREDICATE_GROUPS}
+    return {'nodes':nodes,'edges':facts,'centers':centers,'total_edges':unique,'citations':len(selected),'truncated':truncated,'predicate_groups':PREDICATE_GROUPS}
 
 @app.get('/api/export/graphml')
 def export_graphml(persona:Persona='secret',predicates:str='',year_from:int|None=None,year_to:int|None=None,agencies:str=''):

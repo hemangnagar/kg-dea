@@ -13,7 +13,7 @@ bash scripts/setup.sh
 bash scripts/start.sh
 ```
 
-Setup installs exact dependency versions, expands the world if absent, plans 5,000 cables, generates XML and truth files, extracts relationships, and writes the measured scorecard. Generation takes a few minutes and resumes on rerun. The server binds to loopback port 8000 (override with `PORT`). Open the running app in a browser on the same machine. For a desktop-style window on a machine with a display, Chromium supports `chromium --app=http://127.0.0.1:8000`. This is a local web app, not a packaged native desktop application.
+Setup installs exact dependency versions, expands the world, verifies the published Claude Haiku corpus archive against its checksum and unpacks it into `corpus/`, so the first page you open serves the 5,000 model-written cables. Set `INTELDOC_BUILD_OFFLINE=1` to build the template corpus locally instead (a few minutes, resumable). The presenter's script, with the expected result of every step, is in [docs/demo-runbook.md](docs/demo-runbook.md). The server binds to loopback port 8000 (override with `PORT`). Open the running app in a browser on the same machine. For a desktop-style window on a machine with a display, Chromium supports `chromium --app=http://127.0.0.1:8000`. This is a local web app, not a packaged native desktop application.
 
 Use the existing checkout in cloud tasks. Tasks are already isolated; do not create a Git worktree unless explicitly requested.
 
