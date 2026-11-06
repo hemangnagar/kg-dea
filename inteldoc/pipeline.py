@@ -300,7 +300,7 @@ def check(cable, world):
         for d in DATE.findall(p.text):
             if d not in known_dates:
                 raise ValueError('Unplanned date')
-        scrub = DATE.sub(' ', p.text).replace(cable.reliability, ' ')  # the source grade (e.g. C3) is legitimate metadata in prose
+        scrub = DATE.sub(' ', p.text).replace(cable.reliability, ' ').replace(cable.office, ' ')  # the source grade and office are legitimate metadata in prose
         if cable.corrects:
             scrub = scrub.replace(cable.corrects, ' ')
         scrub = scrubber.sub('entity', scrub)

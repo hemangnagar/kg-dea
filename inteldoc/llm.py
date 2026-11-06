@@ -125,6 +125,8 @@ def render_narrative(cable, world, provider, settings, previous_error=None):
                    'After a person has been named once you may refer to them by a listed alias. '
                    'Never introduce people, organizations, companies, vehicles, places, dates, times, numbers or quantities '
                    'that are not in the supplied data; write counts as words (three, not 3) except planted_quantities. '
+                   'Do not name states, countries, regions, agencies other than the reporting agency, or units of government. '
+                   'Use entity names exactly as given in the required sentences or event_context; never shorten a company, vessel, vehicle or operation name. '
                    'Never move information to a differently marked paragraph; identifiers, finances and structure stay in their paragraph. '
                    'Do not include headings, numbering, portion marks, agency names as headers or metadata inside text. '
                    'All paragraphs together must total between the word_bounds. Do not reuse sentences from the exemplars.')
