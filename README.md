@@ -55,6 +55,16 @@ The new task must separately have `INTELDOC_OPENAI_API_KEY2` (or a supported fal
 .venv/bin/python -m scripts.validate_seed
 ```
 
+## Claude Haiku rendering (the brief's default provider)
+
+`config/anthropic-haiku.yaml` renders and extracts every cable that has no hand-written narrative with Claude Haiku 5.5 through the official Anthropic SDK: draft, critique, revise and extract, with structured JSON output, thinking off at low effort, the two hand-written exemplars of the same agency in a cached system prompt, and the same deterministic checker as every other path. The key comes from the environment variable named by `anthropic_key_env`. `config/anthropic-pilot.yaml` renders only cables 1–20 (which also have hand-written versions) into a separate corpus for a side-by-side comparison:
+
+```sh
+INTELDOC_CORPUS_DIR=corpus/haiku-pilot .venv/bin/python -m scripts.demo build --config config/anthropic-pilot.yaml --count 5000 --retry-failed --workers 4
+```
+
+Measured on the pilot: 20 cables validated, about $0.003 per cable at the configured prices, about four cables per minute per worker. Model extraction keeps only claims whose quote and relation the anchor grammar confirms; dropped claims are counted in the scorecard as `rejected_model_claims`.
+
 ## Hand-written pilot narratives
 
 The first 50 planned cables of the default corpus have hand-written narratives under [`exemplars/narratives/`](exemplars/README.md), written in this repository's sessions without any model API call. They read as agency reporting (source access, caveats, partial views) around the planted anchor sentences, and they pass the same deterministic checker as model output. The default `config/corpus.yaml` sets `narratives_dir`, so `scripts/setup.sh` builds a corpus in which those 50 cables carry the authored prose and the remaining 4,950 carry templates; the record's `authored` flag and the manifest state `authored` mark them. `config/authored-50.yaml` is the strict form that fails any of the 50 without a file:

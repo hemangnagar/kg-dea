@@ -50,7 +50,8 @@ def model_demo(tmp_path, monkeypatch):
             state['interrupt'] = False
             return httpx.Response(503, json={'error': 'test interruption'}, request=request)
         if 'agency' in data:
-            result = {'paragraphs': [{'number': p['number'], 'text': p['baseline']} for p in data['paragraphs']]}
+            filler = ' '.join(pipeline.FILLER[:12])
+            result = {'paragraphs': [{'number': p['number'], 'text': ' '.join(p['required_sentences']) + ' ' + filler} for p in data['paragraphs']]}
         elif 'constraints' in data and 'critique' not in data:
             result = {'defects': []}
         elif 'critique' in data:

@@ -11,7 +11,7 @@ def load_config(path=None):
     if not isinstance(config, dict):
         raise ValueError('Model configuration must be a YAML mapping')
     for key in ['provider', 'query_provider']:
-        if config.get(key, 'offline') not in ['offline', 'authored', 'openai', 'ollama']:
+        if config.get(key, 'offline') not in ['offline', 'authored', 'anthropic', 'openai', 'ollama']:
             raise ValueError(f'Unsupported {key}')
     if config.get('extraction', 'deterministic') not in ['deterministic', 'model']:
         raise ValueError('Unsupported extraction mode')

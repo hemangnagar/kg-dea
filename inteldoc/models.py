@@ -49,6 +49,7 @@ class Cable(BaseModel):
     description: str = ''
     quantities: list[str] = Field(default_factory=list)
     authored: bool = False
+    extraction_rejected: int = 0
 
     @property
     def classification(self):

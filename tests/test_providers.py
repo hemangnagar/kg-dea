@@ -72,7 +72,7 @@ def test_key_and_pricing_required(ledger, monkeypatch):
     monkeypatch.delenv('OPENAI_API_KEY')
     with pytest.raises(ValueError, match='OPENAI_API_KEY'): OpenAIProvider('test-model', 2, 8)
     with pytest.raises(ValueError, match='Offline'): provider_from_config({'provider': 'offline'})
-    with pytest.raises(ValueError, match='Unsupported'): provider_from_config({'provider': 'anthropic'})
+    with pytest.raises(ValueError, match='Unsupported'): provider_from_config({'provider': 'cohere'})
 
 
 @pytest.mark.parametrize('status', ['incomplete', 'refusal'])

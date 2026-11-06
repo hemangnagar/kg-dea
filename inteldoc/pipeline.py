@@ -300,7 +300,7 @@ def check(cable, world):
         for d in DATE.findall(p.text):
             if d not in known_dates:
                 raise ValueError('Unplanned date')
-        scrub = DATE.sub(' ', p.text)
+        scrub = DATE.sub(' ', p.text).replace(cable.reliability, ' ')  # the source grade (e.g. C3) is legitimate metadata in prose
         if cable.corrects:
             scrub = scrub.replace(cable.corrects, ' ')
         scrub = scrubber.sub('entity', scrub)
@@ -328,8 +328,10 @@ def extract(text, world):
     return results
 
 
-def run(limit=None, retry_failed=False, config=None):
+def run(limit=None, retry_failed=False, config=None, workers=1):
     from .llm import render_narrative, extract_claims
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
     cfg = config or load_config(ROOT / 'config/corpus.yaml')
     if limit is not None and limit <= 0:
         raise ValueError('limit must be positive')
@@ -338,7 +340,7 @@ def run(limit=None, retry_failed=False, config=None):
     if saved:
         identity = json.loads(saved[0])
         plan(identity['count'], identity['seed'], cfg)
-    world = load_world(); done = failed = 0
+    world = load_world()
     output = data_root()
     (output / 'xml').mkdir(parents=True, exist_ok=True); (output / 'truth').mkdir(parents=True, exist_ok=True)
     with connect() as db:
@@ -354,21 +356,32 @@ def run(limit=None, retry_failed=False, config=None):
             sql += ' LIMIT ?'; args.append(limit)
         rows = db.execute(sql, args).fetchall()
     provider = provider_from_config(cfg) if rows and cfg.get('provider', 'offline') not in ('offline', 'authored') else None
-    for row in rows:
+    stop = threading.Event()
+    counts = {'validated': 0, 'failed': 0, 'stopped': None}
+    lock = threading.Lock()
+
+    def process(row):
+        if stop.is_set():
+            return
         c = Cable.model_validate_json(row['record'])
         try:
             with connect() as db:
                 db.execute("UPDATE cables SET attempts=attempts+1 WHERE id=?", (c.cable_id,))
-            if provider:
-                c = render_narrative(c, world, provider, cfg, row['error'])
-            else:
-                authored = authored_narrative(c, cfg)
-                c = authored or draft(c, world)
+            authored = authored_narrative(c, cfg)
+            if authored:
+                c = authored
                 check(c, world)
                 with connect() as db:
-                    db.execute("UPDATE cables SET state=? WHERE id=?", ('authored' if authored else 'critiqued', c.cable_id))
+                    db.execute("UPDATE cables SET state='authored' WHERE id=?", (c.cable_id,))
+            elif provider:
+                c = render_narrative(c, world, provider, cfg, row['error'])
+            else:
+                c = draft(c, world)
+                check(c, world)
+                with connect() as db:
+                    db.execute("UPDATE cables SET state='critiqued' WHERE id=?", (c.cable_id,))
             xml = render(c)
-            claims = (extract_claims(c, world, provider, cfg) if cfg.get('extraction') == 'model' else
+            claims = (extract_claims(c, world, provider, cfg) if cfg.get('extraction') == 'model' and provider else
                       [(p.number, f) for p in c.paragraphs for f in extract(p.text, world)])
             number = int(c.cable_id.split('-')[1]); stem = f'{number:04}-{c.report_date.year:06}'
             for path, content in [(output / f'xml/{stem}.xml', xml), (output / f'truth/{stem}.json', c.model_dump_json(indent=2).encode())]:
@@ -381,29 +394,43 @@ def run(limit=None, retry_failed=False, config=None):
                     db.execute('INSERT OR IGNORE INTO evidence VALUES(?,?,?,?,?,?,?,?,?,?)',
                                (c.cable_id, p.number, f.subject, f.predicate, f.object, str(f.date), str(f.until or ''), p.classification, ','.join(p.controls), c.agency))
                 db.execute("UPDATE cables SET state='validated',record=?,error=NULL WHERE id=?", (c.model_dump_json(), c.cable_id))
-            done += 1
+            with lock:
+                counts['validated'] += 1
         except Exception as exc:
             message = str(exc) if isinstance(exc, (ValueError, BudgetExceeded)) else type(exc).__name__
             with connect() as db:
                 db.execute("UPDATE cables SET state='failed',error=? WHERE id=?", (message, c.cable_id))
-            failed += 1
-            if isinstance(exc, BudgetExceeded):
-                return dict(validated=done, failed=failed, stopped='spend_cap')
-            if provider and not isinstance(exc, ValueError):
-                return dict(validated=done, failed=failed, stopped='provider_error')
-    return dict(validated=done, failed=failed)
+            with lock:
+                counts['failed'] += 1
+                if isinstance(exc, BudgetExceeded):
+                    counts['stopped'] = counts['stopped'] or 'spend_cap'; stop.set()
+                elif provider and not isinstance(exc, ValueError):
+                    counts['stopped'] = counts['stopped'] or 'provider_error'; stop.set()
+
+    if workers and workers > 1 and provider:
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            list(pool.map(process, rows))
+    else:
+        for row in rows:
+            if stop.is_set():
+                break
+            process(row)
+    result = dict(validated=counts['validated'], failed=counts['failed'])
+    if counts['stopped']:
+        result['stopped'] = counts['stopped']
+    return result
 
 
 def score():
     truth = {Fact(**f).key() for f in json.loads((world_dir() / 'graph_truth.json').read_text())}
     with connect() as db:
         recovered = {tuple(r) for r in db.execute('SELECT DISTINCT subject,predicate,object,date,until_date FROM evidence')}
-        planted, contradictions, corrections = set(), set(), 0
+        planted, contradictions, corrections, rejected = set(), set(), 0, 0
         for r in db.execute("SELECT record FROM cables WHERE state='validated'"):
             c = Cable.model_validate_json(r[0]); planted.update(f.key() for p in c.paragraphs for f in p.facts)
             if c.dispute:
                 d = c.dispute; contradictions.add((d['subject'], d['predicate'], d['object'], d['reported_date']))
-            corrections += bool(c.corrects)
+            corrections += bool(c.corrects); rejected += c.extraction_rejected
         counts = dict(db.execute('SELECT state,count(*) FROM cables GROUP BY state').fetchall())
         settings_row = db.execute("SELECT value FROM metadata WHERE key='generation_settings'").fetchone()
         settings = json.loads(settings_row[0]) if settings_row else {}
@@ -422,7 +449,7 @@ def score():
                 precision=tp / len(recovered) if recovered else 0,
                 precision_excluding_contradictions=len(undisputed & truth) / len(undisputed) if undisputed else 0,
                 world_recall=tp / len(truth) if truth else 0, planted_recall=len(recovered & planted) / len(planted) if planted else 0,
-                contradiction_edges=len(disputed), correction_cables=corrections, authored_narratives=authored, recall_by_predicate=by_predicate, states=counts,
+                contradiction_edges=len(disputed), correction_cables=corrections, authored_narratives=authored, rejected_model_claims=rejected, recall_by_predicate=by_predicate, states=counts,
                 limitations=('Model-generated prose retains canonical fact-sentence anchors. Scores measure constrained extraction, not unrestricted real-world prose.' if online else
                              'Baseline only. The offline drafter and the extractor share one sentence grammar, so planted recall is high by construction. Deliberate contradictions are reported separately.'),
                 schema_validated=(ROOT / 'schemas/pubs.xsd').exists())
