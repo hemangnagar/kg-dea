@@ -1,0 +1,107 @@
+{
+  "cable_id": "TREASURY-000003-IIR-14",
+  "agency": "TREASURY",
+  "office": "TREASURY Synthetic Reporting Office",
+  "report_date": "2014-01-03",
+  "subject": "Alliance reporting in Manzanillo",
+  "event_id": "event-0002",
+  "source_id": "SYN-TREASURY-002",
+  "reliability": "C3",
+  "place": "Manzanillo",
+  "keywords": [
+    "Alliance",
+    "Manzanillo"
+  ],
+  "ntk": [
+    "TREASURY"
+  ],
+  "relevance": "core",
+  "paragraphs": [
+    {
+      "number": 1,
+      "classification": "U",
+      "controls": [],
+      "text": "Ilareno Nuberal participated in Alliance 0002 on 2014-01-01. Bruma del Cobre was linked to Alliance 0002 on 2014-01-01. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "person-001",
+          "predicate": "participated_in",
+          "object": "event-0002",
+          "date": "2014-01-01",
+          "until": null
+        },
+        {
+          "subject": "org-01",
+          "predicate": "linked_to",
+          "object": "event-0002",
+          "date": "2014-01-01",
+          "until": null
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "classification": "S",
+      "controls": [
+        "NF"
+      ],
+      "text": "Casa Vitraleza 002 supported Alliance 0002 on 2014-01-01. Ilareno Nuberal used DEMO-ACCT-00002 on 2014-01-01. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "company-002",
+          "predicate": "supported",
+          "object": "event-0002",
+          "date": "2014-01-01",
+          "until": null
+        },
+        {
+          "subject": "person-001",
+          "predicate": "uses",
+          "object": "contact-002",
+          "date": "2014-01-01",
+          "until": null
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "classification": "S",
+      "controls": [
+        "NF"
+      ],
+      "text": "Unidad Nacarino 002 was involved in Alliance 0002 on 2014-01-01. Alliance 0002 occurred at Manzanillo on 2014-01-01. Pacto del Faro Gris was linked to Alliance 0002 on 2014-01-01. Ilareno Nuberal led Bruma del Cobre on 2012-01-01 until 2020-01-01. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "asset-002",
+          "predicate": "involved_in",
+          "object": "event-0002",
+          "date": "2014-01-01",
+          "until": null
+        },
+        {
+          "subject": "event-0002",
+          "predicate": "occurred_at",
+          "object": "place-00",
+          "date": "2014-01-01",
+          "until": null
+        },
+        {
+          "subject": "org-02",
+          "predicate": "linked_to",
+          "object": "event-0002",
+          "date": "2014-01-01",
+          "until": null
+        },
+        {
+          "subject": "person-001",
+          "predicate": "leads",
+          "object": "org-01",
+          "date": "2012-01-01",
+          "until": "2020-01-01"
+        }
+      ]
+    }
+  ],
+  "corrects": null,
+  "disputed": false
+}

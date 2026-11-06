@@ -1,16 +1,15 @@
 {
   "method": "openai narratives with model extraction",
   "truth_edges": 3635,
-  "planted_edges": 180,
-  "extracted_edges": 180,
-  "true_positives": 180,
+  "planted_edges": 231,
+  "extracted_edges": 231,
+  "true_positives": 231,
   "precision": 1.0,
-  "world_recall": 0.04951856946354883,
+  "world_recall": 0.06354883081155434,
   "planted_recall": 1.0,
   "states": {
-    "failed": 11,
     "planned": 4950,
-    "validated": 39
+    "validated": 50
   },
   "limitations": "Model-generated prose retains canonical fact-sentence anchors. Scores measure constrained extraction, not unrestricted real-world prose.",
   "schema_validated": false

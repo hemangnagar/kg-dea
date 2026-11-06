@@ -96,6 +96,10 @@ def render_narrative(cable, world, provider, settings, previous_error=None):
                    'Never move information to a differently marked paragraph. '
                    'Do not include headings, numbering, portion marks or metadata inside text. '
                    'All paragraphs together must be 250 to 900 words. Use cautious analytical framing around anchors.')
+    instruction += (' Keep generic analytical phrases lowercase except at sentence starts. '
+                    'Do not title-case phrases or introduce capitalized names outside required sentences. '
+                    'Put framing in separate sentences; never prepend words to a required sentence. '
+                    'Metadata is supplied separately and must not be repeated in the narrative.')
     first = checkpoint(cable.cable_id, 'draft', Narrative,
                        lambda: request(provider, instruction, data, Narrative,
                                        settings.get('narrative_max_output_tokens', 2400)))
@@ -104,14 +108,27 @@ def render_narrative(cable, world, provider, settings, previous_error=None):
     critique = checkpoint(cable.cable_id, 'critique', Critique,
                          lambda: request(provider, 'Critique the draft against the supplied constraints. '
                                          'Check fidelity of every required sentence and assigned paragraph, '
-                                         'word count, invented claims and sober IIR style. List defects only.',
+                                         'word count, invented claims and sober IIR style. '
+                                         'Metadata is supplied separately, so do not require it in narrative text. '
+                                         'Only required_sentences must be preserved verbatim; baseline framing is illustrative. '
+                                         'Report only demonstrable constraint violations, not style preferences. '
+                                         'An empty defects list is valid. '
+                                         'Return only the defects key with at most 30 concise strings. '
+                                         'Do not add counts, summaries or other keys.',
                                          {'constraints': data, 'draft': first.model_dump()}, Critique,
                                          settings.get('critique_max_output_tokens', 900)))
     with connect() as db:
         db.execute("UPDATE cables SET state='critiqued' WHERE id=?", (cable.cable_id,))
 
     def revise():
-        result = request(provider, instruction + ' Revise the draft to address all critique and checker defects.',
+        result = request(provider, instruction + ' Revise the draft to address valid critique and checker defects. '
+                         'The constraints take priority over the critique, which may contain mistakes. '
+                         'Ignore requests to add agency, office, reliability, marks or other metadata to text. '
+                         'Only required_sentences are mandatory verbatim; baseline framing is illustrative. '
+                         'Never rewrite, join, qualify or prepend words to required_sentences. '
+                         'Start each paragraph with its first required sentence when one is provided. '
+                         'Never prefix paragraph text with U//FOUO, S//NF, U, S or numbering; '
+                         'the renderer supplies all portion marks separately.',
                          {'constraints': data, 'draft': first.model_dump(), 'critique': critique.defects,
                           'checker_error': previous_error}, Narrative,
                          settings.get('narrative_max_output_tokens', 2400))

@@ -1,0 +1,95 @@
+{
+  "cable_id": "DEA-000012-IIR-20",
+  "agency": "DEA",
+  "office": "DEA Synthetic Reporting Office",
+  "report_date": "2020-01-12",
+  "subject": "Killing reporting in Veracruz",
+  "event_id": "event-0011",
+  "source_id": "SYN-DEA-003",
+  "reliability": "A2",
+  "place": "Veracruz",
+  "keywords": [
+    "Killing",
+    "Veracruz"
+  ],
+  "ntk": [
+    "DEA"
+  ],
+  "relevance": "core",
+  "paragraphs": [
+    {
+      "number": 1,
+      "classification": "U",
+      "controls": [
+        "FOUO"
+      ],
+      "text": "Tavireo Nuberal participated in Killing 0011 on 2020-01-01. Pacto del Faro Gris was linked to Killing 0011 on 2020-01-01. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "person-011",
+          "predicate": "participated_in",
+          "object": "event-0011",
+          "date": "2020-01-01",
+          "until": null
+        },
+        {
+          "subject": "org-02",
+          "predicate": "linked_to",
+          "object": "event-0011",
+          "date": "2020-01-01",
+          "until": null
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "classification": "U",
+      "controls": [
+        "FOUO"
+      ],
+      "text": "Casa Vitraleza 011 supported Killing 0011 on 2020-01-01. Tavireo Nuberal used DEMO-TEL-00011 on 2020-01-01. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "company-011",
+          "predicate": "supported",
+          "object": "event-0011",
+          "date": "2020-01-01",
+          "until": null
+        },
+        {
+          "subject": "person-011",
+          "predicate": "uses",
+          "object": "contact-011",
+          "date": "2020-01-01",
+          "until": null
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "classification": "U",
+      "controls": [
+        "FOUO"
+      ],
+      "text": "Unidad Nacarino 011 was involved in Killing 0011 on 2020-01-01. Killing 0011 occurred at Veracruz on 2020-01-01. The reporting office distinguishes observed activity from analytical judgment and does not infer an additional relationship from a shared location. The source provided a limited account of the activity. Details outside that account remain unconfirmed. This paragraph should be evaluated with its stated handling controls and the original reporting context. Additional independent reporting would be required before drawing a broader conclusion about the network. The demonstration preserves the distinction between a recorded claim and a verified conclusion throughout the entire review and retrieval process.",
+      "facts": [
+        {
+          "subject": "asset-011",
+          "predicate": "involved_in",
+          "object": "event-0011",
+          "date": "2020-01-01",
+          "until": null
+        },
+        {
+          "subject": "event-0011",
+          "predicate": "occurred_at",
+          "object": "place-01",
+          "date": "2020-01-01",
+          "until": null
+        }
+      ]
+    }
+  ],
+  "corrects": null,
+  "disputed": false
+}

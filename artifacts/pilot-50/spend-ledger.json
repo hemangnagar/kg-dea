@@ -1878,5 +1878,355 @@
     "input_tokens": 1489,
     "output_tokens": 909,
     "status": "settled"
+  },
+  {
+    "id": 189,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.009425600000000001,
+    "actual": 0.0017816000000000002,
+    "input_tokens": 2558,
+    "output_tokens": 474,
+    "status": "settled"
+  },
+  {
+    "id": 190,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.0059436,
+    "actual": 0.0011832000000000001,
+    "input_tokens": 1010,
+    "output_tokens": 487,
+    "status": "settled"
+  },
+  {
+    "id": 191,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.008866,
+    "actual": 0.0013672000000000003,
+    "input_tokens": 2046,
+    "output_tokens": 343,
+    "status": "settled"
+  },
+  {
+    "id": 192,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.0057171999999999995,
+    "actual": 0.0003008,
+    "input_tokens": 732,
+    "output_tokens": 5,
+    "status": "settled"
+  },
+  {
+    "id": 193,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.008464400000000002,
+    "actual": 0.0014884000000000002,
+    "input_tokens": 1869,
+    "output_tokens": 463,
+    "status": "settled"
+  },
+  {
+    "id": 194,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.007447200000000001,
+    "actual": 0.0017684,
+    "input_tokens": 1717,
+    "output_tokens": 676,
+    "status": "settled"
+  },
+  {
+    "id": 195,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.0095468,
+    "actual": 0.0019236,
+    "input_tokens": 2677,
+    "output_tokens": 533,
+    "status": "settled"
+  },
+  {
+    "id": 196,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.0061056,
+    "actual": 0.0013088000000000002,
+    "input_tokens": 1088,
+    "output_tokens": 546,
+    "status": "settled"
+  },
+  {
+    "id": 197,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.0099568,
+    "actual": 0.0018476000000000002,
+    "input_tokens": 2711,
+    "output_tokens": 477,
+    "status": "settled"
+  },
+  {
+    "id": 198,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.0072508,
+    "actual": 0.0021896000000000003,
+    "input_tokens": 1566,
+    "output_tokens": 977,
+    "status": "settled"
+  },
+  {
+    "id": 199,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.009962400000000001,
+    "actual": 0.0019248000000000002,
+    "input_tokens": 2824,
+    "output_tokens": 497,
+    "status": "settled"
+  },
+  {
+    "id": 200,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.006044,
+    "actual": 0.0011036,
+    "input_tokens": 1035,
+    "output_tokens": 431,
+    "status": "settled"
+  },
+  {
+    "id": 201,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.0097836,
+    "actual": 0.0019292,
+    "input_tokens": 2715,
+    "output_tokens": 527,
+    "status": "settled"
+  },
+  {
+    "id": 202,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.006091200000000001,
+    "actual": 0.0012228000000000002,
+    "input_tokens": 1065,
+    "output_tokens": 498,
+    "status": "settled"
+  },
+  {
+    "id": 203,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.0100308,
+    "actual": 0.0020016,
+    "input_tokens": 2928,
+    "output_tokens": 519,
+    "status": "settled"
+  },
+  {
+    "id": 204,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.0065836,
+    "actual": 0.0004448000000000001,
+    "input_tokens": 1088,
+    "output_tokens": 6,
+    "status": "settled"
+  },
+  {
+    "id": 205,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.007072,
+    "actual": 0.0011664000000000002,
+    "input_tokens": 1364,
+    "output_tokens": 388,
+    "status": "settled"
+  },
+  {
+    "id": 206,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.0058324,
+    "actual": 0.0005384000000000001,
+    "input_tokens": 834,
+    "output_tokens": 128,
+    "status": "settled"
+  },
+  {
+    "id": 207,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.009123200000000001,
+    "actual": 0.0015128000000000001,
+    "input_tokens": 2238,
+    "output_tokens": 386,
+    "status": "settled"
+  },
+  {
+    "id": 208,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.0058252,
+    "actual": 0.000534,
+    "input_tokens": 831,
+    "output_tokens": 126,
+    "status": "settled"
+  },
+  {
+    "id": 209,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.0071744,
+    "actual": 0.0017288000000000002,
+    "input_tokens": 1522,
+    "output_tokens": 700,
+    "status": "settled"
+  },
+  {
+    "id": 210,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.0092368,
+    "actual": 0.0017956,
+    "input_tokens": 2513,
+    "output_tokens": 494,
+    "status": "settled"
+  },
+  {
+    "id": 211,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.0060196,
+    "actual": 0.0010876000000000002,
+    "input_tokens": 1011,
+    "output_tokens": 427,
+    "status": "settled"
+  },
+  {
+    "id": 212,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.008464400000000002,
+    "actual": 0.001418,
+    "input_tokens": 1869,
+    "output_tokens": 419,
+    "status": "settled"
+  },
+  {
+    "id": 213,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.0099568,
+    "actual": 0.0018476000000000002,
+    "input_tokens": 2711,
+    "output_tokens": 477,
+    "status": "settled"
+  },
+  {
+    "id": 214,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.0100308,
+    "actual": 0.0019776,
+    "input_tokens": 2928,
+    "output_tokens": 504,
+    "status": "settled"
+  },
+  {
+    "id": 215,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.0060548,
+    "actual": 0.0011044000000000002,
+    "input_tokens": 1041,
+    "output_tokens": 430,
+    "status": "settled"
+  },
+  {
+    "id": 216,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.008590400000000002,
+    "actual": 0.0013196000000000002,
+    "input_tokens": 1927,
+    "output_tokens": 343,
+    "status": "settled"
+  },
+  {
+    "id": 217,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.0057171999999999995,
+    "actual": 0.0003008,
+    "input_tokens": 732,
+    "output_tokens": 5,
+    "status": "settled"
+  },
+  {
+    "id": 218,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.0100828,
+    "actual": 0.0018708000000000002,
+    "input_tokens": 2769,
+    "output_tokens": 477,
+    "status": "settled"
+  },
+  {
+    "id": 219,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.0100828,
+    "actual": 0.0018708000000000002,
+    "input_tokens": 2769,
+    "output_tokens": 477,
+    "status": "settled"
+  },
+  {
+    "id": 220,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.0101612,
+    "actual": 0.0018876000000000001,
+    "input_tokens": 2811,
+    "output_tokens": 477,
+    "status": "settled"
+  },
+  {
+    "id": 221,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.007122,
+    "actual": 0.0011275999999999999,
+    "input_tokens": 1443,
+    "output_tokens": 344,
+    "status": "settled"
+  },
+  {
+    "id": 222,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.008330400000000002,
+    "actual": 0.0015024,
+    "input_tokens": 2072,
+    "output_tokens": 421,
+    "status": "settled"
+  },
+  {
+    "id": 223,
+    "provider": "openai",
+    "operation": "responses",
+    "reserved": 0.00587,
+    "actual": 0.0009448000000000001,
+    "input_tokens": 938,
+    "output_tokens": 356,
+    "status": "settled"
   }
 ]
