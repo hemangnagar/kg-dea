@@ -17,6 +17,7 @@ def main():
     parser.add_argument('--config',help='YAML provider and corpus settings; defaults to offline config')
     parser.add_argument('--world-dir',help='Separate expanded-world directory; also set INTELDOC_WORLD_DIR when serving it')
     parser.add_argument('--output-dir',help='Separate corpus directory; recommended for model pilots')
+    parser.add_argument('--workers',type=int,default=1,help='Concurrent cables for model providers')
     args=parser.parse_args()
     if args.output_dir:use_dataset(args.output_dir)
     if args.world_dir:use_world_dir(args.world_dir)
@@ -28,7 +29,7 @@ def main():
         if args.command in ['plan','build']:
             load_world();print(json.dumps({'planned':plan(args.count,args.seed,cfg)}))
         if args.command in ['generate','build']:
-            result=run(args.limit,args.retry_failed,cfg)
+            result=run(args.limit,args.retry_failed,cfg,args.workers)
             print(json.dumps(result));failed=result['failed']
         if args.command in ['evaluate','build']:
             result=score();data_root().mkdir(parents=True,exist_ok=True)

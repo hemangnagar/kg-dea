@@ -16,22 +16,24 @@ def corpus(tmp_path,monkeypatch):
         shutil.copy(world.ROOT/name,tmp_path/name)
     for module in [world,pipeline,xmlio]:monkeypatch.setattr(module,'ROOT',tmp_path)
     monkeypatch.setattr(store,'DB',tmp_path/'corpus/manifest.sqlite')
-    w=world.expand(42)
-    pipeline.plan(90,42)
+    w=world.expand(42,total_events=120)
+    pipeline.plan(120,42)
     outcome=pipeline.run()
-    assert outcome=={'validated':90,'failed':0}
+    assert outcome=={'validated':120,'failed':0}
     return w,tmp_path
 
 def test_resume_and_reproducibility(corpus):
     w,path=corpus
     first=(path/'corpus/xml').glob('*.xml')
     before={p.name:p.read_bytes() for p in first}
-    pipeline.plan(90,42)
+    pipeline.plan(120,42)
     assert pipeline.run()=={'validated':0,'failed':0}
     assert before=={p.name:p.read_bytes() for p in (path/'corpus/xml').glob('*.xml')}
-    with pytest.raises(ValueError,match='different plan'):pipeline.plan(90,43)
-    assert pipeline.score()['precision']==1
-    assert pipeline.score()['planted_recall']==1
+    with pytest.raises(ValueError,match='different plan'):pipeline.plan(120,43)
+    score=pipeline.score()
+    assert score['precision_excluding_contradictions']==1 and score['planted_recall']==1
+    assert score['contradiction_edges']>0 and score['precision']<1  # deliberate 5% contradictions are measured, not hidden
+    assert 0<score['world_recall']<1 and set(score['recall_by_predicate'])>={'member_of','controls','owns','allied_with','leads'}
 
 def test_xml_rollup_and_metadata(corpus):
     _,path=corpus
@@ -57,6 +59,10 @@ def test_checker_rejects_mutations(corpus):
     with pytest.raises(ValueError,match='relation mismatch'):pipeline.check(c,w)
     c=deepcopy(original);c.paragraphs[0].text+=' Mystery Criminal Company.'
     with pytest.raises(ValueError,match='Unknown capitalized'):pipeline.check(c,w)
+    c=deepcopy(original);c.paragraphs[0].text+=' Investigators later counted 999 kg.'
+    with pytest.raises(ValueError,match='Unplanned number'):pipeline.check(c,w)
+    c=deepcopy(original);c.paragraphs[0].text+=' A meeting followed on 2011-02-02.'
+    with pytest.raises(ValueError,match='Unplanned date'):pipeline.check(c,w)
     with pytest.raises(ValueError):Paragraph(number=1,classification='U',controls=['NF'])
 
 def test_budget_reserves_failed_calls(tmp_path,monkeypatch):
@@ -102,6 +108,55 @@ def test_temporal_query_and_shared_alias(corpus):
     result=client.post('/api/query',json={'question':'Who led Bruma del Cobre in 2021?'}).json()
     assert result['facts']
     assert all(f['predicate']=='leads' and f['date']<='2021-12-31'<f['until_date'] for f in result['facts'])
-    result=client.post('/api/query',json={'question':'Who is El Farol 03?'}).json()
-    assert result['ambiguous'] and not result['facts']
+    result=client.post('/api/query',json={'question':'Who is El Relojero?'}).json()
+    assert result['ambiguous'] and not result['facts'] and len(result['entities'])==2
+    result=client.post('/api/query',json={'question':'Who is Anzures Ibarra?'}).json()
+    assert [e['id'] for e in result['entities']]==['p-anzures-y']  # longest alias wins over the bare surname alias
+    result=client.post('/api/query',json={'question':'Which corridors did Bruma del Cobre control?'}).json()
+    assert result['facts'] and all(f['predicate']=='controls' or any(k.startswith('cor-') for k in [f['subject'],f['object']]) for f in result['facts'])
+    assert client.get('/api/world').json()['organizations'][0]['leadership']
+    web.world.cache_clear();web.entities.cache_clear()
+
+def test_authored_narrative_replaces_template_and_is_checked(corpus,monkeypatch):
+    import json
+    w,path=corpus
+    with store.connect() as db:r=db.execute("SELECT record FROM cables WHERE state='validated' ORDER BY rowid LIMIT 1").fetchone()
+    c=Cable.model_validate_json(r[0])
+    folder=path/'exemplars/narratives';folder.mkdir(parents=True)
+    cfg={'narratives_dir':'exemplars/narratives'}
+    assert pipeline.authored_narrative(c,cfg) is None
+    paragraphs=[{'number':p.number,'text':p.text+' Written by hand for this test.'} for p in c.paragraphs]
+    (folder/f'{c.cable_id}.json').write_text(json.dumps({'paragraphs':paragraphs}))
+    authored=pipeline.authored_narrative(c,cfg)
+    assert authored.authored and 'Written by hand' in authored.paragraphs[0].text
+    pipeline.check(authored,w)
+    paragraphs[1]['text']=paragraphs[1]['text'].replace('participated in','avoided') if 'participated in' in paragraphs[1]['text'] else paragraphs[1]['text']+' Someone met Joaquin Guzman.'
+    (folder/f'{c.cable_id}.json').write_text(json.dumps({'paragraphs':paragraphs}))
+    with pytest.raises(ValueError):pipeline.check(pipeline.authored_narrative(c,cfg),w)
+    (folder/f'{c.cable_id}.json').write_text(json.dumps({'paragraphs':paragraphs[:-1]}))
+    with pytest.raises(ValueError,match='numbering'):pipeline.authored_narrative(c,cfg)
+    with pytest.raises(ValueError,match='No authored narrative'):pipeline.authored_narrative(c.model_copy(update={'cable_id':'X-000000-IIR-00'}),{**cfg,'provider':'authored'})
+
+def test_graph_explorer_and_exports(corpus):
+    from inteldoc import app as web
+    from lxml import etree
+    web.world.cache_clear();web.entities.cache_clear()
+    client=TestClient(web.app)
+    low=client.get('/api/explore?persona=unclassified&predicates=structure,events&limit=50').json()
+    assert low['edges'] and all(e['classification']=='U' for e in low['edges']) and all(e['count']>=1 and e['agencies'] for e in low['edges'])
+    assert len(low['edges'])<=50 and {n['id'] for n in low['nodes']}=={e[k] for e in low['edges'] for k in ['subject','object']}
+    high=client.get('/api/explore?persona=secret&center=org-01&hops=2&predicates=controls').json()
+    assert high['edges'] and all(e['predicate']=='controls' for e in high['edges']) and high['centers']==['org-01']
+    assert client.get('/api/explore?center=nonexistent').status_code==404
+    years=client.get('/api/explore?persona=secret&year_from=2020&year_to=2021&predicates=events').json()
+    assert all(e['date']<='2021-12-31' and (e['until_date'] or e['date'])>='2020-01-01' for e in years['edges'])
+    g=client.get('/api/export/graphml?persona=unclassified')
+    assert g.status_code==200 and 'attachment' in g.headers['content-disposition']
+    root=etree.fromstring(g.content); ns={'g':'http://graphml.graphdrawing.org/xmlns'}
+    nodes=root.findall('.//g:node',ns); edges=root.findall('.//g:edge',ns)
+    assert nodes and edges and all(e.get('source') and e.get('target') for e in edges)
+    assert all(d.text=='U' for d in root.findall('.//g:edge/g:data[@key="classification"]',ns))
+    csv_edges=client.get('/api/export/edges.csv?persona=secret').text.splitlines()
+    assert csv_edges[0].startswith(':START_ID,subject_name,:TYPE,:END_ID') and len(csv_edges)>1
+    assert client.get('/api/export/nodes.csv?persona=secret').text.startswith('id:ID,name,:LABEL')
     web.world.cache_clear();web.entities.cache_clear()

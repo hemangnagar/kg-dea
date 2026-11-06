@@ -1,6 +1,8 @@
 count: 5000
 seed: 42
 provider: offline
+# Hand-written narratives (one JSON per cable id) replace the template when present.
+narratives_dir: exemplars/narratives
 query_provider: offline
 extraction: deterministic
 max_spend_usd: 40

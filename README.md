@@ -1,6 +1,6 @@
 # IntelDoc KG
 
-A local evidence workbench built from the **IntelDoc KG Demo — Handoff Brief**. All actors and reporting are fictional. Real geography only. The default dataset is the **offline demo with a draft world seed**. OpenAI and Ollama are also wired into narrative generation, constrained relationship extraction, and source-grounded query answers. Offline mode spends no API money.
+A local evidence workbench built from the **IntelDoc KG Demo — Handoff Brief**. All actors and reporting are fictional. Real geography only. The default dataset is the **offline demo built from the hand-authored world seed** described in the [world bible](docs/world-bible.md) and authored in `world/seed.yaml`. OpenAI and Ollama are also wired into narrative generation, constrained relationship extraction, and source-grounded query answers. Offline mode spends no API money.
 
 The original specification is included in [IntelDoc KG Demo — Handoff Brief](docs/IntelDoc-KG-Demo-Handoff-Brief.pdf).
 
@@ -13,7 +13,7 @@ bash scripts/setup.sh
 bash scripts/start.sh
 ```
 
-Setup installs exact dependency versions, expands the world if absent, plans 5,000 cables, generates XML and truth files, extracts relationships, and writes the measured scorecard. Generation takes a few minutes and resumes on rerun. The server binds to loopback port 8000 (override with `PORT`). Open the running app in a browser on the same machine. For a desktop-style window on a machine with a display, Chromium supports `chromium --app=http://127.0.0.1:8000`. This is a local web app, not a packaged native desktop application.
+Setup installs exact dependency versions, expands the world, verifies the published Claude Haiku corpus archive against its checksum and unpacks it into `corpus/`, so the first page you open serves the 5,000 model-written cables. Set `INTELDOC_BUILD_OFFLINE=1` to build the template corpus locally instead (a few minutes, resumable). The presenter's script, with the expected result of every step, is in [docs/demo-runbook.md](docs/demo-runbook.md). The server binds to loopback port 8000 (override with `PORT`). Open the running app in a browser on the same machine. For a desktop-style window on a machine with a display, Chromium supports `chromium --app=http://127.0.0.1:8000`. This is a local web app, not a packaged native desktop application.
 
 Use the existing checkout in cloud tasks. Tasks are already isolated; do not create a Git worktree unless explicitly requested.
 
@@ -21,11 +21,13 @@ Use the existing checkout in cloud tasks. Tasks are already isolated; do not cre
 
 1. Ask **Which companies connect to Bruma del Cobre?** The graph traverses organization → event → front company.
 2. Click a bracketed citation to open the exact cable and highlighted paragraph. Click an entity to see its one-hop neighborhood; switch to Timeline.
-3. Ask **Who led Bruma del Cobre in 2021?** Then switch from Secret // NOFORN to Unclassified // FOUO. The newer leadership relationship is withheld. The same question now has no supported answer. Changing persona clears the prior graph, answer, and document before fetching.
-4. Open **Extraction scorecard**. Precision, whole-world recall, and planted-fact recall are computed from extracted text relationships, not hard-coded scores.
-5. Open **World bible** to explain the fictional seed and limitations.
+3. Ask **Who led Bruma del Cobre in 2021?** Then switch from Secret // NOFORN to Unclassified // FOUO. Yesenia Anzures Ibarra's leadership window is marked `secret_only` in the seed and is planted only in Secret cables, so the same question now has no supported answer. Changing persona clears the prior graph, answer, and document before fetching.
+4. Open **Graph explorer** for the whole extracted graph: the structural edges of all six factions by default, then type any entity as the center, raise the hops, switch the edge preset, filter by node kind, reporting agency or years, and click a node for its edges and citations. Double-click a node to expand from it. The accessible graph exports as GraphML or as Neo4j-style `nodes.csv` and `edges.csv`.
+5. Ask **Which corridors did Bruma del Cobre control?** for the dated `controls` windows, and **Who is El Relojero?** for a nickname shared by two people; the engine asks you to disambiguate.
+6. Open **Extraction scorecard**. Precision (with and without the planted contradictions), whole-world recall, planted-fact recall, recall per edge type, and the contradiction, correction and rejected-claim counts are computed from extracted text relationships, not hard-coded scores.
+7. Open **World bible** for the six factions, their arcs, the corridors and the graph schema.
 
-The query engine uses deterministic entity matching and at most two graph hops. It supports relationship, geography, leadership and year queries, not arbitrary natural-language reasoning. Ambiguous shared nicknames prompt disambiguation. Offline answers are evidence statements with citations. Online answers use the model to select relevant source quotations, then verify each quotation and cited relation deterministically.
+The query engine uses deterministic entity matching (canonical names and unique aliases, longest match wins) and at most two graph hops. It supports relationship, geography, leadership, membership, ownership, corridor and year queries, not arbitrary natural-language reasoning. Ambiguous shared nicknames prompt disambiguation. Offline answers are evidence statements with citations. Online answers use the model to select relevant source quotations, then verify each quotation and cited relation deterministically.
 
 ## Restore the original state in a new task
 
@@ -46,9 +48,38 @@ Expected restored state: 5,000 validated **offline** cables, 5,000 planned pilot
 
 The new task must separately have `INTELDOC_OPENAI_API_KEY2` (or a supported fallback) and allowed HTTPS access to `api.openai.com`. If its allowlist draft is pending, review/save/publish that change in environment settings and verify the task's actual network policy before the paid run. The snapshot cannot grant network access or inject credentials.
 
+## The world
+
+`world/seed.yaml` (schema 3) is hand-authored: six factions with distinct arcs (five founded 2010–2011 and one 2018 split-off), 62 real places with state and kind, 23 plazas and routes with contiguous dated control histories, 53 people across every tier and official role with membership windows, 2–4 aliases each, five nicknames shared by exactly two people and five inherited when a boss falls, 17 front companies with owners and nominees, 12 assets with DEMO registrations, 49 sources (seven per agency) with stable grades, and 42 named, described, dated timeline beats. The expansion in `inteldoc/world.py` adds 100 generated lower-tier members, 43 companies, 28 assets, 360 identifiers and routine events sampled from the world's own structure (who controlled which corridor when, who owned what) to reach 500 events and about 3,100 graph-truth edges across 22 edge types, including windowed `leads`, `member_of`, `controls` and `allied_with`. See [docs/world-bible.md](docs/world-bible.md). The seed remains **draft-unreviewed**; automated integrity checks are not editorial approval or proof that every invented name is globally unique.
+
+```sh
+.venv/bin/python -m scripts.validate_seed
+```
+
+## Claude Haiku rendering (the brief's default provider)
+
+`config/anthropic-haiku.yaml` renders and extracts every cable that has no hand-written narrative with Claude Haiku 5.5 through the official Anthropic SDK: draft, critique, revise and extract, with structured JSON output, thinking off at low effort, the two hand-written exemplars of the same agency in a cached system prompt, and the same deterministic checker as every other path. The key comes from the environment variable named by `anthropic_key_env`. `config/anthropic-pilot.yaml` renders only cables 1–20 (which also have hand-written versions) into a separate corpus for a side-by-side comparison:
+
+```sh
+INTELDOC_CORPUS_DIR=corpus/haiku-pilot .venv/bin/python -m scripts.demo build --config config/anthropic-pilot.yaml --count 5000 --retry-failed --workers 4
+```
+
+Measured on the pilot: 20 cables validated, about $0.003 per cable at the configured prices, about four cables per minute per worker. The full run completed on 2026-11-06: **5,000 validated cables for $12.17**, 4,949 by the model and 51 hand-written, in about 2.5 hours at eight workers. See [docs/haiku-5000-status.md](docs/haiku-5000-status.md) and [artifacts/haiku-5000/README.md](artifacts/haiku-5000/README.md) for the scorecard, the run report and how to serve the archive. Model extraction keeps only claims whose quote and relation the anchor grammar confirms; dropped claims are counted in the scorecard as `rejected_model_claims`.
+
+## Hand-written pilot narratives
+
+The first 50 planned cables of the default corpus have hand-written narratives under [`exemplars/narratives/`](exemplars/README.md), written in this repository's sessions without any model API call. They read as agency reporting (source access, caveats, partial views) around the planted anchor sentences, and they pass the same deterministic checker as model output. The default `config/corpus.yaml` sets `narratives_dir`, so `scripts/setup.sh` builds a corpus in which those 50 cables carry the authored prose and the remaining 4,950 carry templates; the record's `authored` flag and the manifest state `authored` mark them. `config/authored-50.yaml` is the strict form that fails any of the 50 without a file:
+
+```sh
+.venv/bin/python -m scripts.narrative_worksheet --max 50
+INTELDOC_CORPUS_DIR=corpus/authored-pilot .venv/bin/python -m scripts.demo build --config config/authored-50.yaml --count 5000
+```
+
+The worksheet prints, for each planned cable, the marks, the anchor sentence each planted fact must appear as, the event context, planted quantities and the usable aliases. Writing more narratives is a matter of adding files; a later model-rendering pass can use these as exemplars.
+
 ## 50-document API pilot
 
-The detailed Claude-style seed requirements are now represented in `world/seed.yaml` (schema v2): five organizations with exact leadership windows, dated fractures/alliances, 25 corridor control histories, 50 people across all required tiers and official roles, 15 shared aliases including five inherited aliases, 18 companies with nominee ownership, 12 registered assets, 56 sources (eight per agency), and 35 dated timeline beats. It remains **draft-unreviewed**; automated integrity checks are not editorial approval or proof that every invented name is globally unique.
+The pilot below ran against the earlier schema-2 template seed; its preserved world under `artifacts/pilot-50/world/pilot` is not the current seed. Re-running the pilot requires a fresh `--world-dir` expansion of the current seed.
 
 ```sh
 .venv/bin/python -m scripts.validate_seed
@@ -80,7 +111,7 @@ Seed validation checks all references, leadership/control intervals, inherited-a
 .venv/bin/python -m pytest -q
 ```
 
-`world/seed.yaml` is the draft editorial input. Scripted expansion creates 200 people, 80 companies, 45 assets, 360 non-operational identifiers, 56 sources in v2 (50 in the preserved v1 baseline), 25 places, five organizations, 600 events and non-overlapping leadership windows. The v2 seed contains 35 exact-dated timeline beats; the preserved v1 baseline used 35 template arc beats. Shared nicknames are intentional. This is a mechanical synthetic baseline, not a hand-authored geopolitical simulation.
+`world/seed.yaml` is the hand-authored editorial input; `docs/world-bible.md` explains it. Expansion is deterministic for a seed value and writes `world/expanded.json` and `world/graph_truth.json`. Each cable samples one event and the reporting agency's partial view of it; identifiers, finances, membership and corridor control appear only in Secret paragraphs; about 5% of core cables carry a deliberately shifted date (`dispute`) and 1–2% correct an earlier DocumentID (`corrects`).
 
 Working generated outputs are ignored by Git; the completed pilot run is preserved under [`artifacts/pilot-50`](artifacts/pilot-50/README.md):
 
@@ -93,7 +124,7 @@ Working generated outputs are ignored by Git; the completed pilot run is preserv
 
 The planner refuses a different count/seed against an existing manifest. Validated cables are never regenerated. Change the dataset deliberately by moving the generated corpus aside before rebuilding; never remove user data blindly. Stop a running generator before changing its code or world. Do not re-expand the world underneath an existing corpus. `--seed` on the planner seeds cable sampling; use the `world` command separately to change world expansion.
 
-Every fact carries a cable and paragraph provenance. The baseline extractor parses narrative text independently and never reads the record's planted-fact list. Its vocabulary comes from the world. This is deliberately an easy baseline: high scores on templated prose do not imply accurate LLM extraction or real-world entity resolution. World recall and planted recall have separate denominators.
+Every fact carries a cable and paragraph provenance. The baseline extractor parses narrative text independently and never reads the record's planted-fact list. Its vocabulary is the world's canonical names and unique aliases (shared nicknames deliberately resolve to nothing). The offline drafter writes anchor sentences in the same grammar, so planted recall is high by construction: this is deliberately an easy baseline, and high scores on it do not imply accurate LLM extraction or real-world entity resolution. World recall and planted recall have separate denominators; contradiction edges are reported separately and excluded from `precision_excluding_contradictions`.
 
 ## XML and validation
 
@@ -101,7 +132,7 @@ XML is escaped through lxml; metadata is deterministic from the Pydantic record.
 
 The output includes the public namespaces, NTK profiles, publisher, identifiers, notices, coverage, sources, dissemination footer and the source feed's unusual CIA extension spellings. Official schema conformance is **not claimed**. Drop a trusted, self-contained schema package with entrypoint `schemas/pubs.xsd` and/or `schemas/pubs.sch` into the checkout to enable the validation hooks. The brief's uncertain DESVersion/COIProtectionLevel/policy-URI values remain as provided. No official schema was supplied or tested.
 
-The checker rejects starter-blocklisted names, missing planted entities/dates, unknown capitalized multiword names, mismatched baseline relationships, numbering and length defects, and invalid portion marks. The blocklist is a small starter from public DEA/State organization names and publicly known officials; it is not exhaustive or proof that every invented name is unique. No real document text is used. IDs beginning DEMO-TEL/DEMO-ACCT are intentionally non-dialable/non-bank labels.
+The checker rejects starter-blocklisted names, missing planted entities (by canonical name or alias) and dates, unknown capitalized multiword names, numbers that are neither planted quantities nor years, mismatched baseline relationships, numbering and length defects, and invalid portion marks. The blocklist is a small starter from public DEA/State organization names and publicly known officials; it is not exhaustive or proof that every invented name is unique. No real document text is used. IDs beginning DEMO-TEL/DEMO-ACCT are intentionally non-dialable/non-bank labels.
 
 ## Security model
 
@@ -164,6 +195,6 @@ Start the server first. The script checks search, citation dialogs, persona swit
 
 ## Remaining brief work
 
-The offline first version intentionally defers editorial seed approval, richer lifetime/membership/corridor semantics, alias usage in narrative prose, event quantities in extraction, 5% contradiction and 1–2% correction sampling, best-of LLM narrative selection, actual provider-batch resumption, unrestricted LLM extraction and QA grading, real NTK authorization, official schema confirmation and native desktop packaging. The model-backed draft/critique/revise pipeline, constrained extraction and quote-grounded query path are implemented; the deferred stages above are not. The UI, corpus and scorecard identify the baseline so it cannot be mistaken for completion of these phases.
+Still deferred: editorial seed approval, measured 40% alias usage in prose, event quantities as graph edges, best-of LLM narrative selection, actual provider-batch resumption, unrestricted LLM extraction and QA grading, real NTK authorization, official schema confirmation and native desktop packaging. Implemented since the first version: the hand-authored world with membership, corridor-control, ownership and alliance edges; world-sampled routine events; agency partial views; Secret-only facts; contradiction and correction sampling; alias-aware checking and extraction; the model-backed draft/critique/revise pipeline; constrained extraction; and the quote-grounded query path. The UI, corpus and scorecard identify the baseline so it cannot be mistaken for completion of these phases.
 
 The replacement variable `INTELDOC_OPENAI_API_KEY2` is supported and takes precedence over older key names. If a published variable is absent in this running task, reconnect/restart the task using the updated environment version; publishing another version does not prove an existing process received the variable. Keep HTTPS access to `api.openai.com` enabled. Do not create or paste duplicate keys to troubleshoot a stale runtime.

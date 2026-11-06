@@ -1,0 +1,31 @@
+# Pilot: the model renders cables 1-20 (which also have hand-written versions, for a side-by-side comparison).
+# Prices from the Claude API reference (Haiku 5.5, prompts under 100K tokens): $0.10 in / $0.50 out per million.
+count: 5000
+seed: 42
+provider: anthropic
+query_provider: offline
+extraction: model
+anthropic_model: claude-haiku-5-5
+anthropic_effort: low
+anthropic_thinking: disabled
+anthropic_key_env: CORPUSCLE_ANTHROPIC_KEY
+input_usd_per_million: 0.10
+output_usd_per_million: 0.50
+max_spend_usd: 2
+narrative_max_output_tokens: 4000
+critique_max_output_tokens: 1500
+extraction_max_output_tokens: 3000
+answer_max_output_tokens: 2000
+narratives_dir: null
+exemplars_dir: exemplars/narratives
+core_fraction: 0.75
+secret_fraction: 0.65
+agencies:
+  DEA: 55
+  FBI: 12
+  HSI: 8
+  CBP: 4
+  DIA: 6
+  TREASURY: 5
+  OSINT: 10
+max_cables: 20

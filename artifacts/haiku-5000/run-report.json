@@ -1,0 +1,154 @@
+{
+ "completed": "2026-11-06",
+ "model": "claude-haiku-5-5",
+ "config": "config/anthropic-haiku.yaml",
+ "workers": 8,
+ "validated": 5000,
+ "authored_by_hand": 51,
+ "rendered_by_model": 4949,
+ "passes": "one main pass interrupted once by a transient provider error and resumed; five automatic retry passes; 26 stuck cables regenerated from fresh drafts; one cable (DIA-002148-IIR-14) hand-written after the model repeatedly shortened an asset name",
+ "wall_clock_minutes": 148,
+ "words_per_cable": {
+  "min": 250,
+  "median": 376.0,
+  "max": 829
+ },
+ "agency_mix": {
+  "FBI": 613,
+  "DEA": 2749,
+  "OSINT": 478,
+  "DIA": 327,
+  "TREASURY": 214,
+  "HSI": 406,
+  "CBP": 213
+ },
+ "classification_mix": {
+  "S": 3226,
+  "U": 1774
+ },
+ "rejected_model_claims_total": 173,
+ "spend": {
+  "anthropic_requests_including_pilot_and_probes": 20411,
+  "accounted_usd": 12.1655,
+  "settled_usd": 12.1655,
+  "input_tokens": 58249069,
+  "output_tokens": 12681271,
+  "prices_usd_per_million": {
+   "input": 0.1,
+   "output": 0.5
+  },
+  "cap_usd": 40,
+  "note": "Local ledger computed from configured prices, not a provider billing statement. Includes the 20-cable pilot, probes and all retries."
+ },
+ "scorecard": {
+  "method": "anthropic narratives with model extraction",
+  "truth_edges": 3156,
+  "planted_edges": 3245,
+  "extracted_edges": 3241,
+  "true_positives": 3063,
+  "precision": 0.9450786794199321,
+  "precision_excluding_contradictions": 1.0,
+  "world_recall": 0.970532319391635,
+  "planted_recall": 0.9987673343605546,
+  "contradiction_edges": 178,
+  "correction_cables": 68,
+  "authored_narratives": 51,
+  "rejected_model_claims": 173,
+  "recall_by_predicate": {
+   "allied_with": {
+    "truth": 4,
+    "recovered": 4
+   },
+   "arrested_in": {
+    "truth": 45,
+    "recovered": 45
+   },
+   "controls": {
+    "truth": 63,
+    "recovered": 56
+   },
+   "designated_in": {
+    "truth": 68,
+    "recovered": 66
+   },
+   "elected_in": {
+    "truth": 11,
+    "recovered": 11
+   },
+   "extradited_in": {
+    "truth": 2,
+    "recovered": 2
+   },
+   "involved_in": {
+    "truth": 137,
+    "recovered": 134
+   },
+   "killed_in": {
+    "truth": 4,
+    "recovered": 4
+   },
+   "leads": {
+    "truth": 13,
+    "recovered": 13
+   },
+   "linked_to": {
+    "truth": 545,
+    "recovered": 545
+   },
+   "member_of": {
+    "truth": 161,
+    "recovered": 105
+   },
+   "nominee_for": {
+    "truth": 11,
+    "recovered": 11
+   },
+   "occurred_at": {
+    "truth": 500,
+    "recovered": 500
+   },
+   "owns": {
+    "truth": 60,
+    "recovered": 42
+   },
+   "paid_in": {
+    "truth": 46,
+    "recovered": 44
+   },
+   "participated_in": {
+    "truth": 512,
+    "recovered": 512
+   },
+   "released_in": {
+    "truth": 1,
+    "recovered": 1
+   },
+   "removed_in": {
+    "truth": 13,
+    "recovered": 13
+   },
+   "split_from": {
+    "truth": 1,
+    "recovered": 1
+   },
+   "supported": {
+    "truth": 144,
+    "recovered": 144
+   },
+   "transited": {
+    "truth": 389,
+    "recovered": 387
+   },
+   "uses": {
+    "truth": 426,
+    "recovered": 423
+   }
+  },
+  "states": {
+   "validated": 5000
+  },
+  "limitations": "Model-generated prose retains canonical fact-sentence anchors. Scores measure constrained extraction, not unrestricted real-world prose.",
+  "schema_validated": false
+ },
+ "official_schema_validation": "Unavailable: no XSD or Schematron package is bundled"
+}

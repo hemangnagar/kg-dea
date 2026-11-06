@@ -3,7 +3,7 @@ import re
 from functools import lru_cache
 from typing import Literal
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse, HTMLResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, Response, PlainTextResponse
 from pydantic import BaseModel, Field
 from .world import ROOT, load_world
 from .store import connect, connect_spend
@@ -41,9 +41,11 @@ def compact(rows,limit=60):
     grouped={}
     for r in sorted(rows,key=lambda r:(r['date'],r['cable'],r['paragraph']),reverse=True):
         key=(r['subject'],r['predicate'],r['object'],r['date'],r['until_date'])
-        if key not in grouped:grouped[key]={**r,'citations':[]}
+        if key not in grouped:grouped[key]={**r,'citations':[],'count':0,'agencies':[]}
         item=grouped[key]
         citation={'cable':r['cable'],'paragraph':r['paragraph'],'mark':r['classification']+('//'+r['controls'].replace(',','//') if r['controls'] else '')}
+        item['count']+=1
+        if r['agency'] not in item['agencies']:item['agencies'].append(r['agency'])
         if len(item['citations'])<3 and citation not in item['citations']:item['citations'].append(citation)
     return list(grouped.values())[:limit]
 
@@ -79,11 +81,17 @@ def query(body:Question):
     rows=visible(body.persona)
     allowed={r[k] for r in rows for k in ['subject','object']}
     text=body.question.casefold()
-    matches=[e for e in entities().values() if e['id'] in allowed and any(n.casefold() in text for n in [e['name']]+e['aliases'])]
+    hits={}
+    for e in entities().values():
+        if e['id'] in allowed:
+            found=[n for n in [e['name']]+e['aliases'] if n.casefold() in text]
+            if found:hits[e['id']]=max(found,key=len)
+    # Prefer the longest matching name: "Anzures Ibarra" must not also match the entity known only as "Anzures".
+    matches=[entities()[id] for id,n in hits.items() if not any(o!=id and n.casefold()!=m.casefold() and n.casefold() in m.casefold() for o,m in hits.items())]
     if body.entity_id:
         matches=[entities()[body.entity_id]] if body.entity_id in allowed else []
     ids=[e['id'] for e in matches]
-    years=re.findall(r'\b(?:201\d|202[0-6])\b',text)
+    years=re.findall(r'\b(?:201\d|202[0-7])\b',text)
     if years:
         lo,hi=min(years)+'-01-01',max(years)+'-12-31'
         rows=[r for r in rows if (r['date']<=hi and (r['until_date']>lo if r['until_date'] else r['date']>=lo))]
@@ -94,6 +102,10 @@ def query(body:Question):
         selected=[r for r in rows if any(t in (entities()[r['subject']]['name']+' '+entities()[r['object']]['name']+' '+r['predicate']).casefold() for t in tokens)]
     if any(t in text for t in ['company','companies','front']):selected=[r for r in selected if any(entities()[r[k]]['kind']=='company' for k in ['subject','object'])]
     if any(t in text for t in ['leader','leads','led','leadership']):selected=[r for r in selected if r['predicate']=='leads']
+    if any(t in text for t in ['corridor','plaza','crossing','route']):selected=[r for r in selected if any(entities()[r[k]]['kind']=='corridor' for k in ['subject','object'])]
+    if any(t in text for t in ['control','controls','controlled']):selected=[r for r in selected if r['predicate']=='controls']
+    if any(t in text for t in ['member','members','membership']):selected=[r for r in selected if r['predicate'] in ('member_of','leads')]
+    if any(t in text for t in ['owner','owns','owned','nominee']):selected=[r for r in selected if r['predicate'] in ('owns','nominee_for')]
     facts=compact(selected,24)
     ambiguity=len(matches)>1 and not body.entity_id and any(len([e for e in matches if alias in e['aliases']])>1 for entity in matches for alias in entity['aliases'] if alias.casefold() in text)
     if ambiguity:facts=[]
@@ -102,7 +114,7 @@ def query(body:Question):
     mode='Deterministic graph retrieval · 2 hops · offline answer'
     cfg=load_config()
     query_provider=cfg.get('query_provider','offline')
-    if query_provider!='offline' and facts and not ambiguity:
+    if query_provider not in ('offline','authored') and facts and not ambiguity:
         try:
             provider=provider_from_config({**cfg,'provider':query_provider})
             accessible_names={id:entities()[id] for id in allowed}
@@ -150,11 +162,115 @@ def xml(id:str,persona:Persona='secret'):
 @app.get('/api/scorecard')
 def scorecard():return score()
 
+@app.get('/api/world')
+def world_summary():
+    w=world(); by_id=entities()
+    organizations=[]
+    for o in w['entities']:
+        if o['kind']!='organization':continue
+        organizations.append({'id':o['id'],'name':o['name'],'base':o['place'],'founded':o.get('founded'),'profile':o.get('profile',''),
+            'leadership':[{'person':by_id[l['person']]['name'],'from':l['from'],'to':l['to'],'secret_only':bool(l.get('secret_only'))} for l in o.get('leadership',[])],
+            'alliances':[{'with':by_id[a['with']]['name'],'from':a['from'],'to':a['to']} for a in o.get('alliances',[])],
+            'fractures':[{'leader':by_id[f['departing_leader']]['name'],'to':by_id[f['destination_org']]['name'],'date':f['date']} for f in o.get('fractures',[])]})
+    kinds={}
+    for e in w['entities']:kinds[e['kind']]=kinds.get(e['kind'],0)+1
+    return {'status':w.get('status'),'notes':w.get('notes',''),'organizations':organizations,'entity_counts':kinds,'events':len(w['events']),
+            'authored_people':sum(1 for e in w['entities'] if e['kind']=='person' and e.get('authored')),
+            'authored_events':sum(1 for e in w['events'] if e.get('seed_event')),
+            'corridors':[{'name':c['name'],'kind':c.get('corridor_kind'),'places':c.get('places',[]),'control':[{'organization':by_id[x['organization']]['name'],'from':x['from'],'to':x['to']} for x in c.get('control_history',[])]} for c in w['entities'] if c['kind']=='corridor']}
+
 
 @app.get('/api/runtime')
 def runtime():
     cfg=load_config()
+    # The served corpus records how it was generated; that beats the serving config for the narrative labels.
+    with connect() as db:
+        row=db.execute("SELECT value FROM metadata WHERE key='generation_settings'").fetchone()
+        authored=db.execute("SELECT count(*) FROM cables WHERE state='validated' AND record LIKE '%\"authored\":true%'").fetchone()[0]
+    generated=json.loads(row[0]) if row else {}
     return {'query_provider':cfg.get('query_provider','offline'),
-            'narrative_provider':cfg.get('provider','offline'),
-            'extraction':cfg.get('extraction','deterministic'),
+            'narrative_provider':generated.get('provider') or cfg.get('provider','offline'),
+            'extraction':generated.get('extraction') or cfg.get('extraction','deterministic'),
+            'authored':authored>0 or bool(cfg.get('narratives_dir')),'authored_count':authored,
+            'generation_model':generated.get('anthropic_model') or generated.get('openai_model') or generated.get('ollama_model'),
             'model':cfg.get('openai_model') if cfg.get('query_provider')=='openai' else cfg.get('ollama_model')}
+
+
+PREDICATE_GROUPS={'structure':['leads','member_of','controls','allied_with','split_from','owns','nominee_for'],
+                  'events':['participated_in','linked_to','occurred_at','transited','supported','involved_in','arrested_in','killed_in','extradited_in','released_in','elected_in','removed_in','paid_in','designated_in'],
+                  'identifiers':['uses']}
+
+def filtered_rows(persona,predicates='',year_from=None,year_to=None,agencies='',kinds=''):
+    rows=visible(persona)
+    preds={x for x in predicates.split(',') if x}
+    for group,members in PREDICATE_GROUPS.items():
+        if group in preds:preds|=set(members)
+    if preds:rows=[r for r in rows if r['predicate'] in preds]
+    agency_set={x for x in agencies.split(',') if x}
+    if agency_set:rows=[r for r in rows if r['agency'] in agency_set]
+    if year_from or year_to:
+        lo,hi=f'{year_from or 2010}-01-01',f'{year_to or 2027}-12-31'
+        rows=[r for r in rows if r['date']<=hi and ((r['until_date']>lo) if r['until_date'] else (r['date']>=lo))]
+    kind_set={x for x in kinds.split(',') if x}
+    if kind_set:rows=[r for r in rows if entities()[r['subject']]['kind'] in kind_set and entities()[r['object']]['kind'] in kind_set]
+    return rows
+
+@app.get('/api/explore')
+def explore_graph(persona:Persona='secret',center:str='',hops:int=1,predicates:str='',kinds:str='',year_from:int|None=None,year_to:int|None=None,agencies:str='',limit:int=300):
+    """Persona-filtered subgraph for the explorer: deduplicated edges with citation counts, ranked around the centers."""
+    hops=max(1,min(hops,3)); limit=max(10,min(limit,1500))
+    rows=filtered_rows(persona,predicates,year_from,year_to,agencies,kinds)
+    allowed={r[k] for r in visible(persona) for k in ['subject','object']}
+    centers=[c for c in center.split(',') if c] if center else [e['id'] for e in entities().values() if e['kind']=='organization']
+    centers=[c for c in centers if c in allowed]
+    if center and not centers:raise HTTPException(404,'No accessible entity')
+    selected=neighborhood(rows,centers,hops) if centers else rows
+    facts=compact(selected,10**6)
+    touching=set(centers)
+    facts.sort(key=lambda f:(not (f['subject'] in touching or f['object'] in touching),-f['count'],f['date']),reverse=False)
+    unique=len(facts); truncated=unique>limit; facts=facts[:limit]
+    degree={}
+    for f in facts:
+        for k in ['subject','object']:degree[f[k]]=degree.get(f[k],0)+1
+    nodes=[{**entities()[i],'degree':degree[i],'center':i in touching} for i in sorted(degree)]
+    return {'nodes':nodes,'edges':facts,'centers':centers,'total_edges':unique,'citations':len(selected),'truncated':truncated,'predicate_groups':PREDICATE_GROUPS}
+
+@app.get('/api/export/graphml')
+def export_graphml(persona:Persona='secret',predicates:str='',year_from:int|None=None,year_to:int|None=None,agencies:str=''):
+    from lxml import etree as E
+    facts=compact(filtered_rows(persona,predicates,year_from,year_to,agencies),10**6)
+    ids=sorted({f[k] for f in facts for k in ['subject','object']})
+    NS='http://graphml.graphdrawing.org/xmlns'
+    root=E.Element('{%s}graphml'%NS,nsmap={None:NS})
+    for key,for_,type_ in [('name','node','string'),('kind','node','string'),('place','node','string'),('predicate','edge','string'),('date','edge','string'),('until','edge','string'),('citations','edge','int'),('agencies','edge','string'),('classification','edge','string')]:
+        E.SubElement(root,'{%s}key'%NS,id=key,attrib={'for':for_,'attr.name':key,'attr.type':type_})
+    g=E.SubElement(root,'{%s}graph'%NS,id='inteldoc-'+persona,edgedefault='directed')
+    for i in ids:
+        e=entities()[i]; n=E.SubElement(g,'{%s}node'%NS,id=i)
+        for key in ['name','kind','place']:E.SubElement(n,'{%s}data'%NS,key=key).text=str(e.get(key,''))
+    for k,f in enumerate(facts):
+        ed=E.SubElement(g,'{%s}edge'%NS,id=f'e{k}',source=f['subject'],target=f['object'])
+        for key,val in [('predicate',f['predicate']),('date',f['date']),('until',f['until_date']),('citations',f['count']),('agencies',','.join(f['agencies'])),('classification',f['classification'])]:
+            E.SubElement(ed,'{%s}data'%NS,key=key).text=str(val)
+    return Response(E.tostring(root,xml_declaration=True,encoding='utf-8',pretty_print=True),media_type='application/xml',headers={'Content-Disposition':f'attachment; filename="inteldoc-{persona}.graphml"'})
+
+@app.get('/api/export/edges.csv')
+def export_edges(persona:Persona='secret',predicates:str='',year_from:int|None=None,year_to:int|None=None,agencies:str=''):
+    import csv,io
+    facts=compact(filtered_rows(persona,predicates,year_from,year_to,agencies),10**6)
+    out=io.StringIO(); w=csv.writer(out)
+    w.writerow([':START_ID','subject_name',':TYPE',':END_ID','object_name','date','until','citations:int','agencies','classification','sample_cable','sample_paragraph:int'])
+    for f in facts:
+        c=f['citations'][0]
+        w.writerow([f['subject'],entities()[f['subject']]['name'],f['predicate'],f['object'],entities()[f['object']]['name'],f['date'],f['until_date'],f['count'],'|'.join(f['agencies']),f['classification'],c['cable'],c['paragraph']])
+    return PlainTextResponse(out.getvalue(),media_type='text/csv',headers={'Content-Disposition':f'attachment; filename="inteldoc-{persona}-edges.csv"'})
+
+@app.get('/api/export/nodes.csv')
+def export_nodes(persona:Persona='secret'):
+    import csv,io
+    allowed={r[k] for r in visible(persona) for k in ['subject','object']}
+    out=io.StringIO(); w=csv.writer(out)
+    w.writerow(['id:ID','name',':LABEL','place','aliases'])
+    for i in sorted(allowed):
+        e=entities()[i]; w.writerow([i,e['name'],e['kind'],e['place'],'|'.join(e['aliases'])])
+    return PlainTextResponse(out.getvalue(),media_type='text/csv',headers={'Content-Disposition':f'attachment; filename="inteldoc-{persona}-nodes.csv"'})

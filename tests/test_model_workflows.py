@@ -1,4 +1,5 @@
 import json
+import re
 import shutil
 from pathlib import Path
 
@@ -23,7 +24,7 @@ def model_demo(tmp_path, monkeypatch):
     monkeypatch.delenv('INTELDOC_OPENAI_API_KEY2', raising=False)
     monkeypatch.setenv('INTELDOC_OPENAI_API_KEY', 'test-key-not-real')
     monkeypatch.delenv('MAX_SPEND_USD', raising=False)
-    bible = world.expand()
+    bible = world.expand(42, total_events=120)
     cfg = pipeline.load_config(tmp_path / 'config/corpus.yaml')
     cfg.update(provider='openai', query_provider='openai', extraction='model',
                openai_model='test-model', input_usd_per_million=2, output_usd_per_million=8)
@@ -31,9 +32,14 @@ def model_demo(tmp_path, monkeypatch):
     state = {'bad_quote': False, 'interrupt': False, 'omit_claim': False}
     names = {e['id']: e['name'] for e in bible['entities']}
 
-    def sentence(f):
-        return (f"{names[f.subject]} {pipeline.VERBS[f.predicate]} {names[f.object]} on {f.date}"
-                + (f' until {f.until}' if f.until else '') + '.')
+    ids = {v: k for k, v in names.items()}
+
+    def quote_for(text, key):
+        # The sentence in the narrative whose extraction yields exactly this fact (it may use an alias or a window).
+        for s in re.split(r'(?<=\.)\s+', text):
+            if any(x.key() == key for x in pipeline.extract(s, bible)):
+                return s
+        raise AssertionError('No supporting sentence for ' + str(key))
 
     def post(url, **kwargs):
         payload = kwargs['json']
@@ -44,7 +50,8 @@ def model_demo(tmp_path, monkeypatch):
             state['interrupt'] = False
             return httpx.Response(503, json={'error': 'test interruption'}, request=request)
         if 'agency' in data:
-            result = {'paragraphs': [{'number': p['number'], 'text': p['baseline']} for p in data['paragraphs']]}
+            filler = ' '.join(pipeline.FILLER[:12])
+            result = {'paragraphs': [{'number': p['number'], 'text': ' '.join(p['required_sentences']) + ' ' + filler} for p in data['paragraphs']]}
         elif 'constraints' in data and 'critique' not in data:
             result = {'defects': []}
         elif 'critique' in data:
@@ -53,12 +60,11 @@ def model_demo(tmp_path, monkeypatch):
             claims = []
             for p in data['paragraphs']:
                 for f in pipeline.extract(p['text'], bible):
-                    claims.append({'paragraph': p['number'], **f.model_dump(mode='json'), 'quote': sentence(f)})
+                    claims.append({'paragraph': p['number'], **f.model_dump(mode='json'), 'quote': quote_for(p['text'], f.key())})
             result = {'claims': claims[1:] if state['omit_claim'] else claims}
         elif 'question' in data:
             e = data['evidence'][0]
-            quote = (f"{e['subject']} {pipeline.VERBS[e['predicate']]} {e['object']} on {e['date']}"
-                     + (f" until {e['until']}" if e['until'] else '') + '.')
+            quote = quote_for(e['source_text'], (ids[e['subject']], e['predicate'], ids[e['object']], e['date'], e['until'] or ''))
             result = {'quotes': [{'fact_index': e['fact_index'],
                                   'quote': 'An invented unsupported sentence.' if state['bad_quote'] else quote}]}
         else:
@@ -114,9 +120,11 @@ def test_model_omissions_reduce_recall_instead_of_copying_truth(model_demo):
 
 
 def test_query_model_citations_and_persona_isolation(model_demo):
-    _, cfg, calls, _, _ = model_demo
-    # Include a 2020 leadership event for org-01 (event index 4).
-    pipeline.plan(7, config=cfg)
+    bible, cfg, calls, _, _ = model_demo
+    # Plan past the first Bruma del Cobre events under the Secret-only 2020 leadership window, so that at least one
+    # Secret cable carries the leadership fact (Unclassified and OSINT cables never do).
+    first = next(i for i, e in enumerate(bible['events']) if e['org'] == 'org-01' and e['date'] >= '2020-02-27')
+    pipeline.plan(first + 20, config=cfg)
     pipeline.run(config=cfg)
     client = TestClient(web.app)
     before = len(calls)
@@ -145,7 +153,7 @@ def test_query_model_citations_and_persona_isolation(model_demo):
 
 def test_invented_query_quote_is_rejected(model_demo):
     _, cfg, _, state, _ = model_demo
-    pipeline.plan(7, config=cfg); pipeline.run(config=cfg)
+    pipeline.plan(4, config=cfg); pipeline.run(config=cfg)
     state['bad_quote'] = True
     client = TestClient(web.app)
     result = client.post('/api/query', json={'question': 'Show Bruma del Cobre'})
@@ -166,7 +174,7 @@ def test_cap_stops_pipeline_without_attempting_remaining_records(model_demo, mon
 
 def test_checker_rejects_secret_fact_duplicated_into_public_paragraph(model_demo):
     bible, cfg, _, _, _ = model_demo
-    pipeline.plan(7, config=cfg); pipeline.run(config=cfg)
+    pipeline.plan(12, config=cfg); pipeline.run(config=cfg)
     with store.connect() as db:
         records = [Cable.model_validate_json(r[0]) for r in db.execute('SELECT record FROM cables')]
     cable = next(c for c in records if c.classification == 'S' and c.paragraphs[1].facts)
