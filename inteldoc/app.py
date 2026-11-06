@@ -25,7 +25,8 @@ def entities():return {e['id']:e for e in world()['entities']}
 def visible(persona):
     with connect() as db:
         # Both demo personas share agency NTK profiles. No client-provided clearance or agency SQL.
-        rows=db.execute("SELECT * FROM evidence"+(' WHERE classification=\'U\'' if persona=='unclassified' else '')).fetchall()
+        # Partner data under LES handling is modelled as unavailable to the Unclassified // FOUO demo persona.
+        rows=db.execute("SELECT * FROM evidence"+(" WHERE classification='U' AND controls NOT LIKE '%LES%'" if persona=='unclassified' else '')).fetchall()
     return [dict(r) for r in rows]
 
 def public_entity(id):return entities()[id]
@@ -106,6 +107,7 @@ def query(body:Question):
     if any(t in text for t in ['control','controls','controlled']):selected=[r for r in selected if r['predicate']=='controls']
     if any(t in text for t in ['member','members','membership']):selected=[r for r in selected if r['predicate'] in ('member_of','leads')]
     if any(t in text for t in ['owner','owns','owned','nominee']):selected=[r for r in selected if r['predicate'] in ('owns','nominee_for')]
+    if any(t in text for t in ['call','called','calls','phone','spoke']):selected=[r for r in (rows if ids else selected) if r['predicate']=='called' and (not ids or r['subject'] in ids or r['object'] in ids)]
     facts=compact(selected,24)
     ambiguity=len(matches)>1 and not body.entity_id and any(len([e for e in matches if alias in e['aliases']])>1 for entity in matches for alias in entity['aliases'] if alias.casefold() in text)
     if ambiguity:facts=[]
@@ -149,7 +151,14 @@ def cable(id:str,persona:Persona='secret'):
     if not r:raise HTTPException(404,'No accessible cable')
     c=Cable.model_validate_json(r[0]); visible_p=[p for p in c.paragraphs if persona=='secret' or p.classification=='U']
     if not visible_p:raise HTTPException(404,'No accessible cable')
-    return {'id':id,'agency':c.agency,'date':str(c.report_date),'subject':c.subject if persona=='secret' or c.classification=='U' else 'Accessible portion of synthetic reporting','place':c.place,'source':c.source_id if persona=='secret' or c.classification=='U' else 'Withheld','reliability':c.reliability if persona=='secret' or c.classification=='U' else 'Withheld','paragraphs':[{'number':p.number,'mark':p.mark,'text':p.text} for p in visible_p],'redacted':len(c.paragraphs)-len(visible_p),'synthetic':True}
+    calls=[]
+    if persona=='secret':
+        from .cdr import corroboration
+        event=next((e for e in world()['events'] if e['id']==c.event_id),None)
+        people=[i for p in visible_p for f in p.facts for i in [f.subject,f.object] if entities().get(i,{}).get('kind')=='person']
+        for item in corroboration(people,event['date'] if event else str(c.report_date)):
+            calls.append({**item,'a_name':entities()[item['a']]['name'],'b_name':entities()[item['b']]['name'],'records':[{**r,'caller_name':entities()[r['caller']]['name'] if r['caller'] in entities() else r['caller']} for r in item['records']]})
+    return {'id':id,'agency':c.agency,'date':str(c.report_date),'subject':c.subject if persona=='secret' or c.classification=='U' else 'Accessible portion of synthetic reporting','place':c.place,'source':c.source_id if persona=='secret' or c.classification=='U' else 'Withheld','reliability':c.reliability if persona=='secret' or c.classification=='U' else 'Withheld','paragraphs':[{'number':p.number,'mark':p.mark,'text':p.text} for p in visible_p],'redacted':len(c.paragraphs)-len(visible_p),'synthetic':True,'corroborating_calls':calls}
 
 @app.get('/api/cables/{id}/xml')
 def xml(id:str,persona:Persona='secret'):
@@ -158,6 +167,18 @@ def xml(id:str,persona:Persona='secret'):
     c=Cable.model_validate_json(r[0])
     if persona=='unclassified' and c.classification=='S':raise HTTPException(403,'Full XML contains inaccessible paragraphs')
     return Response(render(c),media_type='application/xml')
+
+@app.get('/api/cdr/{record_id}')
+def cdr_record(record_id:str,persona:Persona='secret'):
+    if persona!='secret':raise HTTPException(403,'Partner call records carry LES handling and are not available to this persona')
+    with connect() as db:r=db.execute('SELECT * FROM cdr WHERE record_id=?',(record_id.replace('FBI-CDR-',''),)).fetchone()
+    if not r:raise HTTPException(404,'No such record')
+    r=dict(r)
+    def side(label,person,window):
+        e=entities().get(person) if person else None
+        return {'label':label,'person':person,'name':e['name'] if e else None,'kind':e['kind'] if e else None,'window':json.loads(window) if window else None}
+    return {'record_id':r['record_id'],'provider':r['provider'],'handling':r['handling'],'call_start':r['call_start'],'duration_seconds':r['duration_seconds'],'call_type':r['call_type'],
+            'caller':side(r['caller_label'],r['caller_person'],r['caller_window']),'callee':side(r['callee_label'],r['callee_person'],r['callee_window']),'synthetic':True}
 
 @app.get('/api/scorecard')
 def scorecard():return score()
@@ -198,7 +219,7 @@ def runtime():
 
 PREDICATE_GROUPS={'structure':['leads','member_of','controls','allied_with','split_from','owns','nominee_for'],
                   'events':['participated_in','linked_to','occurred_at','transited','supported','involved_in','arrested_in','killed_in','extradited_in','released_in','elected_in','removed_in','paid_in','designated_in'],
-                  'identifiers':['uses']}
+                  'identifiers':['uses'],'communications':['called']}
 
 def filtered_rows(persona,predicates='',year_from=None,year_to=None,agencies='',kinds=''):
     rows=visible(persona)
@@ -225,6 +246,7 @@ def explore_graph(persona:Persona='secret',center:str='',hops:int=1,predicates:s
     centers=[c for c in centers if c in allowed]
     if center and not centers:raise HTTPException(404,'No accessible entity')
     selected=neighborhood(rows,centers,hops) if centers else rows
+    if not selected and not center:selected=rows;touching_fallback=True  # e.g. calls never touch an organization: show the most-cited edges instead
     facts=compact(selected,10**6)
     touching=set(centers)
     facts.sort(key=lambda f:(not (f['subject'] in touching or f['object'] in touching),-f['count'],f['date']),reverse=False)

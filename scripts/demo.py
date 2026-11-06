@@ -9,7 +9,8 @@ from inteldoc.store import use_dataset, data_root
 
 def main():
     parser=argparse.ArgumentParser(description='Reproducible fictional corpus, offline or model-assisted')
-    parser.add_argument('command',choices=['world','plan','generate','evaluate','build'])
+    parser.add_argument('command',choices=['world','plan','generate','evaluate','build','cdr'])
+    parser.add_argument('--cdr-count',type=int,default=14000,help='Synthetic partner-agency call records to generate')
     parser.add_argument('--count',type=int,default=5000)
     parser.add_argument('--seed',type=int,default=42)
     parser.add_argument('--limit',type=int)
@@ -31,6 +32,9 @@ def main():
         if args.command in ['generate','build']:
             result=run(args.limit,args.retry_failed,cfg,args.workers)
             print(json.dumps(result));failed=result['failed']
+        if args.command=='cdr':
+            from inteldoc import cdr
+            print(json.dumps({**cdr.generate(args.seed,args.cdr_count),**cdr.ingest()}))
         if args.command in ['evaluate','build']:
             result=score();data_root().mkdir(parents=True,exist_ok=True)
             (data_root()/'scorecard.json').write_text(json.dumps(result,indent=2));print(json.dumps(result,indent=2))

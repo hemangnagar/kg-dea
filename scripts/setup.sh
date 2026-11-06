@@ -16,3 +16,5 @@ elif [[ -f artifacts/haiku-5000-results.zip && "${INTELDOC_BUILD_OFFLINE:-0}" !=
 else
   .venv/bin/python -m scripts.demo build --count 5000 --retry-failed
 fi
+# Partner-agency call records: generated from the world (synthetic, non-dialable labels) and ingested as a second source.
+.venv/bin/python -m scripts.demo cdr

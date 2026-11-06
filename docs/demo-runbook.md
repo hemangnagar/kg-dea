@@ -10,7 +10,7 @@ The demo takes 12 to 15 minutes plus questions. Rehearse it once end to end the 
 2. The graph answers questions that keyword search cannot: multi-hop, temporal, cross-agency.
 3. The whole thing can be measured, because the corpus was built from a known world with ground truth.
 
-Every step below serves one of those three. If you are short on time, cut steps 6 and 9, never steps 3, 4 or 8.
+Every step below serves one of those three. If you are short on time, cut steps 6 and 10, never steps 3, 4, 7 or 9.
 
 ## 2. Setup, the day before
 
@@ -38,7 +38,7 @@ chromium --app=http://127.0.0.1:8000
 | Check | Expected |
 |---|---|
 | `curl http://127.0.0.1:8000/api/health` | `{"status":"ok","validated":5000,...}` |
-| Top of the Investigate page, persona Secret // NOFORN | 5,000 accessible cables, 944 connected entities, 3,241 distinct accessible facts |
+| Top of the Investigate page, persona Secret // NOFORN | 5,000 accessible cables, 958 connected entities, 15,041 distinct accessible facts (3,241 from cables plus the call edges) |
 | Same, persona Unclassified // FOUO | 5,000 cables, 784 entities, 2,256 facts |
 | The notice line under the search box | "Narratives by anthropic plus 51 hand-written" |
 | Click a citation chip in any answer | a dialog with the cable, the highlighted paragraph and portion marks |
@@ -110,7 +110,29 @@ Appears: 24 controls relationships, each a plaza or route with a from and until 
 
 Say: "Plazas change hands. Nogales went to this organization in 2013 under an accord, back to its rival in 2019 when the accord collapsed, and back again in 2022 when a plaza boss defected. Those are four dated windows in the graph, each backed by reporting." Optionally: "At Unclassified this question has no answer either; corridor control is Secret-only reporting."
 
-### Step 6. The alias trap (45 seconds, optional)
+### Step 6. Partner data: the FBI call records (2 minutes)
+
+Click the chip **Who did Yesenia Anzures Ibarra call in 2022?**
+
+Appears: 24 call relationships, each "A called B" with a date and an amber chip reading "FBI call record" with the mark U//LES.
+
+Say: "This is a second source from a second agency: a spreadsheet of call records, not a document. The numbers in it are labels that change hands. The graph resolved each one to the person who held it on the day of the call, and fused the result with the cable-derived graph, keeping the provenance separate: amber chips are partner records, green chips are cable paragraphs."
+
+Click one amber chip.
+
+Appears: the record with its time and duration, and under Caller and Callee the label, the person it resolves to, and the dates that person held it.
+
+Say: "Same number, different holder a year earlier. Resolving by the window rather than by the number is what makes the fusion right." Close the dialog.
+
+Now click the chip **Who led Bruma del Cobre in 2021?** and open the first citation chip (a Treasury cable).
+
+Appears: above the paragraphs, an amber notice: "Partner data (FBI call records, U//LES): 3 calls between Yesenia Anzures Ibarra and Nicanor Abundis Fregoso" in the week before the event, each a chip.
+
+Say: "The cable says these two were involved in the same event. The partner agency's records show them talking three times in the days before. Nobody read the spreadsheet against the cable; the graph did." Close the dialog.
+
+Switch the persona to **Unclassified // FOUO** and click the call question chip again: no results. Say: "LES-handled partner data is not available to this user, and neither are the corroborations." Switch back to **Secret // NOFORN**.
+
+### Step 7. The alias trap (45 seconds, optional)
 
 Click the chip **Who is El Relojero?**
 
@@ -118,7 +140,7 @@ Appears: "This alias identifies more than one fictional person." Two buttons: Fe
 
 Say: "Nicknames are shared, inherited when a boss falls, and reused across organizations. The graph does not guess. Pick one." Click Fermín Loera Arriaga: his relationships appear, including his defection from one organization to another with dated membership windows.
 
-### Step 7. The graph explorer (2 minutes)
+### Step 8. The graph explorer (2 minutes)
 
 Click **Graph explorer** in the left navigation.
 
@@ -134,7 +156,7 @@ Point at the two "owns Cambios del Pacífico Norte" edges with different dates. 
 
 Mention, without clicking: "The accessible graph exports as GraphML or Neo4j CSV from the links under the canvas, respecting the persona."
 
-### Step 8. The scorecard (90 seconds)
+### Step 9. The scorecard (2 minutes)
 
 Click **Extraction scorecard**.
 
@@ -151,9 +173,11 @@ Say: "This is measured, not claimed. We know every relationship the world contai
 
 Point at the table: "Membership and ownership are the hardest edges, because they live only in Secret paragraphs and appear in fewer cables."
 
+Scroll to the panel **Partner data: FBI call records**. Say: "Fourteen thousand synthetic records. Number-to-person resolution by the dated holder windows is right 99.9 percent of the time, including on the 8,700 records involving a number that changed hands; resolving every number to its first known holder would be right 76 percent of the time. The errors are numbers still used by a previous holder for a few weeks after a handover, which is in the data on purpose."
+
 Then say the honest sentence, because someone will ask otherwise: "These numbers describe a constrained setting. The planted facts are written as explicit sentences and the extractor is checked against the world's vocabulary. On real, unconstrained prose the numbers will be lower, and measuring that is the next phase."
 
-### Step 9. The world bible (45 seconds, optional)
+### Step 10. The world bible (45 seconds, optional)
 
 Click **World bible**. Scroll slowly past the six factions and the corridors.
 
@@ -183,6 +207,10 @@ Return to **Investigate**. Say: "Real document structure, questions keyword sear
 
 **Does it do free-text questions?** It recognizes entity names and aliases, places, years, and the words companies, corridors, members, owns and led. It is deterministic retrieval with two hops, not an LLM answering freely. That is a feature for an audience that needs every answer traceable.
 
+**Where did the call records come from?** Generated from the same fictional world, so every record has a known true caller and callee; that is what makes the resolution measurable. The file has the shape of a provider extract (time, duration, labels) with non-dialable labels and no cell-site data. In a real deployment the partner's file would be ingested through the same resolver against the agency's own identifier holdings.
+
+**Can it do link analysis on the calls?** It fuses them into the graph and shows them per person and per cable; frequency, community and pattern analysis are deliberately out of scope for this demo.
+
 **What is next?** Unconstrained prose and extraction to get real precision and recall numbers; cross-agency questions; an editorial review of the world; official schema validation.
 
 ## 5. Safe questions beyond the script
@@ -194,6 +222,8 @@ All tested on the published corpus at Secret // NOFORN:
 | Who is La Garza? | disambiguation between Lorena Mijares Ocampo and Irene Sandoval Quiroga |
 | Who was a member of Los del Cedro Partido? | 24 relationships, leadership and membership windows |
 | Who owns Transportes Cerro Pardo? | 7 relationships, owner and nominee (Secret only; empty at Unclassified) |
+| Who did Fermín Loera Arriaga call in 2018? | 20 call relationships (Secret only) |
+| Who did Lorena Mijares Ocampo call in 2016? | 24 call relationships (Secret only) |
 | What happened in Reynosa in 2020? | 6 relationships around the Reynosa plaza events of that year |
 
 Questions that will not work well: anything without an entity name, place or year in it; "why" questions; questions about agencies as subjects. Say "the engine is deterministic retrieval" and move on.
@@ -208,12 +238,13 @@ Questions that will not work well: anything without an entity name, place or yea
 | 3 Temporal | 1 |
 | 4 Persona | 1.5 |
 | 5 Corridors | 1 |
-| 6 Alias (optional) | 0.75 |
-| 7 Explorer | 2 |
-| 8 Scorecard | 1.5 |
-| 9 World bible (optional) | 0.75 |
+| 6 Partner call records | 2 |
+| 7 Alias (optional) | 0.75 |
+| 8 Explorer | 2 |
+| 9 Scorecard | 2 |
+| 10 World bible (optional) | 0.75 |
 | Close | 0.5 |
-| Total | about 12 |
+| Total | about 14 |
 
 ## 7. Troubleshooting
 
@@ -230,6 +261,8 @@ Questions that will not work well: anything without an entity name, place or yea
 **A dialog will not close.** Press Escape.
 
 **Accounted API spend shows $0.00.** Expected. The published corpus ships without the generation ledger; the spend is documented in `artifacts/haiku-5000/run-report.json`.
+
+**The call question returns nothing.** The partner records were not ingested. Run `.venv/bin/python -m scripts.demo cdr` once (ten seconds) and reload.
 
 **Do not** run any `scripts/demo` command during the demo, and do not change files under `world/`; the corpus is pinned to the world it was generated from and will refuse a different one.
 

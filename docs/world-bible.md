@@ -62,7 +62,7 @@ The query engine resolves unique aliases and asks for disambiguation when a shar
 
 - **17 authored front companies** (trucking, produce export, currency exchange, used cars, mining, hospitality, agricultural supply), each with an owner and, for some, a nominee; 43 generated ones. Ownership becomes `owns` and `nominee_for` edges dated at registration.
 - **12 authored assets** (vessels, a semi-submersible, aircraft, tractor-trailers, vehicles, a tanker truck) with DEMO-prefixed registrations; 28 generated ones. Each is operated by one organization.
-- **360 identifiers** (DEMO-TEL-nnnnn, DEMO-ACCT-nnnnn) held by people over dated windows. They are labels, not dialable numbers or bank accounts.
+- **360 identifiers** (DEMO-TEL-nnnnn, DEMO-ACCT-nnnnn) held by people over dated windows. They are labels, not dialable numbers or bank accounts. Holder windows are derived from the events that use each identifier, extended into continuous spans, and 59 of the 180 phones are handed to a colleague after their last use, so the same number resolves to different people in different years. Ten cited numbers resolve to someone other than the person a cable attributes them to, which is left in as a realistic inconsistency.
 - **49 sources**, seven per agency (DEA, FBI, HSI, CBP, DIA, Treasury, OSINT), each with a stable reliability grade and a kind (port worker, customs broker, inspection record, financial filing, press digest, and so on).
 
 ## 5. Timeline and events
@@ -70,6 +70,10 @@ The query engine resolves unique aliases and asks for disambiguation when a shar
 Forty-two authored beats, each with a name, a date, a place, an organization, a corridor where relevant, participants with roles, a quantity where relevant and a one-paragraph description used as narrative context. Beat types: Founding, Alliance, AllianceBreak, Split, Arrest, Extradition, Release, Killing, Seizure, Payment, Designation, Election.
 
 The expansion adds routine events to reach 500, sampled from the world rather than invented: a Shipment moves a commodity the corridor actually carries, from a place on that corridor, by a member of the organization that controlled it on that date, using an asset that organization operates and a company one of its members owns. A Payment goes from a launderer to a corrupt official of the same organization. A Seizure happens at a crossing or port on a controlled corridor. An Arrest removes a generated member from later events. Thirty-five percent of routine events cluster within 45 days of an authored beat so the corpus shows reporting bumps.
+
+## 5b. Partner data: FBI call records
+
+A second, structured source generated from the same world: 14,000 synthetic call records between phone labels, sampled around the events (including calls with the organization's boss in the week before) and among members of the same organization, plus 2,000 calls involving numbers the world does not know. A share of handed-over numbers is still used by the previous holder for a few weeks, so resolution has genuine errors. Records carry `U//LES` handling from FBI. Ingestion resolves labels through the holder windows and adds `called` edges (person → person, dated) with the record as provenance; the scorecard reports resolution accuracy against the generator's truth.
 
 ## 6. The knowledge graph
 
@@ -86,6 +90,7 @@ Edges (all dated; windowed edges carry `until`):
 | supported | company → event | point |
 | involved_in | asset → event | point |
 | uses | person → identifier | point |
+| called | person → person (from partner call records) | point |
 | leads | person → organization | window |
 | member_of | person → organization | window |
 | controls | organization → corridor | window |

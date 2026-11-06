@@ -199,11 +199,12 @@ def plan(count=5000, seed=42, config=None):
         if not old_settings and old and cfg.get('provider', 'offline') != 'offline':
             raise ValueError('Existing baseline corpus cannot be relabeled as model-generated; choose a new --output-dir')
         db.execute("INSERT OR IGNORE INTO metadata VALUES('generation_settings',?)", (settings,))
-        world_hash = hashlib.sha256(json.dumps(world, sort_keys=True).encode()).hexdigest()
-        old_hash = db.execute("SELECT value FROM metadata WHERE key='world_hash'").fetchone()
-        if old_hash and old_hash[0] != world_hash:
+        from .world import world_signature
+        signature = world_signature(world)
+        old_signature = db.execute("SELECT value FROM metadata WHERE key='world_signature'").fetchone()
+        if old_signature and old_signature[0] != signature:
             raise ValueError('World changed underneath this dataset')
-        db.execute("INSERT OR IGNORE INTO metadata VALUES('world_hash',?)", (world_hash,))
+        db.execute("INSERT OR IGNORE INTO metadata VALUES('world_signature',?)", (signature,))
         db.executemany('INSERT OR IGNORE INTO cables(id,state,record) VALUES(?,?,?)', [(c.cable_id, 'planned', c.model_dump_json()) for c in records])
     return len(records)
 
@@ -424,7 +425,7 @@ def run(limit=None, retry_failed=False, config=None, workers=1):
 def score():
     truth = {Fact(**f).key() for f in json.loads((world_dir() / 'graph_truth.json').read_text())}
     with connect() as db:
-        recovered = {tuple(r) for r in db.execute('SELECT DISTINCT subject,predicate,object,date,until_date FROM evidence')}
+        recovered = {tuple(r) for r in db.execute("SELECT DISTINCT subject,predicate,object,date,until_date FROM evidence WHERE predicate!='called'")}
         planted, contradictions, corrections, rejected = set(), set(), 0, 0
         for r in db.execute("SELECT record FROM cables WHERE state='validated'"):
             c = Cable.model_validate_json(r[0]); planted.update(f.key() for p in c.paragraphs for f in p.facts)
@@ -440,6 +441,8 @@ def score():
     tp = len(recovered & truth)
     disputed = {k for k in recovered if (k[0], k[1], k[2], k[3]) in contradictions}
     undisputed = recovered - disputed
+    from .cdr import score as cdr_score
+    partner = cdr_score()
     by_predicate = {}
     for predicate in sorted({k[1] for k in truth}):
         total = [k for k in truth if k[1] == predicate]
@@ -449,7 +452,7 @@ def score():
                 precision=tp / len(recovered) if recovered else 0,
                 precision_excluding_contradictions=len(undisputed & truth) / len(undisputed) if undisputed else 0,
                 world_recall=tp / len(truth) if truth else 0, planted_recall=len(recovered & planted) / len(planted) if planted else 0,
-                contradiction_edges=len(disputed), correction_cables=corrections, authored_narratives=authored, rejected_model_claims=rejected, recall_by_predicate=by_predicate, states=counts,
+                contradiction_edges=len(disputed), correction_cables=corrections, authored_narratives=authored, rejected_model_claims=rejected, recall_by_predicate=by_predicate, partner_cdr=partner, states=counts,
                 limitations=('Model-generated prose retains canonical fact-sentence anchors. Scores measure constrained extraction, not unrestricted real-world prose.' if online else
                              'Baseline only. The offline drafter and the extractor share one sentence grammar, so planted recall is high by construction. Deliberate contradictions are reported separately.'),
                 schema_validated=(ROOT / 'schemas/pubs.xsd').exists())
