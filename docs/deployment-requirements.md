@@ -2,81 +2,63 @@
 
 Request to the server team (Tom) for hosting the knowledge-graph demo website. The application is a small Python web app that serves a pre-generated synthetic corpus. It needs no database server, no GPU, no model API access and no outbound network at runtime.
 
-## 1. What we need from the server
+Two ways to host it are described below. **Option A, a VM with root access, is the preferred path**: it needs the least from the server team and gets us to a working site fastest. Option B, a container image, is the fallback if the site does not hand out root or runs everything on a container platform.
 
-### Machine
+## Option A (preferred): a VM with root access
 
-| Item | Requirement |
-|---|---|
-| Operating system | Linux, 64-bit (Ubuntu 22.04 or 24.04, or RHEL/Rocky 9) |
-| CPU | 2 vCPU |
-| Memory | 4 GB |
-| Disk | 10 GB free on the volume holding the checkout (the data is about 300 MB; the rest is headroom for logs and a rebuild) |
-| GPU | none |
-
-### Software installed on the machine
+We install and operate everything on the machine ourselves. The server team provides four things.
 
 | Item | Requirement |
 |---|---|
-| Python | 3.12 or newer, with `venv` and `pip` |
-| Tools | `git`, `unzip`, `sha256sum` (coreutils), `curl` |
-| Reverse proxy | nginx (or the site's standard proxy) in front of the app |
-| Service manager | systemd (we provide the unit file) |
+| 1. The VM | Linux, 64-bit (Ubuntu 22.04 or 24.04, or RHEL/Rocky 9), 2 vCPU, 4 GB memory, 10 GB free disk, no GPU. Root (sudo) for our deployer over SSH. |
+| 2. Hostname and TLS | a DNS name for the site (for example `inteldoc.<domain>`) and a certificate for it; an internal CA is fine. |
+| 3. Network path | inbound HTTPS (443) to the VM from the intended audience (VPN only, an IP allowlist, or the internal network), and outbound HTTPS to `github.com`, `pypi.org` and `files.pythonhosted.org` during installation only. If egress is blocked we bring a tarball with the packages instead. No outbound traffic is needed at runtime. |
+| 4. Authentication in front | the application has no login of its own, so access must be enforced before it: either the site's SSO gateway in front of the site, or permission for us to run HTTP basic authentication at the reverse proxy with credentials held by the demo team. |
 
-### Accounts and access
+Everything else is ours: Python 3.12, nginx as the reverse proxy on 443 forwarding to the app on `127.0.0.1:8000`, a systemd service, log rotation and OS patching while the demo is live.
 
-| Item | Requirement |
-|---|---|
-| Service account | a non-root user (for example `inteldoc`) with a home directory, to own the checkout and run the service |
-| Our access | SSH access for the person deploying, with sudo for the one-time package install and the systemd and nginx configuration, or a Tom-run install from the steps we provide |
-| Repository access | the server must be able to clone `https://github.com/hemangnagar/kg-dea` (private repository: a read-only deploy key or token), or we deliver the repository as a tarball |
-
-### Network
-
-| Item | Requirement |
-|---|---|
-| Outbound, install time only | HTTPS to `github.com`, `pypi.org` and `files.pythonhosted.org`. If egress is blocked, tell us and we will ship a wheelhouse with the tarball |
-| Outbound, runtime | none |
-| Inbound | HTTPS on 443 to the reverse proxy; the app itself listens on `127.0.0.1:8000` and must not be exposed directly |
-| DNS | a hostname for the site (for example `inteldoc.<domain>`) |
-| TLS | a certificate for that hostname; an internal CA is fine |
-| Reachability | who may reach the site (VPN only, an IP allowlist, or the site's SSO gateway) |
-
-### Authentication
-
-The application has no login of its own. The "persona" switch in the interface is a demonstration control, not access control. Access must be enforced in front of it:
-
-- SSO at the reverse proxy (preferred: the site's standard gateway, or nginx `auth_request`), or
-- HTTP basic authentication at the proxy with credentials held by the demo team.
-
-### Data handling
-
-All content is synthetic: every organization, person, company and document is fictional, and the phone labels are deliberately non-dialable. The interface displays classification-style markings (U//FOUO, S//NF, U//LES) as part of the demonstration. The site should be treated as internal-only so that a casual viewer cannot mistake the markings for real material.
-
-## 2. What we provide
-
-- The repository, including the pre-generated 5,000-document corpus as a verified archive, the world data and the call-record generator.
-- An install script (`bash scripts/setup.sh`, two to three minutes) and a start script (`bash scripts/start.sh`).
-- A systemd unit file and an nginx server block for the hostname and certificate paths Tom gives us.
-- A smoke-test checklist: the health endpoint, the expected counts on the first page, and the presenter's runbook.
-
-## 3. Installation summary, for planning
+### Installation summary, for planning
 
 ```sh
 sudo -u inteldoc git clone https://github.com/hemangnagar/kg-dea.git /opt/inteldoc
-cd /opt/inteldoc && sudo -u inteldoc bash scripts/setup.sh
-sudo systemctl enable --now inteldoc        # unit provided by us; runs scripts/start.sh on 127.0.0.1:8000
-curl http://127.0.0.1:8000/api/health        # expect {"status":"ok","validated":5000,...}
+cd /opt/inteldoc && sudo -u inteldoc bash scripts/setup.sh    # two to three minutes
+sudo systemctl enable --now inteldoc                            # runs scripts/start.sh on 127.0.0.1:8000
+curl http://127.0.0.1:8000/api/health                           # expect {"status":"ok","validated":5000,...}
 ```
 
-## 4. Questions for Tom
+### Questions for Tom (Option A)
 
-1. Hostname and certificate: what name will the site have, and who issues the certificate?
-2. Authentication: which mechanism will sit in front of it (SSO gateway, nginx auth, basic auth)?
+1. Can a VM with root access for our deployer be provided, and by when?
+2. Hostname and certificate: what name will the site have, and who issues the certificate?
 3. Reachability: VPN only, allowlist, or open to the internal network?
-4. Install path and service account name, if different from `/opt/inteldoc` and `inteldoc`.
-5. Egress at install time: allowed to GitHub and PyPI, or should we deliver a tarball with a wheelhouse?
-6. Who will run the install: our deployer over SSH, or Tom from our steps?
-7. Logging and monitoring: where should service logs go, and is there a standard uptime check to register the health endpoint with?
-8. Ports: is 8000 free on loopback, or should the service use another port?
-9. Change control: is there a maintenance window or approval needed to add a new internal site?
+4. Authentication: SSO gateway in front, or basic auth run by us?
+5. Egress at install time: allowed to GitHub and PyPI, or should we bring a tarball?
+6. Any change-control step or maintenance window for adding a new internal site?
+
+## Option B (fallback): a container image
+
+If root on a VM is not possible, we deliver a single container image with the application, the pre-generated corpus and the partner call records baked in (about 400 MB). It needs no network access at all, in or out, except the HTTP it serves.
+
+| Item | Requirement |
+|---|---|
+| Container runtime | Docker or Podman on a host, or the site's container platform; tell us which, and how images are delivered (registry push or an image file) |
+| Resources | 2 vCPU, 4 GB memory, 2 GB disk for the image |
+| Hostname and TLS | as in Option A |
+| Network path | inbound HTTPS to whatever terminates TLS in front of the container; the container listens on port 8000 and is not exposed directly |
+| Authentication in front | as in Option A; if the site has no standard front end for containers, our image can include nginx with basic auth |
+
+### Questions for Tom (Option B)
+
+1. Which container runtime or platform, and how should the image be delivered?
+2. Who runs the reverse proxy and TLS termination in front of containers?
+3. Hostname, certificate, reachability and authentication, as for Option A.
+
+## Data handling (both options)
+
+All content is synthetic: every organization, person, company and document is fictional, and the phone labels are deliberately non-dialable. The interface displays classification-style markings (U//FOUO, S//NF, U//LES) as part of the demonstration. The site should be treated as internal-only so that a casual viewer cannot mistake the markings for real material.
+
+## What we provide (both options)
+
+- The repository, including the pre-generated 5,000-document corpus as a verified archive, the world data and the call-record generator.
+- Install and start scripts, a systemd unit and an nginx server block (Option A), or the container image and a compose file (Option B).
+- A smoke-test checklist: the health endpoint, the expected counts on the first page, and the presenter's runbook.
