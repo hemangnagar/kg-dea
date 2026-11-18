@@ -1,0 +1,8 @@
+# Local run of the published image: docker compose up --build, then open http://127.0.0.1:8000
+services:
+  inteldoc:
+    build: .
+    image: inteldoc:1.0
+    ports:
+      - "127.0.0.1:8000:8000"
+    restart: unless-stopped
