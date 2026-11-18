@@ -1,0 +1,15 @@
+.git
+.venv
+__pycache__
+.pytest_cache
+corpus
+world/expanded.json
+world/graph_truth.json
+artifacts/pilot-50
+artifacts/pilot-50-results.zip
+artifacts/pilot-50-results.zip.sha256
+artifacts/pilot-recovery-2026-11-05.tar.gz
+artifacts/pilot-recovery-2026-11-05.tar.gz.sha256
+tests
+.env
+*.sqlite*

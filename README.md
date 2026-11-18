@@ -17,6 +17,10 @@ Setup installs exact dependency versions, expands the world, verifies the publis
 
 Use the existing checkout in cloud tasks. Tasks are already isolated; do not create a Git worktree unless explicitly requested.
 
+## Container image
+
+`Dockerfile` builds one self-contained image: the app, the expanded world, the verified and unpacked corpus archive and the generated partner call records, about 400 MB, listening on port 8000 with a health check on `/api/health` and no outbound requests at runtime. `compose.yaml` runs it locally on `127.0.0.1:8000`. For Azure, build it in the registry without local Docker (`az acr build --registry <acr> --image inteldoc:1.0 .`) and run it on Azure Container Apps with Entra ID sign-in at the ingress; see [docs/deployment-requirements.md](docs/deployment-requirements.md). `scripts/start.sh` honors `HOST` (default loopback) and `PORT`.
+
 ## Demo sequence
 
 1. Ask **Which companies connect to Bruma del Cobre?** The graph traverses organization → event → front company.

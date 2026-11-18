@@ -1,0 +1,12 @@
+# Alternative to the systemd path: run the published image behind an existing reverse proxy.
+# docker compose -f deploy/compose.yaml up -d --build   (from the repository root)
+# Then proxy https://<domain> -> http://127.0.0.1:8000 with basic auth in the existing nginx/traefik/caddy.
+services:
+  inteldoc:
+    build:
+      context: ..
+    image: inteldoc:1.0
+    container_name: inteldoc
+    ports:
+      - "127.0.0.1:8000:8000"
+    restart: unless-stopped
