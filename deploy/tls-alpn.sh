@@ -7,9 +7,10 @@ set -euo pipefail
 HOST="${DOMAIN:?set DOMAIN, e.g. DOMAIN=kg.example.com}"
 PORT="${PORT:-8000}"
 export DEBIAN_FRONTEND=noninteractive
+export HOME=/root   # Azure Run command starts without HOME; acme.sh installs under $HOME
 apt-get install -y -q socat git >/dev/null
 if [[ ! -x /root/.acme.sh/acme.sh ]]; then
-  rm -rf /tmp/acme.sh
+  rm -rf /tmp/acme.sh /root/.acme.sh
   git clone -q --depth 1 https://github.com/acmesh-official/acme.sh.git /tmp/acme.sh
   (cd /tmp/acme.sh && ./acme.sh --install --nocron --no-profile >/dev/null)
 fi
