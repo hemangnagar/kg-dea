@@ -1,6 +1,6 @@
 # Deploying on your own server (hemangnagar.dev)
 
-Three ways, matching how other sites on the box are run. All put the app on `127.0.0.1:8000` and a reverse proxy with HTTP basic authentication in front of it; the app has no login of its own.
+Three ways, matching how other sites on the box are run. All put the app on a loopback port (`127.0.0.1:8000`, or `8093` under C) and a reverse proxy with HTTP basic authentication in front of it; the app has no login of its own.
 
 ## A. systemd service behind nginx (if the other sites run as services)
 
