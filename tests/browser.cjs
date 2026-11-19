@@ -9,12 +9,15 @@ const assert = require('node:assert/strict');
   await page.goto(process.env.DEMO_URL || 'http://127.0.0.1:8000');
   await page.waitForFunction(()=>/[0-9]/.test(document.querySelector('#s-doc').textContent));
   // Workspace (landing page): plain-English brief with citations, raw-data buttons enabled after an answer.
+  // Analyst view (default) hides raw data and citations; Developer view shows them.
   await page.locator('#wquestion').fill('Who led Bruma del Cobre in 2021?');
   await page.locator('#wask').click();
   await page.waitForFunction(()=>!document.querySelector('#wask').disabled);
   await page.locator('#wbrief .brief-p').first().waitFor();
-  assert.match(await page.locator('#wbrief').innerText(), /2020-02-27/);
+  assert.match(await page.locator('#wbrief').innerText(), /2020-02-27|February 27, 2020/);
   assert.doesNotMatch(await page.locator('#wbrief').innerText(), /member_of|occurred_at|linked_to/);
+  assert.equal(await page.locator('#wraw').isVisible(), false, 'analyst view hides raw data');
+  await page.locator('#viewmode').selectOption('developer');
   await page.locator('#wraw [data-raw=cables]:not([disabled])').waitFor();
   await page.locator('#wraw [data-raw=cables]').click();
   await page.locator('dialog[open] .raw-table').waitFor();

@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 import re
 from functools import lru_cache
 from typing import Literal
@@ -58,7 +59,7 @@ def compact(rows,limit=60):
     return list(grouped.values())[:limit]
 
 @app.get('/',response_class=HTMLResponse)
-def home():return (ROOT/'inteldoc/static/index.html').read_text()
+def home():return (Path(__file__).parent/'static/index.html').read_text()  # package-relative, independent of the data ROOT
 
 @app.get('/api/health')
 def health():
@@ -174,6 +175,34 @@ def brief(body:Question):
                 c=Cable.model_validate_json(row[0])
                 open_doc=body.persona=='secret' or c.classification=='U'
                 cables.append({'id':cid,'agency':c.agency,'date':str(c.report_date),'subject':c.subject if open_doc else 'Accessible portion of synthetic reporting','paragraphs':len(c.paragraphs),'classification':c.classification})
+    # Partner call records for the raw-data view: those cited by the facts, plus calls among the people behind the
+    # answer (people named in the facts and participants of its events), within the question's years when it names any.
+    call_records=[]
+    if body.persona=='secret' and facts:
+        by_event={e['id']:e for e in world()['events']}
+        people=set()
+        for f in facts:
+            for k in ('subject','object'):
+                e=entities()[f[k]]
+                if e['kind']=='person':people.add(e['id'])
+                elif e['kind']=='event':people|={x['id'] for x in by_event.get(e['id'],{}).get('participants',[]) if entities().get(x['id'],{}).get('kind')=='person'}
+        years=re.findall(r'\b(?:201\d|202[0-7])\b',body.question)
+        lo,hi=(min(years)+'-01-01',max(years)+'-12-31T23:59:59') if years else ('0000','9999')
+        cited_ids={c.replace('FBI-CDR-','') for c in call_ids}
+        with connect() as db:
+            rows=[]; total_related=0
+            if people:
+                q=','.join('?'*len(people))
+                # Calls among the people behind the answer; when only one person is involved, that person's calls.
+                where=(f'caller_person IN ({q}) AND callee_person IN ({q})' if len(people)>1 else f'(caller_person IN ({q}) OR callee_person IN ({q}))')+" AND caller_person IS NOT NULL AND callee_person IS NOT NULL AND call_start BETWEEN ? AND ?"
+                args=list(people)*2+[lo,hi]
+                total_related=db.execute(f'SELECT count(*) FROM cdr WHERE {where}',args).fetchone()[0]
+                rows=db.execute(f'SELECT record_id,call_start,duration_seconds,caller_person,callee_person FROM cdr WHERE {where} ORDER BY call_start DESC LIMIT 300',args).fetchall()
+            if cited_ids:
+                q=','.join('?'*len(cited_ids))
+                rows=list(db.execute(f'SELECT record_id,call_start,duration_seconds,caller_person,callee_person FROM cdr WHERE record_id IN ({q})',list(cited_ids)).fetchall())+[x for x in rows if x['record_id'] not in cited_ids]
+        for row in rows:
+            call_records.append({'id':'FBI-CDR-'+row['record_id'],'call_start':row['call_start'],'duration_seconds':row['duration_seconds'],'caller':row['caller_person'],'caller_name':entities()[row['caller_person']]['name'],'callee':row['callee_person'],'callee_name':entities()[row['callee_person']]['name'],'cited':row['record_id'] in cited_ids})
     paragraphs=[]; mode='Composed from the graph facts'; model=None
     if facts and not r['ambiguous']:
         cfg=load_config(); provider,settings=brief_provider(cfg)
@@ -193,6 +222,12 @@ def brief(body:Question):
                 paragraphs=narrate.compose(body.question,facts,names,body.persona,len(cable_ids),agencies,len(call_ids))
             if len(BRIEFS)>500:BRIEFS.clear()
             BRIEFS[key]=(paragraphs,mode,model)
+    related=[r for r in call_records if not r['cited']]
+    if related and not any(f['predicate']=='called' for f in facts):
+        names_in=sorted({n for r in related for n in (r['caller_name'],r['callee_name'])})
+        dates=sorted(r['call_start'][:10] for r in related)
+        total=max(total_related,len(related)); span=f'between {dates[0]} and {dates[-1]}' if dates[0]!=dates[-1] else f'on {dates[0]}'
+        paragraphs=paragraphs+[{'title':'Partner call records','text':f'Separately, FBI call records (U//LES) hold {total} call{"s" if total!=1 else ""} {"among" if len(people)>1 else "involving"} the people connected to this answer{" in the years the question names" if years else ""}, {span}: {", ".join(names_in[:8])}{", and others" if len(names_in)>8 else ""}. {"The " + str(len(related)) + " most recent are" if total>len(related) else "They are"} listed under Call records.','facts':[],'citations':[{'cable':r['id'],'paragraph':0,'mark':'U//LES'} for r in related[:3]]}]
     for p in paragraphs:
         seen=[]
         for i in p['facts']:
@@ -200,7 +235,7 @@ def brief(body:Question):
                 if c not in seen:seen.append(c)
         p['citations']=seen[:8]
     return {'question':body.question,'persona':body.persona,'summary':r['summary'],'paragraphs':paragraphs,'facts':facts,'entities':r['entities'],'related_entities':r['related_entities'],'ambiguous':r['ambiguous'],
-            'cables':cables,'call_records':call_ids if body.persona=='secret' else [],'agencies':agencies,'mode':mode,'model':model,'remarked':len(marks.overrides())}
+            'cables':cables,'call_records':call_records,'agencies':agencies,'mode':mode,'model':model,'remarked':len(marks.overrides())}
 
 class MarkChange(BaseModel):
     cable:str=Field(min_length=1,max_length=80)

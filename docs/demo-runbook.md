@@ -60,11 +60,11 @@ Say: "Five thousand synthetic intelligence cables about fictional Mexican cartel
 
 ### Step 0b. The Workspace: the end-user page (90 seconds)
 
-The site opens on **Workspace**, the page for people who will never learn what an edge is. Click the chip **Which companies connect to Bruma del Cobre?**
+The site opens on **Workspace**, the page for people who will never learn what an edge is, in **Analyst view**: prose only. Click the chip **Which companies connect to Bruma del Cobre?** and read the brief. Then switch the **View** selector at the top to **Developer view**: the citation chips and the raw-data buttons appear.
 
 Appears: a plain-English brief of three to five paragraphs, each followed by the citation chips of the paragraphs it was written from. The header reads "24 relationships · 66 cables" and four buttons sit above the text: **Source cables**, **Call records**, **Graph facts**, **Re-marked paragraphs**. The line under the brief says who wrote it: "Written by claude-haiku-5-5 from the graph facts, checked against them" when the server has a model key, otherwise "Composed from the graph facts".
 
-Say: "This is the analyst's page. Same question, same graph underneath, but the answer is written in English for someone who has never heard the words 'designated in' or 'linked to'. The model only rewrites sentences the graph produced; it cannot add a fact, and every paragraph keeps the citations of the facts it used." Click **Source cables**: a table of the cables behind the text, each opening the document, with a link to its PUBS XML. Click **Graph facts**: the raw relationships the text was built from. Close the dialog.
+Say: "This is the analyst's page. Same question, same graph underneath, but the answer is written in English for someone who has never heard the words 'designated in' or 'linked to'. The model only rewrites sentences the graph produced; it cannot add a fact, and every paragraph keeps the citations of the facts it used." Click **Source cables**: a table of the cables behind the text, each opening the document, with a link to its PUBS XML. Click **Call records**: the partner call records among the people behind the answer, newest first. Click **Graph facts**: the raw relationships the text was built from. Close the dialog.
 
 Say: "The buttons are the audit trail. Text for the reader, raw data one click away." Then click **Investigate** in the left navigation for the rest of the script, which shows the machinery.
 
