@@ -29,39 +29,9 @@ install -d -m 700 /etc/ssl/inteldoc
 "$ACME" --install-cert --ecc -d "$HOST" --key-file /etc/ssl/inteldoc/key.pem --fullchain-file /etc/ssl/inteldoc/fullchain.pem --reloadcmd "systemctl reload nginx || true" >/dev/null
 "$ACME" --install-cronjob >/dev/null
 
-cat > /etc/nginx/sites-available/inteldoc <<EOF
-# IntelDoc KG workbench behind nginx with HTTP basic authentication and TLS (acme.sh, tls-alpn-01).
-server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
-    server_name $HOST;
-    return 301 https://\$host\$request_uri;
-}
-server {
-    listen 443 ssl http2 default_server;
-    listen [::]:443 ssl http2 default_server;
-    server_name $HOST;
-    ssl_certificate /etc/ssl/inteldoc/fullchain.pem;
-    ssl_certificate_key /etc/ssl/inteldoc/key.pem;
-    ssl_protocols TLSv1.2 TLSv1.3;
+DOMAIN="$HOST" PORT="$PORT" bash "$(dirname "$0")/render-nginx.sh" && systemctl restart nginx
 
-    auth_basic "IntelDoc KG demo (synthetic data)";
-    auth_basic_user_file /etc/nginx/inteldoc.htpasswd;
-
-    location / {
-        proxy_pass http://127.0.0.1:$PORT;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-        proxy_read_timeout 60s;
-    }
-}
-EOF
-nginx -t && systemctl restart nginx
-
-PW=$(cat /root/inteldoc-demo-password.txt)
-echo "noauth=$(curl -s -o /dev/null -w '%{http_code}' "https://$HOST/")"
-echo "auth=$(curl -s -o /dev/null -w '%{http_code}' -u "demo:$PW" "https://$HOST/")"
-curl -s -u "demo:$PW" "https://$HOST/api/health"; echo
+echo "home=$(curl -s -o /dev/null -w '%{http_code}' "https://$HOST/login")"
+curl -s "https://$HOST/api/health"; echo
 echo "cert: $(openssl s_client -connect 127.0.0.1:443 -servername "$HOST" </dev/null 2>/dev/null | openssl x509 -noout -enddate -issuer | tr '\n' ' ')"
-echo "HTTPS is up at https://$HOST/ (user demo, password in /root/inteldoc-demo-password.txt)."
+echo "HTTPS is up at https://$HOST/ (login: demo, password in /root/inteldoc-demo-password.txt)."

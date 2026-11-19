@@ -1,6 +1,6 @@
 # Deploying on your own server (hemangnagar.dev)
 
-Three ways, matching how other sites on the box are run. All put the app on a loopback port (`127.0.0.1:8000`, or `8093` under C) and a reverse proxy with HTTP basic authentication in front of it; the app has no login of its own.
+Three ways, matching how other sites on the box are run. All put the app on a loopback port (`127.0.0.1:8000`, or `8093` under C) and a reverse proxy in front of it. The app has its own login page, enabled by setting `INTELDOC_PASSWORD` (one shared password, user `demo`); the installer writes it to `/etc/inteldoc.env`.
 
 ## A. systemd service behind nginx (if the other sites run as services)
 
@@ -11,7 +11,7 @@ Three ways, matching how other sites on the box are run. All put the app on a lo
 git clone https://github.com/hemangnagar/kg-dea.git /tmp/kg-dea && DOMAIN=kg.hemangnagar.dev bash /tmp/kg-dea/deploy/install.sh
 ```
 
-   This installs packages, creates the `inteldoc` user, clones to `/opt/inteldoc`, runs `scripts/setup.sh` (unpacks the corpus and generates the call records, two to three minutes), installs and starts the systemd service, installs the nginx site with basic auth, and generates a password for user `demo` in `/root/inteldoc-demo-password.txt`. Change it with `htpasswd /etc/nginx/inteldoc.htpasswd demo`.
+   This installs packages, creates the `inteldoc` user, clones to `/opt/inteldoc`, runs `scripts/setup.sh` (unpacks the corpus and generates the call records, two to three minutes), installs and starts the systemd service, installs the nginx site, and sets the demo password: `PASSWORD=...` on the command line, or a generated one kept in `/root/inteldoc-demo-password.txt`. Re-run with `PASSWORD=...` to change it.
 3. HTTPS: `certbot --nginx -d kg.hemangnagar.dev` (install certbot first if the box does not have it: `apt-get install -y certbot python3-certbot-nginx`).
 4. Check: `https://kg.hemangnagar.dev/api/health` after the basic-auth prompt returns `{"status":"ok","validated":5000,...}`; the first page shows 5,000 cables, 958 entities, 15,041 facts at Secret // NOFORN.
 
@@ -24,7 +24,7 @@ git clone https://github.com/hemangnagar/kg-dea.git /opt/inteldoc && cd /opt/int
 docker compose -f deploy/compose.yaml up -d --build
 ```
 
-The build takes a few minutes the first time (it unpacks the corpus inside the image). Then add the subdomain to the existing reverse proxy pointing at `http://127.0.0.1:8000`, with basic auth and the usual certificate handling. Check `curl http://127.0.0.1:8000/api/health` on the box.
+The build takes a few minutes the first time (it unpacks the corpus inside the image). Then add the subdomain to the existing reverse proxy pointing at `http://127.0.0.1:8000`, with the usual certificate handling, and pass `INTELDOC_PASSWORD` to the container. Check `curl http://127.0.0.1:8000/api/health` on the box.
 
 ## C. docker compose behind a Caddy container that another stack runs on the same host
 
@@ -41,5 +41,5 @@ The container is then reachable from that Caddy as `inteldoc:8000`, and on the m
 
 - Resources: 1 vCPU, 2 GB memory, 1 GB of disk for the checkout and corpus (plus the image under B).
 - No outbound traffic at runtime; no API keys on the server.
-- All data is synthetic, but the interface shows classification-style markings, so keep basic auth on and do not link the site publicly.
+- All data is synthetic, but the interface shows classification-style markings, so keep the password on and do not link the site publicly.
 - The presenter's script is `docs/demo-runbook.md`; its numbers apply to this deployment unchanged.
