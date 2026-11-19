@@ -16,13 +16,15 @@ if [[ ! -x /root/.acme.sh/acme.sh ]]; then
 fi
 ACME=/root/.acme.sh/acme.sh
 "$ACME" --set-default-ca --server letsencrypt >/dev/null
-systemctl stop nginx
-if ! "$ACME" --issue --alpn -d "$HOST" --pre-hook "systemctl stop nginx" --post-hook "systemctl start nginx" --keylength ec-256 >/var/log/acme-issue.log 2>&1; then
-  tail -n 20 /var/log/acme-issue.log
+if [[ ! -s "/root/.acme.sh/${HOST}_ecc/fullchain.cer" ]]; then
+  systemctl stop nginx
+  if ! "$ACME" --issue --alpn -d "$HOST" --pre-hook "systemctl stop nginx" --post-hook "systemctl start nginx" --keylength ec-256 >/var/log/acme-issue.log 2>&1; then
+    tail -n 20 /var/log/acme-issue.log
+    systemctl start nginx
+    exit 1
+  fi
   systemctl start nginx
-  exit 1
 fi
-systemctl start nginx
 install -d -m 700 /etc/ssl/inteldoc
 "$ACME" --install-cert --ecc -d "$HOST" --key-file /etc/ssl/inteldoc/key.pem --fullchain-file /etc/ssl/inteldoc/fullchain.pem --reloadcmd "systemctl reload nginx" >/dev/null
 "$ACME" --install-cronjob >/dev/null
@@ -36,9 +38,8 @@ server {
     return 301 https://\$host\$request_uri;
 }
 server {
-    listen 443 ssl default_server;
-    listen [::]:443 ssl default_server;
-    http2 on;
+    listen 443 ssl http2 default_server;
+    listen [::]:443 ssl http2 default_server;
     server_name $HOST;
     ssl_certificate /etc/ssl/inteldoc/fullchain.pem;
     ssl_certificate_key /etc/ssl/inteldoc/key.pem;
