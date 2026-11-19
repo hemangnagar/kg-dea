@@ -1,6 +1,6 @@
 # Alternative to the systemd path: run the published image behind an existing reverse proxy.
 # docker compose -f deploy/compose.yaml up -d --build   (from the repository root)
-# Then proxy https://<domain> -> http://127.0.0.1:8000 with basic auth in the existing nginx/traefik/caddy.
+# Then proxy https://<domain> -> http://127.0.0.1:8000 in the existing nginx/traefik/caddy; the app shows its own login page.
 services:
   inteldoc:
     build:
@@ -9,4 +9,6 @@ services:
     container_name: inteldoc
     ports:
       - "127.0.0.1:8000:8000"
+    environment:
+      INTELDOC_PASSWORD: ${INTELDOC_PASSWORD:?set INTELDOC_PASSWORD for the demo login}
     restart: unless-stopped

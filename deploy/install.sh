@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Install the IntelDoc KG workbench on an Ubuntu host as a systemd service behind nginx.
-# Usage (as root):  DOMAIN=kg.hemangnagar.dev bash deploy/install.sh
+# Usage (as root):  DOMAIN=kg.hemangnagar.dev [PASSWORD=...] bash deploy/install.sh
 # Re-running is safe: it updates the checkout, keeps the corpus, and restarts the service.
 set -euo pipefail
 DOMAIN="${DOMAIN:?set DOMAIN, e.g. DOMAIN=kg.hemangnagar.dev}"
@@ -12,7 +12,7 @@ PORT="${PORT:-8000}"
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -q
-apt-get install -y -q python3 python3-venv python3-pip git unzip nginx apache2-utils
+apt-get install -y -q python3 python3-venv python3-pip git unzip nginx
 id "$APP_USER" >/dev/null 2>&1 || useradd --system --no-create-home --home-dir "$APP_DIR" --shell /usr/sbin/nologin "$APP_USER"
 # The checkout is the user's home. Create it empty (no skeleton files) so that git clone accepts it.
 if [[ ! -d "$APP_DIR/.git" ]]; then
@@ -36,16 +36,20 @@ systemctl daemon-reload
 systemctl enable --now inteldoc
 systemctl restart inteldoc
 
-sed -e "s|@DOMAIN@|$DOMAIN|g" -e "s|@PORT@|$PORT|g" "$APP_DIR/deploy/nginx-inteldoc.conf" > /etc/nginx/sites-available/inteldoc
-ln -sf /etc/nginx/sites-available/inteldoc /etc/nginx/sites-enabled/inteldoc
-rm -f /etc/nginx/sites-enabled/default   # the app site is the default server, so every hostname and the bare IP get basic auth
-if [[ ! -f /etc/nginx/inteldoc.htpasswd ]]; then
-  echo "No /etc/nginx/inteldoc.htpasswd yet: create the demo login with  htpasswd -c /etc/nginx/inteldoc.htpasswd demo" >&2
-  htpasswd -cb /etc/nginx/inteldoc.htpasswd demo "$(openssl rand -base64 18 | tee /root/inteldoc-demo-password.txt)"
-  echo "Generated a password for user 'demo' in /root/inteldoc-demo-password.txt" >&2
+# Demo password: the app's own login page (INTELDOC_PASSWORD). Set PASSWORD=... to choose it; otherwise it is
+# generated once and kept in /etc/inteldoc.env (root only) and /root/inteldoc-demo-password.txt.
+if [[ -n "${PASSWORD:-}" ]] || [[ ! -f /etc/inteldoc.env ]]; then
+  PASSWORD="${PASSWORD:-$(openssl rand -base64 18)}"
+  printf 'INTELDOC_PASSWORD=%s\n' "$PASSWORD" > /etc/inteldoc.env
+  chmod 600 /etc/inteldoc.env
+  printf '%s\n' "$PASSWORD" > /root/inteldoc-demo-password.txt
+  echo "Demo login: user demo, password in /root/inteldoc-demo-password.txt" >&2
 fi
-nginx -t && systemctl reload nginx
+rm -f /etc/nginx/inteldoc.htpasswd
+systemctl restart inteldoc
+
+DOMAIN="$DOMAIN" PORT="$PORT" bash "$APP_DIR/deploy/render-nginx.sh" && systemctl reload nginx
 
 for i in $(seq 1 30); do curl -sf "http://127.0.0.1:$PORT/api/health" >/dev/null && break; sleep 1; done
 curl -s "http://127.0.0.1:$PORT/api/health"; echo
-echo "Service up. Next: issue the certificate with  certbot --nginx -d $DOMAIN  (see deploy/README.md)."
+echo "Service up at http://$DOMAIN/ (login: demo). HTTPS:  DOMAIN=$DOMAIN bash deploy/tls-alpn.sh  (see deploy/README.md)."

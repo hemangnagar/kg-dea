@@ -13,8 +13,10 @@ from .xmlio import render
 from .settings import load_config
 from .providers import provider_from_config, BudgetExceeded
 from .llm import answer_question
+from . import auth
 
 app=FastAPI(title='IntelDoc / Synthetic intelligence workbench',version='0.1.0')
+auth.install(app)
 Persona=Literal['secret','unclassified']
 
 @lru_cache
