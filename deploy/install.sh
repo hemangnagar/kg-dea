@@ -13,7 +13,14 @@ PORT="${PORT:-8000}"
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -q
 apt-get install -y -q python3 python3-venv python3-pip git unzip nginx apache2-utils
-id "$APP_USER" >/dev/null 2>&1 || useradd --system --create-home --home-dir "$APP_DIR" --shell /usr/sbin/nologin "$APP_USER"
+id "$APP_USER" >/dev/null 2>&1 || useradd --system --no-create-home --home-dir "$APP_DIR" --shell /usr/sbin/nologin "$APP_USER"
+# The checkout is the user's home. Create it empty (no skeleton files) so that git clone accepts it.
+if [[ ! -d "$APP_DIR/.git" ]]; then
+  if [[ -d "$APP_DIR" ]] && [[ -n "$(ls -A "$APP_DIR")" ]]; then
+    echo "$APP_DIR exists and is not a git checkout; move it aside and re-run." >&2; exit 1
+  fi
+  install -d -o "$APP_USER" -g "$APP_USER" "$APP_DIR"
+fi
 
 if [[ -d "$APP_DIR/.git" ]]; then
   sudo -u "$APP_USER" git -C "$APP_DIR" fetch -q origin "$BRANCH"
