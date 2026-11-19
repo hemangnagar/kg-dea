@@ -37,6 +37,7 @@ def connect(path=None):
     CREATE TABLE IF NOT EXISTS metadata(key TEXT PRIMARY KEY,value TEXT);
     CREATE TABLE IF NOT EXISTS cdr(record_id TEXT PRIMARY KEY,provider TEXT,call_start TEXT,duration_seconds INTEGER,caller_label TEXT,callee_label TEXT,call_type TEXT,caller_person TEXT,callee_person TEXT,caller_window TEXT,callee_window TEXT,handling TEXT);
     CREATE INDEX IF NOT EXISTS cdr_parties ON cdr(caller_person,callee_person,call_start);
+    CREATE TABLE IF NOT EXISTS mark_overrides(cable TEXT,paragraph INTEGER,classification TEXT,controls TEXT,original_classification TEXT,original_controls TEXT,PRIMARY KEY(cable,paragraph));
     ''')
     try:
         yield db

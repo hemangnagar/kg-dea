@@ -23,6 +23,9 @@ Use the existing checkout in cloud tasks. Tasks are already isolated; do not cre
 
 ## Demo sequence
 
+The site opens on **Workspace**, the end-user page: one question, a plain-English brief with citation chips, and buttons for the raw data behind it (source cables with their PUBS XML, partner call records, extracted facts). The brief is written by Claude Haiku from the graph's sentences when `CORPUSCLE_ANTHROPIC_KEY` is set on the server (checked: every paragraph must cite real facts and introduce no year the facts do not contain; about $0.002 per question, capped by `brief_spend_cap_usd`), and composed deterministically otherwise. Opening any cable at the Secret persona shows a selector per paragraph to re-mark it between S//NF and U//FOUO at runtime; overrides apply before every persona filter and **Re-marked paragraphs** lists and resets them. The corpus is never rewritten.
+
+
 1. Ask **Which companies connect to Bruma del Cobre?** The graph traverses organization → event → front company.
 2. Click a bracketed citation to open the exact cable and highlighted paragraph. Click an entity to see its one-hop neighborhood; switch to Timeline.
 3. Ask **Who led Bruma del Cobre in 2021?** Then switch from Secret // NOFORN to Unclassified // FOUO. Yesenia Anzures Ibarra's leadership window is marked `secret_only` in the seed and is planted only in Secret cables, so the same question now has no supported answer. Changing persona clears the prior graph, answer, and document before fetching.

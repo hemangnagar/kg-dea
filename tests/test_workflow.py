@@ -160,3 +160,37 @@ def test_graph_explorer_and_exports(corpus):
     assert csv_edges[0].startswith(':START_ID,subject_name,:TYPE,:END_ID') and len(csv_edges)>1
     assert client.get('/api/export/nodes.csv?persona=secret').text.startswith('id:ID,name,:LABEL')
     web.world.cache_clear();web.entities.cache_clear()
+
+def test_workspace_brief_and_runtime_remarking(corpus,monkeypatch):
+    from inteldoc import app as web, marks
+    for var in ['CORPUSCLE_ANTHROPIC_KEY','ANTHROPIC_API_KEY']:monkeypatch.delenv(var,raising=False)  # briefs stay deterministic in tests
+    web.world.cache_clear();web.entities.cache_clear();web.BRIEFS.clear()
+    client=TestClient(web.app)
+    q={'question':'Which companies connect to Bruma del Cobre?','persona':'secret'}
+    b=client.post('/api/brief',json=q).json()
+    assert b['facts'] and b['paragraphs'] and b['cables'] and b['mode'].startswith('Composed')
+    assert all(p['facts']==sorted(p['facts']) and all(0<=i<len(b['facts']) for i in p['facts']) for p in b['paragraphs'])
+    assert all('_' not in p['text'] for p in b['paragraphs'])  # no raw predicate names reach the reader
+    assert {c['cable'] for p in b['paragraphs'] for c in p['citations']}<= {c['cable'] for f in b['facts'] for c in f['citations']}
+    low=client.post('/api/brief',json={**q,'persona':'unclassified'}).json()
+    assert low['paragraphs'][-1]['text'].startswith('Only Unclassified')
+    # Re-mark a Secret paragraph down to U//FOUO: it becomes visible to the Unclassified persona, and only that persona may change marks.
+    with store.connect() as db:
+        secret=db.execute("SELECT cable,paragraph,subject,predicate,object FROM evidence WHERE classification='S' AND cable NOT LIKE 'FBI-CDR-%' LIMIT 1").fetchone()
+    before=[f for f in web.visible('unclassified') if (f['cable'],f['paragraph'])==(secret['cable'],secret['paragraph'])]
+    assert not before
+    assert client.post('/api/marks',json={'cable':secret['cable'],'paragraph':secret['paragraph'],'classification':'U','persona':'unclassified'}).status_code==403
+    r=client.post('/api/marks',json={'cable':secret['cable'],'paragraph':secret['paragraph'],'classification':'U'})
+    assert r.status_code==200 and r.json()['mark']=='U//FOUO' and len(r.json()['overrides'])==1
+    after=[f for f in web.visible('unclassified') if (f['cable'],f['paragraph'])==(secret['cable'],secret['paragraph'])]
+    assert after and all(f['classification']=='U' and f['controls']=='FOUO' for f in after)
+    doc=client.get('/api/cables/'+secret['cable']+'?persona=unclassified').json()
+    para=next(p for p in doc['paragraphs'] if p['number']==secret['paragraph'])
+    assert para['mark']=='U//FOUO' and para['remarked'] is True
+    assert client.post('/api/marks',json={'cable':'NOPE-000000-IIR-20','paragraph':1,'classification':'U'}).status_code==404
+    # Setting a paragraph back to its published mark removes the override; reset clears everything.
+    assert client.post('/api/marks',json={'cable':secret['cable'],'paragraph':secret['paragraph'],'classification':'S'}).json()['overrides']==[]
+    client.post('/api/marks',json={'cable':secret['cable'],'paragraph':secret['paragraph'],'classification':'U'})
+    assert client.delete('/api/marks').json()=={'overrides':[]} and marks.overrides()=={}
+    assert not [f for f in web.visible('unclassified') if (f['cable'],f['paragraph'])==(secret['cable'],secret['paragraph'])]
+    web.world.cache_clear();web.entities.cache_clear();web.BRIEFS.clear()

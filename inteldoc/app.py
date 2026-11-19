@@ -13,7 +13,8 @@ from .xmlio import render
 from .settings import load_config
 from .providers import provider_from_config, BudgetExceeded
 from .llm import answer_question
-from . import auth
+from . import auth, marks, narrate
+import os
 
 app=FastAPI(title='IntelDoc / Synthetic intelligence workbench',version='0.1.0')
 auth.install(app)
@@ -26,10 +27,14 @@ def entities():return {e['id']:e for e in world()['entities']}
 
 def visible(persona):
     with connect() as db:
-        # Both demo personas share agency NTK profiles. No client-provided clearance or agency SQL.
-        # Partner data under LES handling is modelled as unavailable to the Unclassified // FOUO demo persona.
-        rows=db.execute("SELECT * FROM evidence"+(" WHERE classification='U' AND controls NOT LIKE '%LES%'" if persona=='unclassified' else '')).fetchall()
-    return [dict(r) for r in rows]
+        rows=[dict(r) for r in db.execute("SELECT * FROM evidence").fetchall()]
+    # Runtime re-marks (demo control) apply before the persona filter, so a downgraded paragraph becomes visible
+    # and an upgraded one disappears for the Unclassified persona. Both demo personas share agency NTK profiles;
+    # partner data under LES handling is modelled as unavailable to the Unclassified // FOUO demo persona.
+    rows=marks.apply(rows)
+    if persona=='unclassified':
+        rows=[r for r in rows if r['classification']=='U' and 'LES' not in (r['controls'] or '')]
+    return rows
 
 def public_entity(id):return entities()[id]
 
@@ -79,8 +84,8 @@ class Question(BaseModel):
     persona:Persona='secret'
     entity_id:str|None=None
 
-@app.post('/api/query')
-def query(body:Question):
+def retrieve(body:Question):
+    """Deterministic two-hop retrieval shared by the Investigate and Workspace pages."""
     rows=visible(body.persona)
     allowed={r[k] for r in rows for k in ['subject','object']}
     text=body.question.casefold()
@@ -114,6 +119,11 @@ def query(body:Question):
     ambiguity=len(matches)>1 and not body.entity_id and any(len([e for e in matches if alias in e['aliases']])>1 for entity in matches for alias in entity['aliases'] if alias.casefold() in text)
     if ambiguity:facts=[]
     summary=('This alias identifies more than one fictional person. Select an entity below to disambiguate.' if ambiguity else f'Found {len(facts)} supported relationships in the accessible reporting. Each statement below links to its original paragraph.' if facts else 'No supported relationships were found in the accessible reporting. Try a canonical entity name, place, or a sample question.')
+    return {'summary':summary,'facts':facts,'entities':matches,'related_entities':[entities()[id] for id in sorted({f[k] for f in facts for k in ['subject','object']})],'ambiguous':ambiguity,'allowed':allowed}
+
+@app.post('/api/query')
+def query(body:Question):
+    r=retrieve(body); facts,matches,ambiguity,allowed,summary=r['facts'],r['entities'],r['ambiguous'],r['allowed'],r['summary']
     answer=[]
     mode='Deterministic graph retrieval · 2 hops · offline answer'
     cfg=load_config()
@@ -132,7 +142,88 @@ def query(body:Question):
             raise HTTPException(502,'Model configuration or evidence validation failed; no unverified answer returned')
         except Exception:
             raise HTTPException(503,'Model provider unavailable; no unverified answer returned')
-    return {'summary':summary,'answer':answer,'facts':facts,'entities':matches,'related_entities':[entities()[id] for id in sorted({f[k] for f in facts for k in ['subject','object']})],'ambiguous':ambiguity,'mode':mode,'persona':body.persona}
+    return {'summary':summary,'answer':answer,'facts':facts,'entities':matches,'related_entities':r['related_entities'],'ambiguous':ambiguity,'mode':mode,'persona':body.persona}
+
+def brief_provider(cfg):
+    """The model that writes workspace briefs: anthropic when a key is present (or brief_provider says so), else none."""
+    choice=cfg.get('brief_provider','auto')
+    key_env=cfg.get('anthropic_key_env','CORPUSCLE_ANTHROPIC_KEY')
+    if choice=='offline' or (choice=='auto' and not (os.getenv(key_env) or os.getenv('ANTHROPIC_API_KEY'))):return None,None
+    settings={**cfg,'provider':'anthropic','anthropic_model':cfg.get('anthropic_model') or 'claude-haiku-5-5',
+              'input_usd_per_million':cfg.get('input_usd_per_million') or 0.10,'output_usd_per_million':cfg.get('output_usd_per_million') or 0.50,
+              'max_spend_usd':cfg.get('brief_spend_cap_usd',25),'anthropic_key_env':key_env,'anthropic_effort':'low','anthropic_thinking':'disabled'}
+    return provider_from_config(settings),settings
+
+BRIEFS={}
+
+@app.post('/api/brief')
+def brief(body:Question):
+    """Workspace answer: plain-English paragraphs, each backed by the facts (and citations) it was written from, plus the raw data behind them."""
+    r=retrieve(body); facts=r['facts']
+    names={**entities()}
+    cited=[c for f in facts for c in f['citations']]
+    cable_ids=sorted({c['cable'] for c in cited if not c['cable'].startswith('FBI-CDR-')})
+    call_ids=sorted({c['cable'] for c in cited if c['cable'].startswith('FBI-CDR-')})
+    agencies=sorted({a for f in facts for a in f['agencies']})
+    cables=[]
+    if cable_ids:
+        with connect() as db:
+            for cid in cable_ids:
+                row=db.execute("SELECT record FROM cables WHERE id=? AND state='validated'",(cid,)).fetchone()
+                if not row:continue
+                c=Cable.model_validate_json(row[0])
+                open_doc=body.persona=='secret' or c.classification=='U'
+                cables.append({'id':cid,'agency':c.agency,'date':str(c.report_date),'subject':c.subject if open_doc else 'Accessible portion of synthetic reporting','paragraphs':len(c.paragraphs),'classification':c.classification})
+    paragraphs=[]; mode='Composed from the graph facts'; model=None
+    if facts and not r['ambiguous']:
+        cfg=load_config(); provider,settings=brief_provider(cfg)
+        key=(body.question.strip().casefold(),body.persona,marks.version(),bool(provider))
+        if key in BRIEFS:
+            paragraphs,mode,model=BRIEFS[key]
+        else:
+            if provider is not None:
+                try:
+                    paragraphs=narrate.write(body.question,facts,names,body.persona,provider,settings)
+                    model=settings['anthropic_model']; mode=f'Written by {model} from the graph facts, checked against them'
+                except BudgetExceeded:
+                    mode='Model spend cap reached; composed from the graph facts instead'
+                except Exception as e:
+                    mode=f'Model brief unavailable ({type(e).__name__}); composed from the graph facts instead'
+            if not paragraphs:
+                paragraphs=narrate.compose(body.question,facts,names,body.persona,len(cable_ids),agencies,len(call_ids))
+            if len(BRIEFS)>500:BRIEFS.clear()
+            BRIEFS[key]=(paragraphs,mode,model)
+    for p in paragraphs:
+        seen=[]
+        for i in p['facts']:
+            for c in facts[i]['citations']:
+                if c not in seen:seen.append(c)
+        p['citations']=seen[:8]
+    return {'question':body.question,'persona':body.persona,'summary':r['summary'],'paragraphs':paragraphs,'facts':facts,'entities':r['entities'],'related_entities':r['related_entities'],'ambiguous':r['ambiguous'],
+            'cables':cables,'call_records':call_ids if body.persona=='secret' else [],'agencies':agencies,'mode':mode,'model':model,'remarked':len(marks.overrides())}
+
+class MarkChange(BaseModel):
+    cable:str=Field(min_length=1,max_length=80)
+    paragraph:int=Field(ge=1,le=50)
+    classification:Literal['S','U']
+    persona:Persona='secret'
+
+@app.get('/api/marks')
+def list_marks():return {'overrides':marks.listing()}
+
+@app.post('/api/marks')
+def set_mark(body:MarkChange):
+    if body.persona!='secret':raise HTTPException(403,'Only the Secret // NOFORN persona may change portion marks in this demo')
+    try:classification,controls=marks.set_mark(body.cable,body.paragraph,body.classification)
+    except KeyError:raise HTTPException(404,'No such paragraph')
+    BRIEFS.clear()
+    return {'cable':body.cable,'paragraph':body.paragraph,'mark':marks.mark_text(classification,controls),'overrides':marks.listing()}
+
+@app.delete('/api/marks')
+def reset_marks(persona:Persona='secret'):
+    if persona!='secret':raise HTTPException(403,'Only the Secret // NOFORN persona may change portion marks in this demo')
+    marks.clear(); BRIEFS.clear()
+    return {'overrides':[]}
 
 @app.get('/api/graph/{id}')
 def graph(id:str,persona:Persona='secret'):
@@ -151,7 +242,13 @@ def timeline(id:str,persona:Persona='secret'):
 def cable(id:str,persona:Persona='secret'):
     with connect() as db:r=db.execute("SELECT record FROM cables WHERE id=? AND state='validated'",(id,)).fetchone()
     if not r:raise HTTPException(404,'No accessible cable')
-    c=Cable.model_validate_json(r[0]); visible_p=[p for p in c.paragraphs if persona=='secret' or p.classification=='U']
+    c=Cable.model_validate_json(r[0])
+    current=marks.overrides(); remarked=set()
+    for p in c.paragraphs:
+        if (id,p.number) in current:
+            p.classification,p.controls=current[(id,p.number)][0],[x for x in current[(id,p.number)][1].split(',') if x]; remarked.add(p.number)
+    document_class='S' if any(p.classification=='S' for p in c.paragraphs) else 'U'
+    visible_p=[p for p in c.paragraphs if persona=='secret' or p.classification=='U']
     if not visible_p:raise HTTPException(404,'No accessible cable')
     calls=[]
     if persona=='secret':
@@ -160,7 +257,8 @@ def cable(id:str,persona:Persona='secret'):
         people=[i for p in visible_p for f in p.facts for i in [f.subject,f.object] if entities().get(i,{}).get('kind')=='person']
         for item in corroboration(people,event['date'] if event else str(c.report_date)):
             calls.append({**item,'a_name':entities()[item['a']]['name'],'b_name':entities()[item['b']]['name'],'records':[{**r,'caller_name':entities()[r['caller']]['name'] if r['caller'] in entities() else r['caller']} for r in item['records']]})
-    return {'id':id,'agency':c.agency,'date':str(c.report_date),'subject':c.subject if persona=='secret' or c.classification=='U' else 'Accessible portion of synthetic reporting','place':c.place,'source':c.source_id if persona=='secret' or c.classification=='U' else 'Withheld','reliability':c.reliability if persona=='secret' or c.classification=='U' else 'Withheld','paragraphs':[{'number':p.number,'mark':p.mark,'text':p.text} for p in visible_p],'redacted':len(c.paragraphs)-len(visible_p),'synthetic':True,'corroborating_calls':calls}
+    open_doc=persona=='secret' or document_class=='U'
+    return {'id':id,'agency':c.agency,'date':str(c.report_date),'subject':c.subject if open_doc else 'Accessible portion of synthetic reporting','place':c.place,'source':c.source_id if open_doc else 'Withheld','reliability':c.reliability if open_doc else 'Withheld','paragraphs':[{'number':p.number,'mark':p.mark,'classification':p.classification,'text':p.text,'remarked':p.number in remarked} for p in visible_p],'redacted':len(c.paragraphs)-len(visible_p),'synthetic':True,'corroborating_calls':calls,'remarkable':persona=='secret'}
 
 @app.get('/api/cables/{id}/xml')
 def xml(id:str,persona:Persona='secret'):
