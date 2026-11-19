@@ -9,7 +9,6 @@ import hashlib
 import hmac
 import html
 import os
-import secrets
 from urllib.parse import parse_qs, quote, urlparse
 from fastapi import Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
@@ -17,7 +16,9 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 COOKIE = 'inteldoc_session'
 MAX_AGE = 12 * 3600
 OPEN_PATHS = {'/login', '/logout', '/api/health', '/favicon.ico'}
-_SALT = secrets.token_bytes(16)  # per-process: restarting the service signs everyone out
+# The session token is derived from the password alone, so every worker process (and a restarted service) accepts
+# the same cookie. Knowing the password already grants a login, so the token adds no further secret to protect.
+_SALT = hashlib.sha256(b'inteldoc-session-v1').digest()
 
 
 def password():
