@@ -1,0 +1,31 @@
+# Site block for a Caddy that already fronts this host (see deploy/compose.edge.yaml).
+# Append it to that Caddy's Caddyfile, then `caddy validate` and `caddy reload`.
+# SITE_HTTPS_PORT is the https port that Caddy serves on (443 unless the host cannot
+# use it). Change the hostname in both places if yours differs.
+#
+# The app has no login of its own and shows classification-style markings, so basic
+# auth stays on. KG_BASIC_AUTH_HASH is a bcrypt hash made with
+#   docker run --rm caddy:2.8.4 caddy hash-password --plaintext '<password>'
+# (user: demo). Either pass it to the Caddy container as an environment variable, or
+# write the hash in place of the placeholder, which needs only a reload and not a
+# new container. /api/health is left open so uptime checks work without credentials.
+
+# Explicit redirect so the port survives (Caddy's automatic one drops a non-443 https_port).
+http://kg.hemangnagar.dev {
+	redir https://kg.hemangnagar.dev:{$SITE_HTTPS_PORT:443}{uri} permanent
+}
+
+kg.hemangnagar.dev {
+	encode zstd gzip
+
+	@protected not path /api/health
+	basic_auth @protected {
+		demo {$KG_BASIC_AUTH_HASH}
+	}
+
+	reverse_proxy inteldoc:8000
+	log {
+		output stdout
+		format console
+	}
+}
