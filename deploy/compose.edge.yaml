@@ -1,0 +1,31 @@
+# Publish through a Caddy that already owns ports 80 and 443 (or 8443) on this host.
+#   docker compose -f deploy/compose.yaml -f deploy/compose.edge.yaml up -d --build   (from the repository root)
+#
+# Two sites on one machine cannot both bind port 80, so this stack does not run
+# its own proxy. It joins the Docker network of the stack that does, under the
+# name `inteldoc`, and that Caddy proxies to inteldoc:8000 using the site block
+# in deploy/kg.caddy (basic auth lives there; the app has no login of its own).
+#
+# EDGE_NETWORK is that stack's network, usually <its folder name>_default;
+# `docker network ls` shows the real name. Set it in deploy/.env (gitignored):
+#   EDGE_NETWORK=otherstack_default
+#
+# The host port moves off 8000 in case another service on the machine uses it
+# (INTELDOC_HOST_PORT, default 8093). It stays bound to loopback: Caddy reaches
+# the container over the Docker network, not through this port.
+
+# Without a name the project would be called `deploy`, after this folder.
+name: kg-dea
+
+services:
+  inteldoc:
+    ports: !override ["127.0.0.1:${INTELDOC_HOST_PORT:-8093}:8000"]
+    networks:
+      default: {}
+      edge:
+        aliases: [inteldoc]
+
+networks:
+  edge:
+    external: true
+    name: ${EDGE_NETWORK:?set EDGE_NETWORK in deploy/.env to the Docker network of the stack that runs Caddy}

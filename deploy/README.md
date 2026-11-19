@@ -1,6 +1,6 @@
 # Deploying on your own server (hemangnagar.dev)
 
-Two ways, matching how other sites on the box are run. Both put the app on `127.0.0.1:8000` and a reverse proxy with HTTP basic authentication in front of it; the app has no login of its own.
+Three ways, matching how other sites on the box are run. All put the app on a loopback port (`127.0.0.1:8000`, or `8093` under C) and a reverse proxy with HTTP basic authentication in front of it; the app has no login of its own.
 
 ## A. systemd service behind nginx (if the other sites run as services)
 
@@ -25,6 +25,17 @@ docker compose -f deploy/compose.yaml up -d --build
 ```
 
 The build takes a few minutes the first time (it unpacks the corpus inside the image). Then add the subdomain to the existing reverse proxy pointing at `http://127.0.0.1:8000`, with basic auth and the usual certificate handling. Check `curl http://127.0.0.1:8000/api/health` on the box.
+
+## C. docker compose behind a Caddy container that another stack runs on the same host
+
+When another compose stack on the machine already runs Caddy on ports 80 and 443 (or 8443), join its Docker network instead of publishing a port to a proxy on the host:
+
+```sh
+echo "EDGE_NETWORK=<that stack's network, see docker network ls>" > deploy/.env
+docker compose -f deploy/compose.yaml -f deploy/compose.edge.yaml up -d --build
+```
+
+The container is then reachable from that Caddy as `inteldoc:8000`, and on the machine itself at `http://127.0.0.1:8093`. Add the DNS record, append `deploy/kg.caddy` to that Caddy's Caddyfile with the basic-auth hash filled in, then `caddy validate` and `caddy reload` inside its container. Caddy obtains the certificate on the first request.
 
 ## Either way
 
