@@ -10,7 +10,7 @@ The demo takes 12 to 15 minutes plus questions. Rehearse it once end to end the 
 2. The graph answers questions that keyword search cannot: multi-hop, temporal, cross-agency.
 3. The whole thing can be measured, because the corpus was built from a known world with ground truth.
 
-Every step below serves one of those three. If you are short on time, cut steps 6 and 10, never steps 3, 4, 7 or 9.
+Every step below serves one of those three. If you are short on time, cut steps 6 and 10, never steps 0b, 3, 4, 7 or 9.
 
 ## 2. Setup, the day before
 
@@ -58,6 +58,16 @@ Do nothing yet. Point at the stats row.
 
 Say: "Five thousand synthetic intelligence cables about fictional Mexican cartels, 2010 to 2026, in real PUBS XML with real portion marks. Every organization, person, nickname, company and vessel is invented; only the geography is real. We built the world first and generated the cables from it, so we know the complete truth behind the corpus, which is what lets us measure the graph at the end. The analyst sees one search box."
 
+### Step 0b. The Workspace: the end-user page (90 seconds)
+
+The site opens on **Workspace**, the page for people who will never learn what an edge is. Click the chip **Which companies connect to Bruma del Cobre?**
+
+Appears: a plain-English brief of three to five paragraphs, each followed by the citation chips of the paragraphs it was written from. The header reads "24 relationships · 66 cables" and four buttons sit above the text: **Source cables**, **Call records**, **Graph facts**, **Re-marked paragraphs**. The line under the brief says who wrote it: "Written by claude-haiku-5-5 from the graph facts, checked against them" when the server has a model key, otherwise "Composed from the graph facts".
+
+Say: "This is the analyst's page. Same question, same graph underneath, but the answer is written in English for someone who has never heard the words 'designated in' or 'linked to'. The model only rewrites sentences the graph produced; it cannot add a fact, and every paragraph keeps the citations of the facts it used." Click **Source cables**: a table of the cables behind the text, each opening the document, with a link to its PUBS XML. Click **Graph facts**: the raw relationships the text was built from. Close the dialog.
+
+Say: "The buttons are the audit trail. Text for the reader, raw data one click away." Then click **Investigate** in the left navigation for the rest of the script, which shows the machinery.
+
 ### Step 1. A multi-hop question (90 seconds)
 
 Click the chip **Which companies connect to Bruma del Cobre?** or type it and press Investigate.
@@ -101,6 +111,14 @@ Click the chip **Which companies connect to Bruma del Cobre?** while still Uncla
 Say: "Public facts survive, financial structure does not. Each paragraph carried its own mark, and that is the unit of access."
 
 Switch the persona back to **Secret // NOFORN**.
+
+### Step 4b. Re-marking at runtime (90 seconds)
+
+Back at **Secret // NOFORN**, with **Who led Bruma del Cobre in 2021?** answered, open the first citation chip (a Treasury cable). Each paragraph in the dialog has a small selector showing its mark. On the highlighted paragraph, change **S//NF** to **U//FOUO**. The paragraph gets a "re-marked at runtime" badge, the stats row refreshes, and the open question re-runs.
+
+Say: "A classifier just downgraded one paragraph. Nothing else changed." Close the dialog and switch the persona to **Unclassified // FOUO**: the leadership answer now appears for this user, cited to that one paragraph, marked U//FOUO. Switch back to Secret, click **Re-marked paragraphs** in the Workspace, and click **Reset all to the published marks**.
+
+Say: "Access follows the mark on the paragraph, not the document, and the graph re-filters every time. The corpus itself was never rewritten, so a reset restores the published marks."
 
 ### Step 5. Corridor control over time (60 seconds)
 
