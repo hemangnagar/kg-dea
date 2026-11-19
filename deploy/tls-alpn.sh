@@ -26,7 +26,7 @@ if [[ ! -s "/root/.acme.sh/${HOST}_ecc/fullchain.cer" ]]; then
   systemctl start nginx
 fi
 install -d -m 700 /etc/ssl/inteldoc
-"$ACME" --install-cert --ecc -d "$HOST" --key-file /etc/ssl/inteldoc/key.pem --fullchain-file /etc/ssl/inteldoc/fullchain.pem --reloadcmd "systemctl reload nginx" >/dev/null
+"$ACME" --install-cert --ecc -d "$HOST" --key-file /etc/ssl/inteldoc/key.pem --fullchain-file /etc/ssl/inteldoc/fullchain.pem --reloadcmd "systemctl reload nginx || true" >/dev/null
 "$ACME" --install-cronjob >/dev/null
 
 cat > /etc/nginx/sites-available/inteldoc <<EOF
@@ -57,7 +57,7 @@ server {
     }
 }
 EOF
-nginx -t && systemctl reload nginx
+nginx -t && systemctl restart nginx
 
 PW=$(cat /root/inteldoc-demo-password.txt)
 echo "noauth=$(curl -s -o /dev/null -w '%{http_code}' "https://$HOST/")"
