@@ -8,6 +8,7 @@ from fastapi.responses import FileResponse, HTMLResponse, Response, PlainTextRes
 from pydantic import BaseModel, Field
 from .world import ROOT, load_world
 from .store import connect, connect_spend
+from . import store
 from .models import Cable
 from .pipeline import score
 from .xmlio import render
@@ -26,16 +27,38 @@ def world():return load_world()
 @lru_cache
 def entities():return {e['id']:e for e in world()['entities']}
 
+import threading
+_CACHE={}; _CACHE_LOCK=threading.Lock()
+
+def cached(key,make):
+    """Per-process memo keyed on the re-mark version: the evidence table is static at runtime, only the marks move."""
+    version=(str(store.DB),marks.version())  # the dataset path too, so switching corpora (or test fixtures) never serves stale rows
+    with _CACHE_LOCK:
+        if _CACHE.get('version')!=version:
+            _CACHE.clear(); _CACHE['version']=version
+        hit=_CACHE.get(key)
+    if hit is not None:return hit
+    value=make()
+    with _CACHE_LOCK:
+        if _CACHE.get('version')==version:_CACHE[key]=value
+    return value
+
 def visible(persona):
-    with connect() as db:
-        rows=[dict(r) for r in db.execute("SELECT * FROM evidence").fetchall()]
-    # Runtime re-marks (demo control) apply before the persona filter, so a downgraded paragraph becomes visible
-    # and an upgraded one disappears for the Unclassified persona. Both demo personas share agency NTK profiles;
-    # partner data under LES handling is modelled as unavailable to the Unclassified // FOUO demo persona.
-    rows=marks.apply(rows)
-    if persona=='unclassified':
-        rows=[r for r in rows if r['classification']=='U' and 'LES' not in (r['controls'] or '')]
-    return rows
+    """Evidence rows this persona may see. Cached per process; rows are shared, so callers must not mutate them."""
+    def make():
+        with connect() as db:
+            rows=[dict(r) for r in db.execute("SELECT * FROM evidence").fetchall()]
+        # Runtime re-marks (demo control) apply before the persona filter, so a downgraded paragraph becomes visible
+        # and an upgraded one disappears for the Unclassified persona. Both demo personas share agency NTK profiles;
+        # partner data under LES handling is modelled as unavailable to the Unclassified // FOUO demo persona.
+        rows=marks.apply(rows)
+        if persona=='unclassified':
+            rows=[r for r in rows if r['classification']=='U' and 'LES' not in (r['controls'] or '')]
+        return rows
+    return cached(('visible',persona),make)
+
+def allowed_ids(persona):
+    return cached(('allowed',persona),lambda:frozenset(r[k] for r in visible(persona) for k in ['subject','object']))
 
 def public_entity(id):return entities()[id]
 
@@ -68,16 +91,19 @@ def health():
 
 @app.get('/api/stats')
 def stats(persona:Persona='secret'):
-    rows=visible(persona)
-    with connect() as db:
-        states=dict(db.execute('SELECT state,count(*) FROM cables GROUP BY state'))
+    def make():
+        rows=visible(persona)
+        with connect() as db:
+            states=dict(db.execute('SELECT state,count(*) FROM cables GROUP BY state'))
+        return {'documents':states.get('validated',0),'entities':len(allowed_ids(persona)),'facts':len(compact(rows,100000)),'states':states,'events':len(world()['events'])}
+    counts=cached(('stats',persona),make)
     with connect_spend() as db:
         spend=db.execute('SELECT COALESCE(sum(COALESCE(actual,reserved)),0) FROM spend').fetchone()[0]
-    return {'documents':states.get('validated',0),'entities':len({r[k] for r in rows for k in ['subject','object']}),'facts':len(compact(rows,100000)),'states':states,'spend':round(spend,4),'events':len(world()['events'])}
+    return {**counts,'spend':round(spend,4)}
 
 @app.get('/api/entities')
 def list_entities(q:str='',persona:Persona='secret'):
-    allowed={r[k] for r in visible(persona) for k in ['subject','object']}
+    allowed=allowed_ids(persona)
     return [e for e in entities().values() if e['id'] in allowed and (not q or q.casefold() in (e['name']+' '+' '.join(e['aliases'])).casefold())][:50]
 
 class Question(BaseModel):
@@ -88,7 +114,7 @@ class Question(BaseModel):
 def retrieve(body:Question):
     """Deterministic two-hop retrieval shared by the Investigate and Workspace pages."""
     rows=visible(body.persona)
-    allowed={r[k] for r in rows for k in ['subject','object']}
+    allowed=allowed_ids(body.persona)
     text=body.question.casefold()
     hits={}
     for e in entities().values():
@@ -262,7 +288,7 @@ def reset_marks(persona:Persona='secret'):
 
 @app.get('/api/graph/{id}')
 def graph(id:str,persona:Persona='secret'):
-    rows=visible(persona); allowed={r[k] for r in rows for k in ['subject','object']}
+    rows=visible(persona); allowed=allowed_ids(persona)
     if id not in allowed:raise HTTPException(404,'No accessible entity')
     facts=compact(neighborhood(rows,[id],1),40)
     ids={r[k] for r in facts for k in ['subject','object']}|{id}
@@ -376,7 +402,7 @@ def explore_graph(persona:Persona='secret',center:str='',hops:int=1,predicates:s
     """Persona-filtered subgraph for the explorer: deduplicated edges with citation counts, ranked around the centers."""
     hops=max(1,min(hops,3)); limit=max(10,min(limit,1500))
     rows=filtered_rows(persona,predicates,year_from,year_to,agencies,kinds)
-    allowed={r[k] for r in visible(persona) for k in ['subject','object']}
+    allowed=allowed_ids(persona)
     centers=[c for c in center.split(',') if c] if center else [e['id'] for e in entities().values() if e['kind']=='organization']
     centers=[c for c in centers if c in allowed]
     if center and not centers:raise HTTPException(404,'No accessible entity')
@@ -425,7 +451,7 @@ def export_edges(persona:Persona='secret',predicates:str='',year_from:int|None=N
 @app.get('/api/export/nodes.csv')
 def export_nodes(persona:Persona='secret'):
     import csv,io
-    allowed={r[k] for r in visible(persona) for k in ['subject','object']}
+    allowed=allowed_ids(persona)
     out=io.StringIO(); w=csv.writer(out)
     w.writerow(['id:ID','name',':LABEL','place','aliases'])
     for i in sorted(allowed):
