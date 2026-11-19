@@ -16,7 +16,7 @@ from .llm import answer_question
 from . import auth, marks, narrate
 import os
 
-app=FastAPI(title='IntelDoc / Synthetic intelligence workbench',version='0.1.0')
+app=FastAPI(title='Knowledge Graph / Synthetic intelligence workbench',version='0.1.0')
 auth.install(app)
 Persona=Literal['secret','unclassified']
 

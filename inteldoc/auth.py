@@ -44,7 +44,7 @@ def safe_next(value):
 
 
 PAGE = '''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>IntelDoc KG · Sign in</title><style>
+<title>Knowledge Graph · Sign in</title><style>
 :root{--bg:#0d1117;--panel:#141b23;--line:#29323e;--muted:#91a0b2;--text:#e5ebf1;--accent:#b9e681}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--text);font:14px system-ui,-apple-system,sans-serif;padding:16px}
 .card{width:100%;max-width:400px;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:34px 32px}
@@ -53,7 +53,7 @@ PAGE = '''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name=
 input{width:100%;background:#1b242e;border:1px solid var(--line);color:var(--text);padding:11px;border-radius:5px;font:inherit}input:focus{outline:2px solid var(--accent);outline-offset:2px}
 button{width:100%;margin-top:22px;background:var(--accent);color:#182111;border:0;border-radius:5px;padding:12px;font:inherit;font-weight:600;cursor:pointer}
 .error{color:#ffaf99;font-size:12px;margin-top:14px}.note{color:var(--muted);font-size:11px;line-height:1.7;margin-top:22px}
-</style></head><body><form class="card" method="post" action="/login"><div class="brand">IntelDoc <span>/ KG</span></div><div class="eyebrow">SYNTHETIC ENVIRONMENT · SIGN IN</div>
+</style></head><body><form class="card" method="post" action="/login"><div class="brand">Knowledge <span>Graph</span></div><div class="eyebrow">SYNTHETIC ENVIRONMENT · SIGN IN</div>
 <label for="username">Username</label><input id="username" name="username" value="demo" autocomplete="username">
 <label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" autofocus required>
 <input type="hidden" name="next" value="{next}"><button type="submit">Sign in ↗</button>{error}
