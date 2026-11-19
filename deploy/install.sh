@@ -38,6 +38,7 @@ systemctl restart inteldoc
 
 sed -e "s|@DOMAIN@|$DOMAIN|g" -e "s|@PORT@|$PORT|g" "$APP_DIR/deploy/nginx-inteldoc.conf" > /etc/nginx/sites-available/inteldoc
 ln -sf /etc/nginx/sites-available/inteldoc /etc/nginx/sites-enabled/inteldoc
+rm -f /etc/nginx/sites-enabled/default   # the app site is the default server, so every hostname and the bare IP get basic auth
 if [[ ! -f /etc/nginx/inteldoc.htpasswd ]]; then
   echo "No /etc/nginx/inteldoc.htpasswd yet: create the demo login with  htpasswd -c /etc/nginx/inteldoc.htpasswd demo" >&2
   htpasswd -cb /etc/nginx/inteldoc.htpasswd demo "$(openssl rand -base64 18 | tee /root/inteldoc-demo-password.txt)"
