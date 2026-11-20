@@ -197,13 +197,17 @@ def retrieve(body:Question):
     else:
         tokens=set(re.findall(r'[a-z]{4,}',text))-{'what','which','show','with','from','about','does','have','that','were','their','when','where'}
         selected=[r for r in rows if any(t in (ents[r['subject']]['name']+' '+ents[r['object']]['name']+' '+r['predicate']).casefold() for t in tokens)]
-    if any(t in text for t in ['company','companies','front']):selected=[r for r in selected if any(ents[r[k]]['kind']=='company' for k in ['subject','object'])]
-    if any(t in text for t in ['leader','leads','led','leadership']):selected=[r for r in selected if r['predicate']=='leads']
-    if any(t in text for t in ['corridor','plaza','crossing','route']):selected=[r for r in selected if any(ents[r[k]]['kind']=='corridor' for k in ['subject','object'])]
-    if any(t in text for t in ['control','controls','controlled']):selected=[r for r in selected if r['predicate']=='controls']
-    if any(t in text for t in ['member','members','membership']):selected=[r for r in selected if r['predicate'] in ('member_of','leads')]
-    if any(t in text for t in ['owner','owns','owned','nominee']):selected=[r for r in selected if r['predicate'] in ('owns','nominee_for')]
-    if any(t in text for t in ['call','called','calls','phone','spoke']):selected=[r for r in (rows if ids else selected) if r['predicate']=='called' and (not ids or r['subject'] in ids or r['object'] in ids)]
+    def asks(*words):return any(re.search(r'\b'+w+r'\b',text) for w in words)  # whole words: 'controlled' must not read as 'led'
+    if asks('company','companies','front'):selected=[r for r in selected if any(ents[r[k]]['kind']=='company' for k in ['subject','object'])]
+    def near(rows):  # a relation-specific question about a named entity is answered about that entity, not its neighbours
+        hit=[r for r in rows if r['subject'] in ids or r['object'] in ids] if ids else []
+        return hit or rows
+    if asks('leader','leads','led','leadership'):selected=near([r for r in selected if r['predicate']=='leads'])
+    if asks('corridor','corridors','plaza','plazas','crossing','crossings','route','routes'):selected=[r for r in selected if any(ents[r[k]]['kind']=='corridor' for k in ['subject','object'])]
+    if asks('control','controls','controlled'):selected=near([r for r in selected if r['predicate']=='controls'])
+    if asks('member','members','membership'):selected=near([r for r in selected if r['predicate'] in ('member_of','leads')])
+    if asks('owner','owners','owns','owned','nominee'):selected=near([r for r in selected if r['predicate'] in ('owns','nominee_for')])
+    if asks('call','called','calls','phone','phoned','spoke','talk','talked'):selected=[r for r in (rows if ids else selected) if r['predicate']=='called' and (not ids or r['subject'] in ids or r['object'] in ids)]
     facts=compact(selected,24)
     ambiguity=len(matches)>1 and not body.entity_id and any(len([e for e in matches if alias in e['aliases']])>1 for entity in matches for alias in entity['aliases'] if alias.casefold() in text)
     if ambiguity:facts=[]
