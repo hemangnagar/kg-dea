@@ -15,7 +15,7 @@ from .xmlio import render
 from .settings import load_config
 from .providers import provider_from_config, BudgetExceeded
 from .llm import answer_question
-from . import auth, marks, narrate
+from . import auth, marks, narrate, aliases
 import os
 
 app=FastAPI(title='Knowledge Graph / Synthetic intelligence workbench',version='0.1.0')
@@ -24,15 +24,12 @@ Persona=Literal['secret','unclassified']
 
 @lru_cache
 def world():return load_world()
-@lru_cache
-def entities():return {e['id']:e for e in world()['entities']}
-
 import threading
 _CACHE={}; _CACHE_LOCK=threading.Lock()
 
 def cached(key,make):
     """Per-process memo keyed on the re-mark version: the evidence table is static at runtime, only the marks move."""
-    version=(str(store.DB),marks.version())  # the dataset path too, so switching corpora (or test fixtures) never serves stale rows
+    version=(str(store.DB),marks.version(),aliases.version())  # dataset path too, so switching corpora (or test fixtures) never serves stale rows
     with _CACHE_LOCK:
         if _CACHE.get('version')!=version:
             _CACHE.clear(); _CACHE['version']=version
@@ -42,6 +39,53 @@ def cached(key,make):
     with _CACHE_LOCK:
         if _CACHE.get('version')==version:_CACHE[key]=value
     return value
+
+@lru_cache
+def base_entities():return {e['id']:e for e in world()['entities']}
+
+def entities():
+    """World entities with analyst-added aliases merged in (cached per alias version)."""
+    def make():
+        extra=aliases.by_entity()
+        if not extra:return base_entities()
+        out=dict(base_entities())
+        for id,names in extra.items():
+            if id in out:out[id]={**out[id],'aliases':list(out[id]['aliases'])+[a for a in names if a not in out[id]['aliases']],'added_aliases':names}
+        return out
+    return cached(('entities',),make)
+entities.cache_clear=lambda:(base_entities.cache_clear(),domain_of.cache_clear(),_CACHE.clear())  # tests switch worlds between fixtures
+
+@lru_cache
+def domain_of():
+    """Entity id -> organization id (the organization's own graph, or 'domain', the entity belongs to). Person: current
+    organization; company: its owner's; asset: its operator; event: the organization it was sampled for. Others: none."""
+    w=world(); ents=base_entities(); out={}
+    for e in w['entities']:
+        if e['kind']=='organization':out[e['id']]=e['id']
+        elif e['kind']=='person' and e.get('organization'):out[e['id']]=e['organization']
+        elif e['kind']=='asset' and e.get('operator'):out[e['id']]=e['operator']
+    for e in w['entities']:
+        if e['kind']=='company' and e.get('owner') in out:out[e['id']]=out[e['owner']]
+    for ev in w['events']:
+        if ev.get('org'):out[ev['id']]=ev['org']
+    return out
+
+def domain_trail(facts):
+    """Which organizations' graphs an answer touches, and the facts that cross from one into another."""
+    dom=domain_of(); ents=entities()
+    touched={}
+    for f in facts:
+        for k in ('subject','object'):
+            d=dom.get(f[k])
+            if d:touched[d]=touched.get(d,0)+1
+    hops=[]
+    for i,f in enumerate(facts):
+        a,b=dom.get(f['subject']),dom.get(f['object'])
+        if a and b and a!=b:
+            hops.append({'fact_index':i,'from':a,'from_name':ents[a]['name'],'to':b,'to_name':ents[b]['name'],'predicate':f['predicate'],
+                         'subject':f['subject'],'subject_name':ents[f['subject']]['name'],'object':f['object'],'object_name':ents[f['object']]['name'],'date':f['date'],'count':f['count']})
+    domains=[{'id':d,'name':ents[d]['name'],'facts':n} for d,n in sorted(touched.items(),key=lambda x:-x[1])]
+    return {'domains':domains,'hops':hops}
 
 def visible(persona):
     """Evidence rows this persona may see. Cached per process; rows are shared, so callers must not mutate them."""
@@ -60,7 +104,9 @@ def visible(persona):
 def allowed_ids(persona):
     return cached(('allowed',persona),lambda:frozenset(r[k] for r in visible(persona) for k in ['subject','object']))
 
-def public_entity(id):return entities()[id]
+def public_entity(id):
+    e=entities()[id]; d=domain_of().get(id)
+    return {**e,'domain':d,'domain_name':entities()[d]['name'] if d else None}
 
 def neighborhood(rows,ids,hops=2):
     reached=set(ids); selected=[]
@@ -104,7 +150,7 @@ def stats(persona:Persona='secret'):
 @app.get('/api/entities')
 def list_entities(q:str='',persona:Persona='secret'):
     allowed=allowed_ids(persona)
-    return [e for e in entities().values() if e['id'] in allowed and (not q or q.casefold() in (e['name']+' '+' '.join(e['aliases'])).casefold())][:50]
+    return [public_entity(e['id']) for e in entities().values() if e['id'] in allowed and (not q or q.casefold() in (e['name']+' '+' '.join(e['aliases'])).casefold())][:50]
 
 class Question(BaseModel):
     question:str=Field(min_length=1,max_length=1000)
@@ -169,7 +215,7 @@ def query(body:Question):
             raise HTTPException(502,'Model configuration or evidence validation failed; no unverified answer returned')
         except Exception:
             raise HTTPException(503,'Model provider unavailable; no unverified answer returned')
-    return {'summary':summary,'answer':answer,'facts':facts,'entities':matches,'related_entities':r['related_entities'],'ambiguous':ambiguity,'mode':mode,'persona':body.persona}
+    return {'summary':summary,'answer':answer,'facts':facts,'entities':[public_entity(e['id']) for e in matches],'related_entities':[public_entity(e['id']) for e in r['related_entities']],'ambiguous':ambiguity,'mode':mode,'persona':body.persona,'trail':domain_trail(facts)}
 
 def brief_provider(cfg):
     """The model that writes workspace briefs: anthropic when a key is present (or brief_provider says so), else none."""
@@ -248,19 +294,30 @@ def brief(body:Question):
                 paragraphs=narrate.compose(body.question,facts,names,body.persona,len(cable_ids),agencies,len(call_ids))
             if len(BRIEFS)>500:BRIEFS.clear()
             BRIEFS[key]=(paragraphs,mode,model)
+    trail=domain_trail(facts)
+    if trail['hops'] and paragraphs:
+        pairs={}
+        for h in trail['hops']:pairs.setdefault((h['from_name'],h['to_name']),[]).append(h)
+        parts=[]
+        for (a,b),hs in pairs.items():
+            kinds=sorted({h['predicate'].replace('_',' ') for h in hs})
+            parts.append(f"from the {a} graph into the {b} graph through {len(hs)} relationship{'s' if len(hs)!=1 else ''} ({', '.join(kinds)}), for example {hs[0]['subject_name']} to {hs[0]['object_name']} on {hs[0]['date']}")
+        paragraphs=paragraphs+[{'title':'Across organizations','text':f"This answer crosses organizational boundaries: {'; '.join(parts)}. Each organization is its own sub-graph; the search followed the relationship across and continued in the other graph.",'facts':sorted({h['fact_index'] for h in trail['hops']})}]
     related=[r for r in call_records if not r['cited']]
     if related and not any(f['predicate']=='called' for f in facts):
         names_in=sorted({n for r in related for n in (r['caller_name'],r['callee_name'])})
         dates=sorted(r['call_start'][:10] for r in related)
         total=max(total_related,len(related)); span=f'between {dates[0]} and {dates[-1]}' if dates[0]!=dates[-1] else f'on {dates[0]}'
         paragraphs=paragraphs+[{'title':'Partner call records','text':f'Separately, FBI call records (U//LES) hold {total} call{"s" if total!=1 else ""} {"among" if len(people)>1 else "involving"} the people connected to this answer{" in the years the question names" if years else ""}, {span}: {", ".join(names_in[:8])}{", and others" if len(names_in)>8 else ""}. {"The " + str(len(related)) + " most recent are" if total>len(related) else "They are"} listed under Call records.','facts':[],'citations':[{'cable':r['id'],'paragraph':0,'mark':'U//LES'} for r in related[:3]]}]
+    note=[p for p in paragraphs if p['text'].startswith('Only Unclassified')]
+    paragraphs=[p for p in paragraphs if p not in note]+note  # the access note stays last, after any appended paragraphs
     for p in paragraphs:
         seen=[]
         for i in p['facts']:
             for c in facts[i]['citations']:
                 if c not in seen:seen.append(c)
         p['citations']=seen[:8]
-    return {'question':body.question,'persona':body.persona,'summary':r['summary'],'paragraphs':paragraphs,'facts':facts,'entities':r['entities'],'related_entities':r['related_entities'],'ambiguous':r['ambiguous'],
+    return {'question':body.question,'persona':body.persona,'summary':r['summary'],'paragraphs':paragraphs,'facts':facts,'entities':[public_entity(e['id']) for e in r['entities']],'related_entities':[public_entity(e['id']) for e in r['related_entities']],'ambiguous':r['ambiguous'],'trail':trail,
             'cables':cables,'call_records':call_records,'agencies':agencies,'mode':mode,'model':model,'remarked':len(marks.overrides())}
 
 class MarkChange(BaseModel):
@@ -279,6 +336,36 @@ def set_mark(body:MarkChange):
     except KeyError:raise HTTPException(404,'No such paragraph')
     BRIEFS.clear()
     return {'cable':body.cable,'paragraph':body.paragraph,'mark':marks.mark_text(classification,controls),'overrides':marks.listing()}
+
+class AliasChange(BaseModel):
+    entity:str=Field(min_length=1,max_length=80)
+    alias:str=Field(min_length=1,max_length=aliases.MAX_LENGTH)
+    persona:Persona='secret'
+
+@app.get('/api/aliases')
+def list_aliases():return {'aliases':aliases.listing()}
+
+@app.get('/api/entity/{id}')
+def entity_card(id:str,persona:Persona='secret'):
+    if id not in allowed_ids(persona):raise HTTPException(404,'No accessible entity')
+    e=public_entity(id); base=base_entities()[id]
+    return {**e,'published_aliases':base['aliases'],'added_aliases':[a for a in e['aliases'] if a not in base['aliases']],
+            'shared_aliases':sorted({a for a in e['aliases'] for o in entities().values() if o['id']!=id and a in o['aliases']}),
+            'degree':sum(1 for r in visible(persona) if id in (r['subject'],r['object']))}
+
+@app.post('/api/aliases')
+def add_alias(body:AliasChange):
+    if body.entity not in allowed_ids(body.persona):raise HTTPException(404,'No accessible entity')
+    try:alias=aliases.add(body.entity,body.alias)
+    except ValueError as e:raise HTTPException(422,str(e))
+    BRIEFS.clear()
+    return entity_card(body.entity,body.persona)
+
+@app.delete('/api/aliases')
+def remove_alias(entity:str,alias:str,persona:Persona='secret'):
+    if entity not in base_entities():raise HTTPException(404,'No such entity')
+    aliases.remove(entity,alias); BRIEFS.clear()
+    return entity_card(entity,persona)
 
 @app.delete('/api/marks')
 def reset_marks(persona:Persona='secret'):
@@ -415,7 +502,7 @@ def explore_graph(persona:Persona='secret',center:str='',hops:int=1,predicates:s
     degree={}
     for f in facts:
         for k in ['subject','object']:degree[f[k]]=degree.get(f[k],0)+1
-    nodes=[{**entities()[i],'degree':degree[i],'center':i in touching} for i in sorted(degree)]
+    nodes=[{**public_entity(i),'degree':degree[i],'center':i in touching} for i in sorted(degree)]
     return {'nodes':nodes,'edges':facts,'centers':centers,'total_edges':unique,'citations':len(selected),'truncated':truncated,'predicate_groups':PREDICATE_GROUPS}
 
 @app.get('/api/export/graphml')

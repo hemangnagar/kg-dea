@@ -23,6 +23,8 @@ Use the existing checkout in cloud tasks. Tasks are already isolated; do not cre
 
 ## Demo sequence
 
+Organization graphs and analyst aliases: every person, company, asset and event belongs to an organization's sub-graph, and each answer reports the graphs it touched and the facts that hop between them (the strip above the brief, the "Across organizations" paragraph, and the explorer's "Color by organization"). An analyst can add aliases to any entity from its card; they live in `alias_overrides`, join the entity wherever names resolve, and can be removed. The header switches dark and light themes; Analyst view shows only the Workspace and the Graph explorer.
+
 The site opens on **Workspace**, the end-user page: one question, a plain-English brief with citation chips, and buttons for the raw data behind it (source cables with their PUBS XML, partner call records, extracted facts). The brief is written by Claude Haiku from the graph's sentences when `CORPUSCLE_ANTHROPIC_KEY` is set on the server (checked: every paragraph must cite real facts and introduce no year the facts do not contain; about $0.002 per question, capped by `brief_spend_cap_usd`), and composed deterministically otherwise. Opening any cable at the Secret persona shows a selector per paragraph to re-mark it between S//NF and U//FOUO at runtime; overrides apply before every persona filter and **Re-marked paragraphs** lists and resets them. The corpus is never rewritten.
 
 

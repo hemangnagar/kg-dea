@@ -60,7 +60,7 @@ Say: "Five thousand synthetic intelligence cables about fictional Mexican cartel
 
 ### Step 0b. The Workspace: the end-user page (90 seconds)
 
-The site opens on **Workspace**, the page for people who will never learn what an edge is, in **Analyst view**: prose only. Click the chip **Which companies connect to Bruma del Cobre?** and read the brief. Then switch the **View** selector at the top to **Developer view**: the citation chips and the raw-data buttons appear.
+The site opens on **Workspace**, the page for people who will never learn what an edge is, in **Analyst view**: prose only, and only the Workspace and Graph explorer in the navigation. The header button switches between dark and light; in the explorer, hover any node or edge for its details. Click the chip **Which companies connect to Bruma del Cobre?** and read the brief. Then switch the **View** selector at the top to **Developer view**: the citation chips and the raw-data buttons appear.
 
 Appears: a plain-English brief of three to five paragraphs, each followed by the citation chips of the paragraphs it was written from. The header reads "24 relationships · 66 cables" and four buttons sit above the text: **Source cables**, **Call records**, **Graph facts**, **Re-marked paragraphs**. The line under the brief says who wrote it: "Written by claude-haiku-5-5 from the graph facts, checked against them" when the server has a model key, otherwise "Composed from the graph facts".
 
@@ -119,6 +119,14 @@ Back at **Secret // NOFORN**, with **Who led Bruma del Cobre in 2021?** answered
 Say: "A classifier just downgraded one paragraph. Nothing else changed." Close the dialog and switch the persona to **Unclassified // FOUO**: the leadership answer now appears for this user, cited to that one paragraph, marked U//FOUO. Switch back to Secret, click **Re-marked paragraphs** in the Workspace, and click **Reset all to the published marks**.
 
 Say: "Access follows the mark on the paragraph, not the document, and the graph re-filters every time. The corpus itself was never rewritten, so a reset restores the published marks."
+
+### Step 4c. Across organizations, and analyst aliases (90 seconds, optional)
+
+In the Workspace click **Who did Lorena Mijares Ocampo call in 2016?** A strip above the brief reads "Graphs touched: Pacto del Faro Gris, Círculo del Valle Quieto · Hops across: Pacto del Faro Gris → Círculo del Valle Quieto via called ×4", and the brief ends with an "Across organizations" paragraph.
+
+Say: "Each organization is its own sub-graph. The question started in one, the call records crossed into another, and the search continued there. The strip shows every hop." In the Graph explorer, set **Color by** to **organization** to see the same boundaries as colors.
+
+Then click her name in the "In this answer" row under the brief. The entity card lists her published aliases; type a new one, say a spelling from partner data, and click **Add alias**. Ask the question again using the new name: it resolves. Say: "An analyst can teach the graph a name, and it becomes part of the graph at once. A name two people share makes the graph ask which one, exactly as with the published nicknames." Remove the alias with the × to leave the graph as you found it.
 
 ### Step 5. Corridor control over time (60 seconds)
 

@@ -194,3 +194,32 @@ def test_workspace_brief_and_runtime_remarking(corpus,monkeypatch):
     assert client.delete('/api/marks').json()=={'overrides':[]} and marks.overrides()=={}
     assert not [f for f in web.visible('unclassified') if (f['cable'],f['paragraph'])==(secret['cable'],secret['paragraph'])]
     web.world.cache_clear();web.entities.cache_clear();web.BRIEFS.clear()
+
+def test_aliases_and_domain_trail(corpus,monkeypatch):
+    from inteldoc import app as web, aliases
+    for var in ['CORPUSCLE_ANTHROPIC_KEY','ANTHROPIC_API_KEY']:monkeypatch.delenv(var,raising=False)
+    web.world.cache_clear();web.base_entities.cache_clear();web.domain_of.cache_clear();web.BRIEFS.clear();aliases.clear()
+    client=TestClient(web.app)
+    card=client.get('/api/entity/p-anzures-y?persona=secret').json()
+    assert card['domain']=='org-01' and card['added_aliases']==[] and card['degree']>0
+    assert client.post('/api/query',json={'question':'Who is The Doctor?','persona':'secret'}).json()['entities']==[]
+    r=client.post('/api/aliases',json={'entity':'p-anzures-y','alias':'  The   Doctor '})
+    assert r.status_code==200 and r.json()['added_aliases']==['The Doctor'] and 'The Doctor' in r.json()['aliases']
+    q=client.post('/api/query',json={'question':'Who is The Doctor?','persona':'secret'}).json()
+    assert [e['id'] for e in q['entities']]==['p-anzures-y'] and q['facts']
+    assert 'The Doctor' in [a for e in client.get('/api/entities?persona=secret&q=doctor').json() for a in e['aliases']]
+    assert client.post('/api/aliases',json={'entity':'p-anzures-y','alias':'<script>'}).status_code==422
+    assert client.post('/api/aliases',json={'entity':'nobody','alias':'x'}).status_code==404
+    # A name another entity carries becomes a shared alias: questions must disambiguate.
+    other=next(e['id'] for e in web.base_entities().values() if e['kind']=='person' and e['id']!='p-anzures-y' and e['id'] in web.allowed_ids('secret'))
+    client.post('/api/aliases',json={'entity':other,'alias':'The Doctor'})
+    assert client.post('/api/query',json={'question':'Who is The Doctor?','persona':'secret'}).json()['ambiguous'] is True
+    assert client.delete('/api/aliases?entity='+other+'&alias=The%20Doctor').json()['added_aliases']==[]
+    assert client.delete('/api/aliases?entity=p-anzures-y&alias=The%20Doctor').json()['added_aliases']==[]
+    assert client.post('/api/query',json={'question':'Who is The Doctor?','persona':'secret'}).json()['entities']==[]
+    # Domain trail: every entity in an answer carries its organization's graph; cross-graph facts are reported as hops.
+    b=client.post('/api/brief',json={'question':'Which companies connect to Bruma del Cobre?','persona':'secret'}).json()
+    assert b['trail']['domains'] and b['trail']['domains'][0]['id']=='org-01'
+    for h in b['trail']['hops']:assert h['from']!=h['to'] and 0<=h['fact_index']<len(b['facts'])
+    assert all(e.get('domain') is not None for e in b['entities'])
+    web.world.cache_clear();web.base_entities.cache_clear();web.domain_of.cache_clear();web.BRIEFS.clear()
