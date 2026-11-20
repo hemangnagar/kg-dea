@@ -45,14 +45,15 @@ def safe_next(value):
 
 
 PAGE = '''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Knowledge Graph · Sign in</title><style>
-:root{--bg:#0d1117;--panel:#141b23;--line:#29323e;--muted:#91a0b2;--text:#e5ebf1;--accent:#b9e681}
+<title>Knowledge Graph · Sign in</title><script>try{var t=localStorage.getItem('inteldoc-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script><style>
+:root{--bg:#0d1117;--panel:#141b23;--line:#29323e;--muted:#91a0b2;--text:#e5ebf1;--accent:#b9e681;--accent-text:#182111;--input:#1b242e;color-scheme:dark}
+:root[data-theme=light]{--bg:#f4f6f8;--panel:#ffffff;--line:#d8dfe6;--muted:#5b6b7c;--text:#16202a;--accent:#3f7d20;--accent-text:#ffffff;--input:#eef2f6;color-scheme:light}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--text);font:14px system-ui,-apple-system,sans-serif;padding:16px}
 .card{width:100%;max-width:400px;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:34px 32px}
 .brand{font-size:22px;font-weight:650;letter-spacing:-1px;margin-bottom:6px}.brand span{color:var(--muted);font-weight:350}
 .eyebrow{font:10px monospace;letter-spacing:2px;color:var(--accent);margin-bottom:22px}label{display:block;color:var(--muted);font-size:12px;margin:18px 0 6px}
-input{width:100%;background:#1b242e;border:1px solid var(--line);color:var(--text);padding:11px;border-radius:5px;font:inherit}input:focus{outline:2px solid var(--accent);outline-offset:2px}
-button{width:100%;margin-top:22px;background:var(--accent);color:#182111;border:0;border-radius:5px;padding:12px;font:inherit;font-weight:600;cursor:pointer}
+input{width:100%;background:var(--input);border:1px solid var(--line);color:var(--text);padding:11px;border-radius:5px;font:inherit}input:focus{outline:2px solid var(--accent);outline-offset:2px}
+button{width:100%;margin-top:22px;background:var(--accent);color:var(--accent-text);border:0;border-radius:5px;padding:12px;font:inherit;font-weight:600;cursor:pointer}
 .error{color:#ffaf99;font-size:12px;margin-top:14px}.note{color:var(--muted);font-size:11px;line-height:1.7;margin-top:22px}
 </style></head><body><form class="card" method="post" action="/login"><div class="brand">Knowledge <span>Graph</span></div><div class="eyebrow">SYNTHETIC ENVIRONMENT · SIGN IN</div>
 <label for="username">Username</label><input id="username" name="username" value="demo" autocomplete="username">
