@@ -174,7 +174,7 @@ def write(question, facts, names, persona, provider, settings):
                      'Write an analyst brief in plain English that answers the question for a reader who knows nothing about '
                      'the system or its vocabulary. Use ONLY the numbered statements as facts; the entity notes give background '
                      'wording (what kind of thing each name is, what an event was). Do not add, infer or soften any fact, and '
-                     'keep every name, date and number exactly as given. Write two to five short paragraphs: first a direct answer '
+                     'keep every name, date and number exactly as given, dates in the YYYY-MM-DD form. Write two to five short paragraphs: first a direct answer '
                      'to the question, then the detail grouped by topic, in full sentences, no bullet points, no headings, no '
                      'mention of graphs, databases, predicates or this instruction. Only if two statements give different dates for the '
                      'same relationship, say that the reporting disagrees; otherwise do not comment on dates. For each paragraph list '

@@ -29,9 +29,22 @@ def world():return load_world()
 import threading
 _CACHE={}; _CACHE_LOCK=threading.Lock()
 
+import time
+_VERSION={'at':0.0,'value':None}
+def current_version():
+    """(dataset path, re-mark version, alias version). Re-read at most every 0.3 s: hot paths call this per row."""
+    now=time.monotonic()
+    if now-_VERSION['at']>0.3 or _VERSION['value'] is None or _VERSION['value'][0]!=str(store.DB):
+        _VERSION['value']=(str(store.DB),marks.version(),aliases.version()); _VERSION['at']=now
+    return _VERSION['value']
+
+def bump_version():
+    """Call after writing an override so the next request sees it at once."""
+    _VERSION['at']=0.0
+
 def cached(key,make):
     """Per-process memo keyed on the re-mark version: the evidence table is static at runtime, only the marks move."""
-    version=(str(store.DB),marks.version(),aliases.version())  # dataset path too, so switching corpora (or test fixtures) never serves stale rows
+    version=current_version()
     with _CACHE_LOCK:
         if _CACHE.get('version')!=version:
             _CACHE.clear(); _CACHE['version']=version
@@ -55,7 +68,7 @@ def entities():
             if id in out:out[id]={**out[id],'aliases':list(out[id]['aliases'])+[a for a in names if a not in out[id]['aliases']],'added_aliases':names}
         return out
     return cached(('entities',),make)
-entities.cache_clear=lambda:(base_entities.cache_clear(),domain_of.cache_clear(),_CACHE.clear())  # tests switch worlds between fixtures
+entities.cache_clear=lambda:(base_entities.cache_clear(),domain_of.cache_clear(),_CACHE.clear(),bump_version())  # tests switch worlds between fixtures
 
 @lru_cache
 def domain_of():
@@ -178,14 +191,15 @@ def retrieve(body:Question):
     if years:
         lo,hi=min(years)+'-01-01',max(years)+'-12-31'
         rows=[r for r in rows if (r['date']<=hi and (r['until_date']>lo if r['until_date'] else r['date']>=lo))]
+    ents=entities()
     if ids:
         selected=neighborhood(rows,ids,2)
     else:
         tokens=set(re.findall(r'[a-z]{4,}',text))-{'what','which','show','with','from','about','does','have','that','were','their','when','where'}
-        selected=[r for r in rows if any(t in (entities()[r['subject']]['name']+' '+entities()[r['object']]['name']+' '+r['predicate']).casefold() for t in tokens)]
-    if any(t in text for t in ['company','companies','front']):selected=[r for r in selected if any(entities()[r[k]]['kind']=='company' for k in ['subject','object'])]
+        selected=[r for r in rows if any(t in (ents[r['subject']]['name']+' '+ents[r['object']]['name']+' '+r['predicate']).casefold() for t in tokens)]
+    if any(t in text for t in ['company','companies','front']):selected=[r for r in selected if any(ents[r[k]]['kind']=='company' for k in ['subject','object'])]
     if any(t in text for t in ['leader','leads','led','leadership']):selected=[r for r in selected if r['predicate']=='leads']
-    if any(t in text for t in ['corridor','plaza','crossing','route']):selected=[r for r in selected if any(entities()[r[k]]['kind']=='corridor' for k in ['subject','object'])]
+    if any(t in text for t in ['corridor','plaza','crossing','route']):selected=[r for r in selected if any(ents[r[k]]['kind']=='corridor' for k in ['subject','object'])]
     if any(t in text for t in ['control','controls','controlled']):selected=[r for r in selected if r['predicate']=='controls']
     if any(t in text for t in ['member','members','membership']):selected=[r for r in selected if r['predicate'] in ('member_of','leads')]
     if any(t in text for t in ['owner','owns','owned','nominee']):selected=[r for r in selected if r['predicate'] in ('owns','nominee_for')]
@@ -275,8 +289,9 @@ def brief(body:Question):
             if cited_ids:
                 q=','.join('?'*len(cited_ids))
                 rows=list(db.execute(f'SELECT record_id,call_start,duration_seconds,caller_person,callee_person FROM cdr WHERE record_id IN ({q})',list(cited_ids)).fetchall())+[x for x in rows if x['record_id'] not in cited_ids]
+        ents=entities()
         for row in rows:
-            call_records.append({'id':'FBI-CDR-'+row['record_id'],'call_start':row['call_start'],'duration_seconds':row['duration_seconds'],'caller':row['caller_person'],'caller_name':entities()[row['caller_person']]['name'],'callee':row['callee_person'],'callee_name':entities()[row['callee_person']]['name'],'cited':row['record_id'] in cited_ids})
+            call_records.append({'id':'FBI-CDR-'+row['record_id'],'call_start':row['call_start'],'duration_seconds':row['duration_seconds'],'caller':row['caller_person'],'caller_name':ents[row['caller_person']]['name'],'callee':row['callee_person'],'callee_name':ents[row['callee_person']]['name'],'cited':row['record_id'] in cited_ids})
     paragraphs=[]; mode='Composed from the graph facts'; model=None
     if facts and not r['ambiguous']:
         cfg=load_config(); provider,settings=brief_provider(cfg)
@@ -340,7 +355,7 @@ def set_mark(body:MarkChange):
     if body.persona!='secret':raise HTTPException(403,'Only the Secret // NOFORN persona may change portion marks in this demo')
     try:classification,controls=marks.set_mark(body.cable,body.paragraph,body.classification)
     except KeyError:raise HTTPException(404,'No such paragraph')
-    BRIEFS.clear()
+    BRIEFS.clear(); bump_version()
     return {'cable':body.cable,'paragraph':body.paragraph,'mark':marks.mark_text(classification,controls),'overrides':marks.listing()}
 
 class AliasChange(BaseModel):
@@ -364,19 +379,19 @@ def add_alias(body:AliasChange):
     if body.entity not in allowed_ids(body.persona):raise HTTPException(404,'No accessible entity')
     try:alias=aliases.add(body.entity,body.alias)
     except ValueError as e:raise HTTPException(422,str(e))
-    BRIEFS.clear()
+    BRIEFS.clear(); bump_version()
     return entity_card(body.entity,body.persona)
 
 @app.delete('/api/aliases')
 def remove_alias(entity:str,alias:str,persona:Persona='secret'):
     if entity not in base_entities():raise HTTPException(404,'No such entity')
-    aliases.remove(entity,alias); BRIEFS.clear()
+    aliases.remove(entity,alias); BRIEFS.clear(); bump_version()
     return entity_card(entity,persona)
 
 @app.delete('/api/marks')
 def reset_marks(persona:Persona='secret'):
     if persona!='secret':raise HTTPException(403,'Only the Secret // NOFORN persona may change portion marks in this demo')
-    marks.clear(); BRIEFS.clear()
+    marks.clear(); BRIEFS.clear(); bump_version()
     return {'overrides':[]}
 
 @app.get('/api/graph/{id}')
@@ -487,7 +502,8 @@ def filtered_rows(persona,predicates='',year_from=None,year_to=None,agencies='',
         lo,hi=f'{year_from or 2010}-01-01',f'{year_to or 2027}-12-31'
         rows=[r for r in rows if r['date']<=hi and ((r['until_date']>lo) if r['until_date'] else (r['date']>=lo))]
     kind_set={x for x in kinds.split(',') if x}
-    if kind_set:rows=[r for r in rows if entities()[r['subject']]['kind'] in kind_set and entities()[r['object']]['kind'] in kind_set]
+    if kind_set:
+        ents=entities(); rows=[r for r in rows if ents[r['subject']]['kind'] in kind_set and ents[r['object']]['kind'] in kind_set]
     return rows
 
 @app.get('/api/explore')
@@ -536,9 +552,10 @@ def export_edges(persona:Persona='secret',predicates:str='',year_from:int|None=N
     facts=compact(filtered_rows(persona,predicates,year_from,year_to,agencies),10**6)
     out=io.StringIO(); w=csv.writer(out)
     w.writerow([':START_ID','subject_name',':TYPE',':END_ID','object_name','date','until','citations:int','agencies','classification','sample_cable','sample_paragraph:int'])
+    ents=entities()
     for f in facts:
         c=f['citations'][0]
-        w.writerow([f['subject'],entities()[f['subject']]['name'],f['predicate'],f['object'],entities()[f['object']]['name'],f['date'],f['until_date'],f['count'],'|'.join(f['agencies']),f['classification'],c['cable'],c['paragraph']])
+        w.writerow([f['subject'],ents[f['subject']]['name'],f['predicate'],f['object'],ents[f['object']]['name'],f['date'],f['until_date'],f['count'],'|'.join(f['agencies']),f['classification'],c['cable'],c['paragraph']])
     return PlainTextResponse(out.getvalue(),media_type='text/csv',headers={'Content-Disposition':f'attachment; filename="inteldoc-{persona}-edges.csv"'})
 
 @app.get('/api/export/nodes.csv')
