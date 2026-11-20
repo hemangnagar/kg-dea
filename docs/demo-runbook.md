@@ -132,7 +132,7 @@ Then click her name in the "In this answer" row under the brief. The entity card
 
 Click the chip **Which corridors did Bruma del Cobre control?**
 
-Appears: 24 controls relationships, each a plaza or route with a from and until date: Manzanillo port plaza, the Highway 15 Pacific route, Nogales crossing, San Luis Río Colorado, Mexicali.
+Appears: 18 controls relationships, each a plaza or route with a from and until date: Manzanillo port plaza, Lázaro Cárdenas, the Highway 15 Pacific route, Nogales crossing, San Luis Río Colorado, Mexicali.
 
 Say: "Plazas change hands. Nogales went to this organization in 2013 under an accord, back to its rival in 2019 when the accord collapsed, and back again in 2022 when a plaza boss defected. Those are four dated windows in the graph, each backed by reporting." Optionally: "At Unclassified this question has no answer either; corridor control is Secret-only reporting."
 
@@ -246,11 +246,12 @@ All tested on the published corpus at Secret // NOFORN:
 | Question | Result |
 |---|---|
 | Who is La Garza? | disambiguation between Lorena Mijares Ocampo and Irene Sandoval Quiroga |
-| Who was a member of Los del Cedro Partido? | 24 relationships, leadership and membership windows |
-| Who owns Transportes Cerro Pardo? | 7 relationships, owner and nominee (Secret only; empty at Unclassified) |
+| Who was a member of Los del Cedro Partido? | 18 relationships, leadership and membership windows |
+| Who owns Transportes Cerro Pardo? | 3 relationships, owner and nominee (Secret only; empty at Unclassified) |
 | Who did Fermín Loera Arriaga call in 2018? | 20 call relationships (Secret only) |
 | Who did Lorena Mijares Ocampo call in 2016? | 24 call relationships (Secret only) |
 | What happened in Reynosa in 2020? | 6 relationships around the Reynosa plaza events of that year |
+| Who controlled the Nogales crossing? | 4 control windows, two organizations |
 
 Questions that will not work well: anything without an entity name, place or year in it; "why" questions; questions about agencies as subjects. Say "the engine is deterministic retrieval" and move on.
 
