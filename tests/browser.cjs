@@ -14,7 +14,7 @@ const assert = require('node:assert/strict');
   await page.locator('#wask').click();
   await page.waitForFunction(()=>!document.querySelector('#wask').disabled);
   await page.locator('#wbrief .brief-p').first().waitFor();
-  assert.match(await page.locator('#wbrief').innerText(), /2020-02-27|February 27, 2020/);
+  assert.match(await page.locator('#wbrief').innerText(), /Yesenia Anzures Ibarra[\s\S]*2020/);
   assert.doesNotMatch(await page.locator('#wbrief').innerText(), /member_of|occurred_at|linked_to/);
   assert.equal(await page.locator('#wraw').isVisible(), false, 'analyst view hides raw data');
   await page.locator('#viewmode').selectOption('developer');
