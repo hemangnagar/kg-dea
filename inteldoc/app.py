@@ -17,6 +17,8 @@ from .providers import provider_from_config, BudgetExceeded
 from .llm import answer_question
 from . import auth, marks, narrate, aliases
 import os
+import logging
+log=logging.getLogger('inteldoc')
 
 app=FastAPI(title='Knowledge Graph / Synthetic intelligence workbench',version='0.1.0')
 auth.install(app)
@@ -283,17 +285,21 @@ def brief(body:Question):
             paragraphs,mode,model=BRIEFS[key]
         else:
             if provider is not None:
-                try:
-                    paragraphs=narrate.write(body.question,facts,names,body.persona,provider,settings)
-                    model=settings['anthropic_model']; mode=f'Written by {model} from the graph facts, checked against them'
-                except BudgetExceeded:
-                    mode='Model spend cap reached; composed from the graph facts instead'
-                except Exception as e:
-                    mode=f'Model brief unavailable ({type(e).__name__}); composed from the graph facts instead'
+                for attempt in range(2):  # one retry: a truncated or malformed model reply is transient
+                    try:
+                        paragraphs=narrate.write(body.question,facts,names,body.persona,provider,settings)
+                        model=settings['anthropic_model']; mode=f'Written by {model} from the graph facts, checked against them'
+                        break
+                    except BudgetExceeded:
+                        mode='Model spend cap reached; composed from the graph facts instead'; break
+                    except Exception as e:
+                        log.warning('brief: model attempt %d failed for %r: %s: %s',attempt+1,body.question[:80],type(e).__name__,str(e)[:300].replace(chr(10),' '))
+                        mode=f'Model brief unavailable ({type(e).__name__}); composed from the graph facts instead'
             if not paragraphs:
                 paragraphs=narrate.compose(body.question,facts,names,body.persona,len(cable_ids),agencies,len(call_ids))
-            if len(BRIEFS)>500:BRIEFS.clear()
-            BRIEFS[key]=(paragraphs,mode,model)
+            if provider is None or model:  # cache only what will not improve on a retry
+                if len(BRIEFS)>500:BRIEFS.clear()
+                BRIEFS[key]=(paragraphs,mode,model)
     trail=domain_trail(facts)
     if trail['hops'] and paragraphs:
         pairs={}
